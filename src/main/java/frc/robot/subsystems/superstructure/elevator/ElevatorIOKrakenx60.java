@@ -6,19 +6,19 @@ import com.ctre.phoenix6.BaseStatusSignal;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
+//import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
-import com.ctre.phoenix6.controls.VoltageOut;
+//import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
-import com.ctre.phoenix6.signals.GravityTypeValue;
-import com.ctre.phoenix6.signals.InvertedValue;
+//import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+//import com.ctre.phoenix6.signals.GravityTypeValue;
+//import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
+//import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.*;
-
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
@@ -28,25 +28,22 @@ public class ElevatorIOKrakenx60 implements ElevatorIO {
 
     private final TalonFX elevatorTalon; 
 
-    private final StatusSignal<Double> positionRotations;
+    private final StatusSignal<Angle> positionRotations;
     private final StatusSignal<AngularVelocity> velocityRps;
     private final StatusSignal<Voltage> appliedVoltage;
     private final StatusSignal<Current> supplyCurrent;
     private final StatusSignal<Temperature> tempCelsius;
-    private final StatusSignal<Double> setPointError;
-    
-    private final VoltageOut voltageControl =
-     new VoltageOut(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
+    //private final StatusSignal<Double> setPointError;
+     
     private final TorqueCurrentFOC currentControl = new TorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
-    private final MotionMagicTorqueCurrentFOC positionControl =
-     new MotionMagicTorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
 
     private final TalonFXConfiguration config = new TalonFXConfiguration();
+    private final NeutralOut neutralout = new NeutralOut();
 
     public ElevatorIOKrakenx60(){
        elevatorTalon = new TalonFX(0); //will use device Id's when created. 
 
-    // numbers from Arm Constant that will be implemented later. 
+    // numbers from Elevator Constant that will be implemented later. 
     // config.Slot0.kP = gains.kP(); 
     // config.Slot0.kI = gains.kI();
     // config.Slot0.kD = gains.kD();
@@ -73,40 +70,70 @@ public class ElevatorIOKrakenx60 implements ElevatorIO {
     // config.MotionMagic.MotionMagicJerk = cruiseJerk;
     // armTalon.getConfigurator().apply(config, 1.0);
 
-    //internalPositionRotations = armTalon.getPosition();
-    setPointError = elevatorTalon.getClosedLoopError();
-    //encoderAbsolutePositionRotations = armCancoder.getAbsolutePosition();
-    //encoderRelativePositionRotations = armCancoder.getPosition();
+    positionRotations = elevatorTalon.getPosition(); 
+    //setPointError = elevatorTalon.getClosedLoopError();
     velocityRps = elevatorTalon.getVelocity();
     appliedVoltage = elevatorTalon.getMotorVoltage();
     supplyCurrent = elevatorTalon.getSupplyCurrent();
-    //torqueCurrent = armTalon.getTorqueCurrent();
     tempCelsius = elevatorTalon.getDeviceTemp();
     BaseStatusSignal.setUpdateFrequencyForAll(
-        100,
-        //internalPositionRotations,
+        50, 
+        positionRotations,
         velocityRps,
         appliedVoltage,
         supplyCurrent,
-        //torqueCurrent,
         tempCelsius);
 
-   // BaseStatusSignal.setUpdateFrequencyForAll(
-       // 250, encoderAbsolutePositionRotations, encoderRelativePositionRotations);
        
-    elevatorTalon.optimizeBusUtilization(1.0);
-    //armCancoder.optimizeBusUtilization(1.0);
-
-
-
-
-
-
+    //elevatorTalon.optimizeBusUtilization(1.0);
 
     }
 
+    @Override
+    public void updateInputs(ElevatorIOInputs inputs){
+         
+        BaseStatusSignal.refreshAll(
+            positionRotations,
+            velocityRps,
+            appliedVoltage,
+            supplyCurrent,
+            tempCelsius);
 
+        inputs.positionRad =
+            Units.rotationsToRadians(positionRotations.getValueAsDouble()); // / reduction;
+        inputs.velocityRadPerSec =
+            Units.rotationsToRadians(velocityRps.getValueAsDouble());// / reduction;
+        inputs.appliedVolts = appliedVoltage.getValueAsDouble();
+        inputs.supplyCurrentAmps = supplyCurrent.getValueAsDouble();
+        inputs.tempCelsius = tempCelsius.getValueAsDouble();
 
+    }
 
+    @Override
+    public void runCurrent(double currentSetpoint){
+
+        elevatorTalon.setControl(currentControl.withOutput(currentSetpoint));
+
+    }
+
+    @Override
+    public void stop(){
+        elevatorTalon.setControl(neutralout);
+    }
+
+    @Override
+    public void setBreakMode(boolean enabled){
+        elevatorTalon.setNeutralMode(enabled ? NeutralModeValue.Brake : NeutralModeValue.Coast);
+    }
+
+    @Override
+    public void setPID(double p, double i, double d){
+
+        config.Slot0.kP = p;
+        config.Slot0.kI = i;
+        config.Slot0.kD = d;
+        elevatorTalon.getConfigurator().apply(config);
+
+    }
 
 }

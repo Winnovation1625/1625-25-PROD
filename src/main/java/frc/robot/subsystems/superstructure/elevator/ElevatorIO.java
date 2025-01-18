@@ -22,12 +22,16 @@ public interface ElevatorIO {
 
     public default void setPID(double p, double i, double d) {};
 
+    public default void runCurrent(double currentSetpoint) {};
+
+    public default void stop() {};
+
     //public default void setVelocity(double velocitySetpoint) {};
 
     //public default void setPosition(double positionSetpoint) {};
 
     //public default void setVolts(double voltageSetpoint) {};
 
-    //public default void setAmps(double ampsSetpoint) {};
+    
     
 }
