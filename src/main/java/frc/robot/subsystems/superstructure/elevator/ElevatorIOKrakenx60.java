@@ -5,6 +5,7 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
+import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
@@ -13,6 +14,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
+import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
 
 public class ElevatorIOKrakenx60 implements ElevatorIO {
 
@@ -26,6 +28,7 @@ public class ElevatorIOKrakenx60 implements ElevatorIO {
   // private final StatusSignal<Double> setPointError;
 
   private final TorqueCurrentFOC currentControl = new TorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
+  private final MotionMagicTorqueCurrentFOC positionControl = new MotionMagicTorqueCurrentFOC(0).withUpdateFreqHz(null);
 
   private final TalonFXConfiguration config = new TalonFXConfiguration();
   private final NeutralOut neutralout = new NeutralOut();
@@ -100,7 +103,7 @@ public class ElevatorIOKrakenx60 implements ElevatorIO {
   }
 
   @Override
-  public void setBreakMode(boolean enabled) {
+  public void setBrakeMode(boolean enabled) {
     elevatorTalon.setNeutralMode(enabled ? NeutralModeValue.Brake : NeutralModeValue.Coast);
   }
 
@@ -111,5 +114,10 @@ public class ElevatorIOKrakenx60 implements ElevatorIO {
     config.Slot0.kI = i;
     config.Slot0.kD = d;
     elevatorTalon.getConfigurator().apply(config);
+  }
+
+  @Override
+  public void setPosition(double positionSetpoint){
+    elevatorTalon.setControl(positionControl.withPosition(Units.radiansToRotations(positionSetpoint)).withUpdateFreqHz(50)); 
   }
 }

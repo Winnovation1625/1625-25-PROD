@@ -18,7 +18,7 @@ public interface ElevatorIO {
   public default void updateInputs(ElevatorIOInputs inputs) {}
   ;
 
-  public default void setBreakMode(boolean enabled) {}
+  public default void setBrakeMode(boolean enabled) {}
   ;
 
   public default void setPID(double p, double i, double d) {}
@@ -32,7 +32,7 @@ public interface ElevatorIO {
 
   // public default void setVelocity(double velocitySetpoint) {};
 
-  // public default void setPosition(double positionSetpoint) {};
+  public default void setPosition(double positionSetpoint) {};
 
   // public default void setVolts(double voltageSetpoint) {};
 
