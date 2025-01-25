@@ -1,14 +1,13 @@
 package frc.robot.subsystems.apriltagvision;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.*;
 import java.util.*;
 import lombok.experimental.ExtensionMethod;
 import org.littletonrobotics.junction.Logger;
-//import frc.robot.RobotState.VisionObservation;
+// import frc.robot.RobotState.VisionObservation;
 
 @ExtensionMethod({GeomUtil.class})
 public class AprilTagVision extends SubsystemBase {
@@ -55,10 +54,10 @@ public class AprilTagVision extends SubsystemBase {
     // List<Pose3d> allRobotPoses3d = new ArrayList<>();
     // List<VisionObservation> allVisionObservations = new ArrayList<>();
     for (int instanceIndex = 0; instanceIndex < io.length; instanceIndex++) {
-    //   cameraDisconnects[instanceIndex].set(!inputs[instanceIndex].isConnected);
-    //   // Loop over frames
-    //   lastFrameTimes.put(instanceIndex, Timer.getFPGATimestamp());
-    //   var timestamp = inputs[instanceIndex].timestamp;
+      //   cameraDisconnects[instanceIndex].set(!inputs[instanceIndex].isConnected);
+      //   // Loop over frames
+      //   lastFrameTimes.put(instanceIndex, Timer.getFPGATimestamp());
+      //   var timestamp = inputs[instanceIndex].timestamp;
       var values = inputs[instanceIndex].cameraPoses;
 
       if (values.length == 0 || values[0].equals(new Pose3d())) {
@@ -70,7 +69,7 @@ public class AprilTagVision extends SubsystemBase {
       boolean useVisionRotation = false;
       if (inputs[instanceIndex].isMultiTag) {
         cameraPose = inputs[instanceIndex].cameraPoses[0];
-        //robotPose3d = cameraPose.plus(cameraLocations[instanceIndex].inverse());
+        // robotPose3d = cameraPose.plus(cameraLocations[instanceIndex].inverse());
         useVisionRotation = true;
       } else {
         if (inputs[instanceIndex].cameraPoses.length < 2
@@ -106,11 +105,8 @@ public class AprilTagVision extends SubsystemBase {
         //     cameraPose = inputs[instanceIndex].cameraPoses[1];
         //     robotPose3d = robotPose3d1;
         //   }
-      
+
       }
     }
-
-    
-
   }
 }
