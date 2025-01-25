@@ -1,8 +1,11 @@
 package frc.robot.subsystems.apriltagvision;
 
 import edu.wpi.first.math.geometry.Transform3d;
+import frc.robot.util.GeomUtil;
+import lombok.experimental.ExtensionMethod;
 import org.photonvision.PhotonCamera;
 
+@ExtensionMethod({GeomUtil.class})
 public class AprilTagVisionIOPhoton implements AprilTagVisionIO {
 
   private final String name;
@@ -15,5 +18,44 @@ public class AprilTagVisionIOPhoton implements AprilTagVisionIO {
     camera = new PhotonCamera(name);
     camera.setDriverMode(false);
     camera.setPipelineIndex(0);
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void updateInputs(VisionIOInputs inputs) {
+
+    // PhotonPipelineResult result = camera.getLatestResult();
+    // inputs.isConnected = camera.isConnected();
+    // if (inputs.isConnected) {
+    //   inputs.numberOfTargets = result.hasTargets() ? result.getTargets().size() : 0;
+    //   inputs.latency = result.latencyMillis();
+    //   inputs.timestamp = result.getTimestampSeconds();
+    //   if (result.getMultiTagResult().estimatedPose.isPresent) {
+    //     inputs.cameraPoses =
+    //         new Pose3d[] {result.getMultiTagResult().estimatedPose.best.toPose3d()};
+    //     inputs.ambiguity = result.getMultiTagResult().estimatedPose.ambiguity;
+    //     inputs.tagId =
+    //         result.getMultiTagResult().fiducialIDsUsed.stream()
+    //             .mapToInt(Integer::intValue)
+    //             .toArray();
+    //     inputs.isMultiTag = true;
+    //   } } else if (result.hasTargets()) {
+    //     inputs.isMultiTag = false;
+    //     inputs.cameraPoses =
+    //         new Pose3d[] {
+    //           result.getBestTarget().getBestCameraToTarget().toPose3d(),
+    //           result.getBestTarget().getAlternateCameraToTarget().toPose3d()
+    //         };
+    //     inputs.ambiguity = result.getBestTarget().getPoseAmbiguity();
+    //     inputs.tagId = new int[] {result.getBestTarget().getFiducialId()};
+    //   } else {
+    //     inputs.isMultiTag = false;
+    //     inputs.cameraPoses = new Pose3d[] {};
+    //     inputs.ambiguity = -1;
+    //     inputs.tagId = tagPoses;
+    //   }
+
   }
 }
