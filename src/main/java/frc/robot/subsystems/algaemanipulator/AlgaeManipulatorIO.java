@@ -19,6 +19,8 @@ public interface AlgaeManipulatorIO {
     
     public default void setVoltageOutput(DoubleSupplier volts) {}
 
+    public default void setCurrentOutput(DoubleSupplier current) {}
+
     public default void stop() {}
 
 }

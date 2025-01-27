@@ -9,6 +9,8 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import au.grapplerobotics.LaserCan;
 import au.grapplerobotics.interfaces.LaserCanInterface.RangingMode;
 import au.grapplerobotics.interfaces.LaserCanInterface.TimingBudget;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Velocity;
@@ -20,15 +22,16 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import au.grapplerobotics.ConfigurationFailedException;
+import java.util.function.DoubleSupplier;
 
 public class AlgaeManipulatorIOKrakenx60 implements AlgaeManipulatorIO{
 
     private final TalonFX motor;
     private final LaserCan sensor;
-    private final StatusSignal<Velocity> velocityRadPerSec;
+    private final StatusSignal<AngularVelocity> velocity;
     private final StatusSignal<Voltage> appliedVoltage;
     private final StatusSignal<Current> supplyCurrent; //supply current or torqe current?
-    private final StatusSignal<AngularVelocity> positionRad;
+    private final StatusSignal<Angle> position;
 
     private LaserCan.Measurement[] measurements = new LaserCan.Measurement[5];
     
@@ -75,43 +78,49 @@ public class AlgaeManipulatorIOKrakenx60 implements AlgaeManipulatorIO{
         // armTalon.getConfigurator().apply(config, 1.0);
 
         // // Status signals
-        // internalPositionRotations = armTalon.getPosition();
-        // encoderAbsolutePositionRotations = armCancoder.getAbsolutePosition();
-        // encoderRelativePositionRotations = armCancoder.getPosition();
-        // velocityRps = armTalon.getVelocity();
-        // appliedVoltage = armTalon.getMotorVoltage();
-        // supplyCurrent = armTalon.getSupplyCurrent();
-        // torqueCurrent = armTalon.getTorqueCurrent();
-        // tempCelsius = armTalon.getDeviceTemp();
-        // BaseStatusSignal.setUpdateFrequencyForAll(
-        //     100,
-        //     internalPositionRotations,
-        //     velocityRps,
-        //     appliedVoltage,
-        //     supplyCurrent,
-        //     torqueCurrent,
-        //     tempCelsius);
+           position = motor.getPosition();
+           velocity = motor.getVelocity();
+           supplyCurrent = motor.getSupplyCurrent();
+           appliedVoltage = motor.getMotorVoltage();
+            BaseStatusSignal.setUpdateFrequencyForAll(
+                100,
+                position,
+                velocity,
+                appliedVoltage,
+                supplyCurrent);
 
-        // BaseStatusSignal.setUpdateFrequencyForAll(
-        //     250, encoderAbsolutePositionRotations, encoderRelativePositionRotations);
-
-        // // Optimize bus utilization
-        // armTalon.optimizeBusUtilization(1.0);
-        // armCancoder.optimizeBusUtilization(1.0);
+        // Optimize bus utilization
+        motor.optimizeBusUtilization(1.0);
 
 
     }
 
     @Override
     public void updateInputs(AlgaeManipulatorIOInputs inputs){
-        inputs.appliedCurrentOut = motor.getSupplyCurrent().getValueAsDouble();
-        inputs.appliedVoltageOut = motor.getMotorVoltage().getValueAsDouble();
-        inputs.positionRad = motor.getPosition().getValueAsDouble()
+        inputs.appliedCurrentOut = supplyCurrent.getValueAsDouble();
+        inputs.appliedVoltageOut = appliedVoltage.getValueAsDouble();
+        inputs.positionRad = Units.rotationsToRadians(position.getValueAsDouble());
+        inputs.velocityRadsPerSecond = Units.rotationsPerMinuteToRadiansPerSecond(velocity.getValueAsDouble() / 60);
     }
 
     private void configureLaserCans(LaserCan laserCan) throws ConfigurationFailedException {
     laserCan.setRangingMode(RangingMode.SHORT);
     laserCan.setTimingBudget(TimingBudget.TIMING_BUDGET_20MS);
+  }
+
+  @Override
+  public void setCurrentOutput(DoubleSupplier current){
+    motor.setControl(currentControl.withOutput(current.getAsDouble()));
+  }
+
+  @Override
+  public void setVoltageOutput(DoubleSupplier voltage){
+    motor.setControl(voltageControl.withOutput(voltage.getAsDouble()));
+  }
+
+  @Override
+  public void stop(){
+    motor.stopMotor();
   }
     
 }
