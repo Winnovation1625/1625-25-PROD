@@ -1,3 +1,24 @@
 package frc.robot.subsystems.algaemanipulator;
 
-public class AlgaeManipulatorIO {}
+import org.littletonrobotics.junction.AutoLog;
+import java.util.function.DoubleSupplier;
+
+public interface AlgaeManipulatorIO {
+
+    @AutoLog
+    public static class AlgaeManipulatorIOInputs{
+
+        public double appliedVoltageOut = 0.0;
+        public double appliedCurrentOut = 0.0;
+        public double velocityRadsPerSecond = 0.0;
+        public double positionRad = 0.0;
+
+    }
+
+    public default void updateInputs(AlgaeManipulatorIOInputs inputs) {}
+    
+    public default void setVoltageOutput(DoubleSupplier volts) {}
+
+    public default void stop() {}
+
+}
