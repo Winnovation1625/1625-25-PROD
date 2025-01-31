@@ -30,10 +30,6 @@ public interface ElevatorIO {
   public default void stop() {}
   ;
 
-  // public default void setVelocity(double velocitySetpoint) {};
-
-  public default void setPosition(double positionSetpoint) {};
-
-  // public default void setVolts(double voltageSetpoint) {};
-
+  public default void setPosition(double positionSetpoint) {}
+  ;
 }

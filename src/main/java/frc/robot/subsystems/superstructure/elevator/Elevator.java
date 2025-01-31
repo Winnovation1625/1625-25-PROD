@@ -1,16 +1,16 @@
 package frc.robot.subsystems.superstructure.elevator;
 
+import static frc.robot.subsystems.superstructure.elevator.ElevatorConstants.*;
+
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import frc.robot.util.EqualsUtil;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
-import frc.robot.util.EqualsUtil;
 
 public class Elevator {
 
@@ -40,22 +40,24 @@ public class Elevator {
   // private static final LoggedTunableNumber cruiseJ =
   //   new LoggedTunableNumber("Elevator/cruiseJ", cruiseJerk);
 
-  //@RequiredArgsConstructor
+  @RequiredArgsConstructor
   public enum ElevatorState {
-    STOP(), // Will discuss about values.
-    STOW(),
-    LEVEL3(),
-    LEVEL4(),
-    BARGE();
+    STOP(() -> 0),
+    STOW(new LoggedTunableNumber("Superstructure/Elevator/Stow", 0)),
+    LEVEL_0NE(new LoggedTunableNumber("Superstructure/Elevator/L1", 12)),
+    LEVEL_TWO(new LoggedTunableNumber("Superstructure/Elevator/L2", 22)),
+    LEVEL_THREE(new LoggedTunableNumber("Superstructure/Elevator/L3", 33)),
+    LEVEL_FOUR(new LoggedTunableNumber("Superstructure/Elevator/L4", 44)),
+    BARGE(new LoggedTunableNumber("Superstructure/Elevator/Barge", 55));
 
-    private DoubleSupplier elevatorSetpointSupplier;
+    private final DoubleSupplier elevatorSetpointSupplier;
 
-    private double getRads() {
+    private double getDistanceOffGround() {
       return Units.degreesToRadians(elevatorSetpointSupplier.getAsDouble());
     }
   }
 
-  @AutoLogOutput(key = "Superstructure/ElevatorArm/ElevatorState")
+  @AutoLogOutput(key = "Superstructure/Elevator/ElevatorState")
   // @Getter
   // @Setter
   private ElevatorState elevatorState = ElevatorState.STOW;
@@ -72,14 +74,15 @@ public class Elevator {
   public void periodic() {
     io.updateInputs(inputs);
 
-    Logger.processInputs("Elevator", inputs);
+    Logger.processInputs("Superstructure/Elevator", inputs);
 
     if (disableSupplier.getAsBoolean() || elevatorState == ElevatorState.STOP) {
       io.stop();
     }
 
     setBrakeMode(!coastSupplier.getAsBoolean() || DriverStation.isEnabled());
-    // LoggedTunableNumber.ifChanged(hashCode(), pid -> io.setPID(pid[0], pid[1], pid[2]), kP, kI, kD);
+    // LoggedTunableNumber.ifChanged(hashCode(), pid -> io.setPID(pid[0], pid[1], pid[2]), kP, kI,
+    // kD);
     // LoggedTunableNumber.ifChanged(
     //     hashCode(), kSVA -> io.setFF(kSVA[0], kSVA[1], kSVA[2], kSVA[3]), kS, kV, kA, kG);
 
@@ -90,27 +93,24 @@ public class Elevator {
     //     cruiseA,
     //     cruiseJ);
 
-    //visualizer.updateVisualizer(inputs.positionRads);
+    // visualizer.updateVisualizer(inputs.positionRads);
     if (!characterizing
         && brakeModeEnabled
         && !disableSupplier.getAsBoolean()
         && elevatorState != ElevatorState.STOP) {
 
-      io.setPosition(elevatorState.getRads());
+      io.setPosition(elevatorState.getDistanceOffGround());
     }
     Logger.recordOutput(
-        "Superstructure/ShooterArm/ArmSetpoint", Units.radiansToDegrees(elevatorState.getRads()));
+        "Superstructure/Elevator/ArmSetpoint",
+        Units.radiansToDegrees(elevatorState.getDistanceOffGround()));
   }
 
-  public void setArmPosition(DoubleSupplier desiredArmPosition) {
-    io.setPosition(Units.degreesToRadians(desiredArmPosition.getAsDouble()));
+  @AutoLogOutput(key = "Superstructure/Elevator/AtGoal")
+  public boolean atGoal() {
+    return EqualsUtil.epsilonEquals(
+        inputs.positionRad, elevatorState.getDistanceOffGround(), ELEVATOR_TOLERANCE_METERS);
   }
-
-  // @AutoLogOutput(key = "Superstructure/ShooterArm/AtGoal")
-  // public boolean atGoal() {
-  //   return EqualsUtil.epsilonEquals(inputs.positionRad, elevatorState.getRads(), armTolerance);
-  // }
-
 
   public void setBrakeMode(boolean enabled) {
     if (brakeModeEnabled == enabled) return;
@@ -130,7 +130,4 @@ public class Elevator {
   public void endCharacterization() {
     characterizing = false;
   }
-
-
-
 }
