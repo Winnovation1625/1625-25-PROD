@@ -30,6 +30,9 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.superstructure.elevator.Elevator;
+import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
+
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -40,9 +43,9 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  */
 public class RobotContainer {
   // Subsystems
-  private final Drive drive;
+   private final Drive drive;
   //   private final Superstructure superstructure;
-  //   private final Elevator elevator;
+   private final Elevator elevator;
   //   private final Arm arm;
 
   // Controller
@@ -78,6 +81,9 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
+        
+        elevator = new Elevator(new ElevatorIOSim());
+        
         break;
 
       default:
@@ -154,6 +160,13 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
+
+
+    controller
+            .leftTrigger()
+                    .whileTrue(
+                        elevator.
+                    )
   }
 
   /**

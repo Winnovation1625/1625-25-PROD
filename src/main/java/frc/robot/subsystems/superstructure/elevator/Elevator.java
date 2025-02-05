@@ -4,10 +4,13 @@ import static frc.robot.subsystems.superstructure.elevator.ElevatorConstants.*;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotState;
 import frc.robot.util.EqualsUtil;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
+
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -50,11 +53,8 @@ public class Elevator {
     LEVEL_FOUR(new LoggedTunableNumber("Superstructure/Elevator/L4", 44)),
     BARGE(new LoggedTunableNumber("Superstructure/Elevator/Barge", 55));
 
-    private final DoubleSupplier elevatorSetpointSupplier;
-
-    private double getDistanceOffGround() {
-      return Units.degreesToRadians(elevatorSetpointSupplier.getAsDouble());
-    }
+    @Getter
+    private final DoubleSupplier elevatorSetpointFromGround;
   }
 
   @AutoLogOutput(key = "Superstructure/Elevator/ElevatorState")
@@ -81,17 +81,11 @@ public class Elevator {
     }
 
     setBrakeMode(!coastSupplier.getAsBoolean() || DriverStation.isEnabled());
-    // LoggedTunableNumber.ifChanged(hashCode(), pid -> io.setPID(pid[0], pid[1], pid[2]), kP, kI,
-    // kD);
-    // LoggedTunableNumber.ifChanged(
-    //     hashCode(), kSVA -> io.setFF(kSVA[0], kSVA[1], kSVA[2], kSVA[3]), kS, kV, kA, kG);
-
-    // LoggedTunableNumber.ifChanged(
-    //     hashCode(),
-    //     kSVA -> io.setMotionMagicCruise(kSVA[0], kSVA[1], kSVA[2]),
-    //     cruiseV,
-    //     cruiseA,
-    //     cruiseJ);
+    
+    if (elevatorState != ElevatorState.STOP) {
+      // Update goals
+      
+    }
 
     // visualizer.updateVisualizer(inputs.positionRads);
     if (!characterizing
@@ -99,7 +93,6 @@ public class Elevator {
         && !disableSupplier.getAsBoolean()
         && elevatorState != ElevatorState.STOP) {
 
-      io.setPosition(elevatorState.getDistanceOffGround());
     }
     Logger.recordOutput(
         "Superstructure/Elevator/ArmSetpoint",
