@@ -31,6 +31,8 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
+import frc.robot.subsystems.superstructure.elevator.ElevatorIO;
+import frc.robot.subsystems.superstructure.elevator.ElevatorIOKraken;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -67,7 +69,7 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
-        // elevator = new Elevator(new ElevatorIOKrakenx60());
+         elevator = new Elevator(new ElevatorIOKraken());
         // arm = new Arm(new ArmIOKraken());
         // superstructure = new Superstructure(elevator, arm);
         break;
@@ -95,6 +97,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
+            elevator = new Elevator(new ElevatorIOSim());
         break;
     }
 
@@ -165,8 +168,8 @@ public class RobotContainer {
     controller
             .leftTrigger()
                     .whileTrue(
-                        elevator.
-                    )
+                        elevator.tempCommand()
+                    );
   }
 
   /**

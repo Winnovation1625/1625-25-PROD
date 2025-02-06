@@ -5,6 +5,7 @@ import static frc.robot.subsystems.superstructure.elevator.ElevatorConstants.*;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotState;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.util.EqualsUtil;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.BooleanSupplier;
@@ -14,6 +15,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 
 public class Elevator {
 
@@ -82,27 +85,23 @@ public class Elevator {
 
     setBrakeMode(!coastSupplier.getAsBoolean() || DriverStation.isEnabled());
     
-    if (elevatorState != ElevatorState.STOP) {
-      // Update goals
-      
-    }
-
     // visualizer.updateVisualizer(inputs.positionRads);
-    if (!characterizing
-        && brakeModeEnabled
-        && !disableSupplier.getAsBoolean()
-        && elevatorState != ElevatorState.STOP) {
 
-    }
+    if (!characterizing
+    && brakeModeEnabled
+    && !disableSupplier.getAsBoolean()
+    && elevatorState != ElevatorState.STOP) {
+
     Logger.recordOutput(
         "Superstructure/Elevator/ArmSetpoint",
-        Units.radiansToDegrees(elevatorState.getDistanceOffGround()));
+        Units.radiansToDegrees(elevatorState.getElevatorSetpointFromGround().getAsDouble()));
+    }
   }
 
   @AutoLogOutput(key = "Superstructure/Elevator/AtGoal")
   public boolean atGoal() {
     return EqualsUtil.epsilonEquals(
-        inputs.positionRad, elevatorState.getDistanceOffGround(), ELEVATOR_TOLERANCE_METERS);
+        inputs.positionRad, elevatorState.getElevatorSetpointFromGround().getAsDouble(), ELEVATOR_TOLERANCE_METERS);
   }
 
   public void setBrakeMode(boolean enabled) {
@@ -123,4 +122,19 @@ public class Elevator {
   public void endCharacterization() {
     characterizing = false;
   }
+
+  public void changeLevel() {
+    elevatorState = ElevatorState.LEVEL_0NE;
+    io.setPosition(ElevatorState.LEVEL_0NE.getElevatorSetpointFromGround().getAsDouble());
+  }
+
+  public void tempStop(){
+    io.stop();
+  }
+  
+  public Command tempCommand(){
+    return startEnd(() -> changeLevel(), () -> tempStop());
+  }
+
+
 }
