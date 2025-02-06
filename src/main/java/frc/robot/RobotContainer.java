@@ -31,10 +31,8 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
-import frc.robot.subsystems.superstructure.elevator.ElevatorIO;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOKraken;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
-
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -45,9 +43,9 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  */
 public class RobotContainer {
   // Subsystems
-   private final Drive drive;
+  private final Drive drive;
   //   private final Superstructure superstructure;
-   private final Elevator elevator;
+  private final Elevator elevator;
   //   private final Arm arm;
 
   // Controller
@@ -69,7 +67,7 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
-         elevator = new Elevator(new ElevatorIOKraken());
+        elevator = new Elevator(new ElevatorIOKraken());
         // arm = new Arm(new ArmIOKraken());
         // superstructure = new Superstructure(elevator, arm);
         break;
@@ -83,9 +81,9 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
-        
+
         elevator = new Elevator(new ElevatorIOSim());
-        
+
         break;
 
       default:
@@ -97,7 +95,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-            elevator = new Elevator(new ElevatorIOSim());
+        elevator = new Elevator(new ElevatorIOSim());
         break;
     }
 
@@ -164,12 +162,7 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-
-    controller
-            .leftTrigger()
-                    .whileTrue(
-                        elevator.tempCommand()
-                    );
+    controller.leftTrigger().whileTrue(elevator.tempCommand());
   }
 
   /**

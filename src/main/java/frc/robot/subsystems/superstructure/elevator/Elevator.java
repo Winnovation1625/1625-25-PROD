@@ -4,21 +4,18 @@ import static frc.robot.subsystems.superstructure.elevator.ElevatorConstants.*;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.EqualsUtil;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-import edu.wpi.first.wpilibj2.command.StartEndCommand;
-
-public class Elevator {
+public class Elevator extends SubsystemBase {
 
   private final ElevatorIO io;
   private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
@@ -56,8 +53,7 @@ public class Elevator {
     LEVEL_FOUR(new LoggedTunableNumber("Superstructure/Elevator/L4", 44)),
     BARGE(new LoggedTunableNumber("Superstructure/Elevator/Barge", 55));
 
-    @Getter
-    private final DoubleSupplier elevatorSetpointFromGround;
+    @Getter private final DoubleSupplier elevatorSetpointFromGround;
   }
 
   @AutoLogOutput(key = "Superstructure/Elevator/ElevatorState")
@@ -84,24 +80,26 @@ public class Elevator {
     }
 
     setBrakeMode(!coastSupplier.getAsBoolean() || DriverStation.isEnabled());
-    
+
     // visualizer.updateVisualizer(inputs.positionRads);
 
     if (!characterizing
-    && brakeModeEnabled
-    && !disableSupplier.getAsBoolean()
-    && elevatorState != ElevatorState.STOP) {
+        && brakeModeEnabled
+        && !disableSupplier.getAsBoolean()
+        && elevatorState != ElevatorState.STOP) {
 
-    Logger.recordOutput(
-        "Superstructure/Elevator/ArmSetpoint",
-        Units.radiansToDegrees(elevatorState.getElevatorSetpointFromGround().getAsDouble()));
+      Logger.recordOutput(
+          "Superstructure/Elevator/ElevatorSetpoint",
+          Units.radiansToDegrees(elevatorState.getElevatorSetpointFromGround().getAsDouble()));
     }
   }
 
   @AutoLogOutput(key = "Superstructure/Elevator/AtGoal")
   public boolean atGoal() {
     return EqualsUtil.epsilonEquals(
-        inputs.positionRad, elevatorState.getElevatorSetpointFromGround().getAsDouble(), ELEVATOR_TOLERANCE_METERS);
+        inputs.positionRad,
+        elevatorState.getElevatorSetpointFromGround().getAsDouble(),
+        ELEVATOR_TOLERANCE_METERS);
   }
 
   public void setBrakeMode(boolean enabled) {
@@ -128,13 +126,11 @@ public class Elevator {
     io.setPosition(ElevatorState.LEVEL_0NE.getElevatorSetpointFromGround().getAsDouble());
   }
 
-  public void tempStop(){
+  public void tempStop() {
     io.stop();
   }
-  
-  public Command tempCommand(){
+
+  public Command tempCommand() {
     return startEnd(() -> changeLevel(), () -> tempStop());
   }
-
-
 }
