@@ -1,14 +1,16 @@
 package frc.robot.subsystems.superstructure.arm;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import org.littletonrobotics.junction.AutoLogOutput;
-
-import edu.wpi.first.math.util.Units;
-import frc.robot.subsystems.superstructure.elevator.Elevator.ElevatorState;
-import frc.robot.subsystems.superstructure.elevator.ElevatorIO;
+import org.littletonrobotics.junction.Logger;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import frc.robot.subsystems.superstructure.elevator.Elevator.ElevatorState;
+import frc.robot.subsystems.superstructure.elevator.ElevatorIO;
 import lombok.Setter;
 
 public class Arm {
@@ -55,11 +57,67 @@ public class Arm {
         }
     }
     @AutoLogOutput(key = "Superstructure/Arm/ArmState")
-    @Getter
-    @Setter
+    //@Getter
+    //@Setter
     private ArmState armState = ArmState.STOW;
 
     public Arm(ArmIO io) {
       this.io = io;
+    }
+
+    private boolean characterizing;
+    private boolean brakeModeEnabled;
+    private BooleanSupplier disableSupplier = DriverStation::isDisabled;
+    private BooleanSupplier coastSupplier = () -> false;
+
+    public void periodic(){
+        io.updateInputs(inputs);
+
+        Logger.processInputs("Superstructre/Arm", inputs);
+        if(disableSupplier.getAsBoolean()||armState==ArmState.STOP){
+            io.stop();
+        }
+        io.setBrakeMode(!coastSupplier.getAsBoolean()||armState==ArmState.STOW);
+
+        if(!characterizing&&!disableSupplier.getAsBoolean()&&armState!=ArmState.STOP){
+            Logger.recordOutput("Superstructure/Arm/ArmSetpoint",Units.radiansToDegrees(armState.getRads()));
+        }
+
+        @AutoLogOutput(key = "Superstructre/Arm/AtGoal");
+        public boolean atGoal(){
+            return Equals.util.epsilonEquals(inputs.positionRad,armState.getRads,ARM_TOLERANCE);
+        }
+
+        public void setBreakMode(boolean enabled){
+            if(brakeModeEnabled==enabled)return;
+            brakeModeEnabled=enabled;
+            io.setBrakeMode(enabled);
+        }
+
+        public void runCharacterizaiton(double amps){
+            characterizing=true;
+            io.runCurrent(amps);
+        }
+
+        public double getCharacterizationVelocity(){
+            return inputs.velocityRadPerSec;
+        }
+
+        public void endCharacterization(){
+            characterizing=false;
+        }
+
+        public void moveArm(){
+            armState=ArmState.CLVL1;
+            io.setArmPosition(ArmState.CLVL1.getRads());
+        }
+
+        public void tempStop(){
+            io.stop();
+        }
+
+        public Command tempCommand(){
+            return startEnd(()->moveArm(),()->tempStop());
+        }
     }
 }

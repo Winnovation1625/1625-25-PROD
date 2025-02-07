@@ -1,6 +1,7 @@
 import org.littletonrobotics.junction.AutoLog;
 
 public interface ArmIO {
+    
     @AutoLog
     class ArmIOInputs {
         public double positionRad = 0.0;
