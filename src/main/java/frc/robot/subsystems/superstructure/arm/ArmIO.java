@@ -21,5 +21,7 @@ public interface ArmIO {
 
     public default void runCurrent(double amps){};
 
+    public default void stop(){};
+
     public default void runVolts(double volts){};
 }

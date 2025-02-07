@@ -20,13 +20,12 @@ public class ArmIOKrakenx60 implements ArmIO{
     private final StatusSignal<Voltage> appliedVolts;
     private final StatusSignal<AngularVelocity> velocityRadPerSec;
     private final StatusSignal<Current> supplyCurrentAmps;
-    private final StatusSignal<Current> torqueCurrentAmps;
     private final StatusSignal<Temperature> tempCelsius;
     private final TorqueCurrentFOC currentControl = new TorqueCurrentFOC(0.0);
     private final MotionMagicTorqueCurrentFOC positionControl = new MotionMagicTorqueCurrentFOC(0.0);
     private final TalonFX armTalon;
     private final TalonFXConfiguration armConfig;
-
+    private final NeutralOut neutralOut = new NeutralOut();
     public ArmIOKrakenx60(){
         armTalon = new TalonFX(0);
         armConfig = new TalonFXConfiguration();
@@ -61,27 +60,29 @@ public class ArmIOKrakenx60 implements ArmIO{
     velocityRadPerSec = armTalon.getVelocity();
     appliedVolts = armTalon.getMotorVoltage();
     supplyCurrentAmps = armTalon.getSupplyCurrent();
-    torqueCurrentAmps = armTalon.getTorqueCurrent();
     tempCelsius = armTalon.getDeviceTemp();
-    BaseStatusSignal.setUpdateFrequencyForAll(0.20, positionRotations,velocityRadPerSec,appliedVolts,supplyCurrentAmps,torqueCurrentAmps,tempCelsius);
-    armTalon.optimizeBusUtilization();
+    BaseStatusSignal.setUpdateFrequencyForAll(50, positionRotations,velocityRadPerSec,appliedVolts,supplyCurrentAmps,tempCelsius);
     
     }
 
     @Override
     public void updateInputs(ArmIOInputs inputs){
-        BaseStatusSignal.refreshAll(positionRotations,appliedVolts,velocityRadPerSec,supplyCurrentAmps,torqueCurrentAmps,tempCelsius);
+        BaseStatusSignal.refreshAll(positionRotations,appliedVolts,velocityRadPerSec,supplyCurrentAmps,tempCelsius);
         inputs.appliedVolts = appliedVolts.getValueAsDouble();
         inputs.positionRad = Units.rotationsToRadians(positionRotations.getValueAsDouble());
         inputs.supplyCurrentAmps = supplyCurrentAmps.getValueAsDouble();
         inputs.tempCelsius = tempCelsius.getValueAsDouble();
-        inputs.torqueCurrentAmps = torqueCurrentAmps.getValueAsDouble();
         inputs.velocityRadPerSec = velocityRadPerSec.getValueAsDouble();
     }
 
     @Override
     public void setArmPosition(double desiredPositionRad){
         armTalon.setControl(positionControl.withPosition(Units.radiansToRotations(desiredPositionRad)));
+    }
+
+    @Override
+    public void stop(){
+        armTalon.setControl(neutralOut);
     }
 
     @Override
