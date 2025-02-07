@@ -1,20 +1,18 @@
 package frc.robot.subsystems.superstructure.elevator;
 
-import java.util.function.DoubleSupplier;
-
-import org.littletonrobotics.junction.AutoLogOutput;
-
 import edu.wpi.first.math.util.Units;
+import java.util.function.DoubleSupplier;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.littletonrobotics.junction.AutoLogOutput;
 
 public class Elevator {
 
-   private final ElevatorIO io;
-   private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
-   private final ElevatorVisualizer visualizer =
-    new ElevatorVisualizer(ElevatorConstants.elevatorPose);
+  private final ElevatorIO io;
+  private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
+  private final ElevatorVisualizer visualizer =
+      new ElevatorVisualizer(ElevatorConstants.elevatorPose);
 
   // private static final LoggedTunableNumber kP =
   //   new LoggedTunableNumber("Elevator/kP", gains.kP());
@@ -39,8 +37,7 @@ public class Elevator {
 
   @RequiredArgsConstructor
   public enum ElevatorState {
-
-    STOP(),   //Will discuss about values.
+    STOP(), // Will discuss about values.
     STOW(),
     LEVEL3(),
     LEVEL4(),
@@ -48,10 +45,9 @@ public class Elevator {
 
     private DoubleSupplier elevatorSetpointSupplier;
 
-    private double getRads(){
-        return Units.degreesToRadians(elevatorSetpointSupplier.getAsDouble());
+    private double getRads() {
+      return Units.degreesToRadians(elevatorSetpointSupplier.getAsDouble());
     }
-
   }
 
   @AutoLogOutput(key = "Superstructure/ElevatorArm/ElevatorState")
@@ -62,9 +58,4 @@ public class Elevator {
   public Elevator(ElevatorIO io) {
     this.io = io;
   }
-
-
-
-
-
 }

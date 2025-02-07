@@ -1,17 +1,14 @@
 package frc.robot.subsystems.algaemanipulator;
 
-import org.littletonrobotics.junction.AutoLogOutput;
-
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.LoggedTunableNumber;
 import lombok.Getter;
+import org.littletonrobotics.junction.AutoLogOutput;
 
 public class AlgaeManipulator extends SubsystemBase {
 
-
   private final AlgaeManipulatorIO io;
-  private final IntakeSensorsIOInputsAutoLogged sensorInputs =
-      new IntakeSensorsIOInputsAutoLogged();
+  
   private LoggedTunableNumber intakeSensorThreshold =
       new LoggedTunableNumber("Intake/IntakeSensorActivate", 280);
   private LoggedTunableNumber indexerSensorThreshold =
@@ -24,23 +21,18 @@ public class AlgaeManipulator extends SubsystemBase {
   private boolean noteInInitialIndexerSensor = false;
   private boolean noteInStagingIndexerSensor = false;
 
-
-  public enum ManipulatorState{
-
+  public enum ManipulatorState {
     INTAKING,
     SHOOTING,
     IDLE
-
   }
 
-  public enum GamepieceState{
-
+  public enum GamepieceState {
     NONE,
     IN_SHOOTER,
-    
   }
 
-  public AlgaeManipulator(AlgaeManipulatorIO io){
+  public AlgaeManipulator(AlgaeManipulatorIO io) {
     io = this.io;
   }
 
@@ -49,7 +41,5 @@ public class AlgaeManipulator extends SubsystemBase {
   private ManipulatorState state = ManipulatorState.IDLE;
 
   @Override
-  public void periodic(){
-
-  }
+  public void periodic() {}
 }
