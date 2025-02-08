@@ -1,9 +1,5 @@
 package frc.robot.subsystems.algaemanipulator;
 
-import au.grapplerobotics.ConfigurationFailedException;
-import au.grapplerobotics.LaserCan;
-import au.grapplerobotics.interfaces.LaserCanInterface.RangingMode;
-import au.grapplerobotics.interfaces.LaserCanInterface.TimingBudget;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -33,7 +29,6 @@ public class AlgaeManipulatorIOKraken implements AlgaeManipulatorIO {
 
   public AlgaeManipulatorIOKraken() {
     motor = new TalonFX(0); // motor contstants ID is needed
-    
 
     // config.Slot0.kP = gains.kP();
     // config.Slot0.kI = gains.kI();
