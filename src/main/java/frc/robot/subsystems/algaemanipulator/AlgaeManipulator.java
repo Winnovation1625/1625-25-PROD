@@ -1,20 +1,15 @@
 package frc.robot.subsystems.algaemanipulator;
 
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.LoggedTunableNumber;
+import java.util.function.DoubleSupplier;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-
-import java.util.function.DoubleSupplier;
-
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
-
 
 public class AlgaeManipulator extends SubsystemBase {
 
@@ -23,21 +18,16 @@ public class AlgaeManipulator extends SubsystemBase {
   private final AlgaeManipulatorSensorIOInputsAutoLogged sensorInputs =
       new AlgaeManipulatorSensorIOInputsAutoLogged();
   private LoggedTunableNumber SensorThreshold =
-      new LoggedTunableNumber("Intake/IntakeSensorActivate", 280);
-  private LoggedTunableNumber Sensor2Threshold =
-      new LoggedTunableNumber("Intake/indexerSensorActivate", 150);
+      new LoggedTunableNumber("AlgaeManipulator/SensorThreshold", 280);
   private boolean algaeInSensor = false;
-  private boolean algaeInSensor2 = false;
-  
+
   @RequiredArgsConstructor
   public enum ManipulatorState {
     INTAKING(new LoggedTunableNumber("AlgaeManipulator/AlgaeIntakeVoltage", 12)),
     SHOOTING(new LoggedTunableNumber("AlgaeManipulator/AlgaeShootingVoltage", -12)),
     IDLE(() -> 0);
 
-
-   private final DoubleSupplier voltageSupplier;
-
+    private final DoubleSupplier voltageSupplier;
   }
 
   public enum GamepieceState {
@@ -50,27 +40,21 @@ public class AlgaeManipulator extends SubsystemBase {
     this.sensorsIO = sensorsIO;
   }
 
-  
-  @AutoLogOutput(key = "AlgaeManipulator/State") 
-  @Getter  
+  @AutoLogOutput(key = "AlgaeManipulator/State")
+  @Getter
   private ManipulatorState state = ManipulatorState.IDLE;
 
-  @AutoLogOutput 
-  @Getter 
-  private GamepieceState gamepieceState = GamepieceState.NONE;
+  @AutoLogOutput @Getter private GamepieceState gamepieceState = GamepieceState.NONE;
 
   private GamepieceState lastGamepieceState = GamepieceState.NONE;
   private Timer gamepieceStateTimer = new Timer();
 
-   @Override
+  @Override
   public void periodic() {
     sensorsIO.updateInputs(sensorInputs);
     Logger.processInputs("IntakeSensors", sensorInputs);
 
-      algaeInSensor =
-        sensorInputs.SensorMeasurement < SensorThreshold.get();
-    algaeInSensor2 =
-        sensorInputs.Sensor2Measurement < Sensor2Threshold.get();
+    algaeInSensor = sensorInputs.SensorMeasurement < SensorThreshold.get();
 
     if (DriverStation.isDisabled()) {
       state = ManipulatorState.IDLE;
@@ -78,8 +62,7 @@ public class AlgaeManipulator extends SubsystemBase {
 
     if (algaeInSensor) {
       gamepieceState = GamepieceState.IN_SHOOTER;
-    } 
-    else {
+    } else {
       gamepieceState = GamepieceState.NONE;
     }
     if (gamepieceState != lastGamepieceState) {
@@ -118,14 +101,10 @@ public class AlgaeManipulator extends SubsystemBase {
     // }
 
     io.setVoltageOutput(state.voltageSupplier);
-
   }
 
-   public Command setDesiredStateCommand(ManipulatorState goal) {
+  public Command setDesiredStateCommand(ManipulatorState goal) {
     return startEnd(() -> this.state = goal, () -> this.state = ManipulatorState.IDLE)
         .withName("AlgaeManipulator " + goal);
   }
-
-
-
 }

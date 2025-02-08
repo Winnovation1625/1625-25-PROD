@@ -8,7 +8,6 @@ public interface AlgaeManipulatorSensorIO {
   class AlgaeManipulatorSensorIOInputs {
 
     public double SensorMeasurement = 1000;
-    public double Sensor2Measurement = 1000;
   }
 
   public default void updateInputs(AlgaeManipulatorSensorIOInputs inputs) {}

@@ -24,6 +24,13 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.algaemanipulator.AlgaeManipulator;
+import frc.robot.subsystems.algaemanipulator.AlgaeManipulator.GamepieceState;
+import frc.robot.subsystems.algaemanipulator.AlgaeManipulator.ManipulatorState;
+import frc.robot.subsystems.algaemanipulator.AlgaeManipulatorIOKraken;
+import frc.robot.subsystems.algaemanipulator.AlgaeManipulatorIOSim;
+import frc.robot.subsystems.algaemanipulator.AlgaeManipulatorSensorIOLaserCan;
+import frc.robot.subsystems.algaemanipulator.AlgaeManipulatorSensorIOSim;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -41,6 +48,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
+  private final AlgaeManipulator algaeManipulator;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -61,6 +69,9 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
+        algaeManipulator =
+            new AlgaeManipulator(
+                new AlgaeManipulatorIOKraken(), new AlgaeManipulatorSensorIOLaserCan());
         break;
 
       case SIM:
@@ -72,6 +83,8 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
+        algaeManipulator =
+            new AlgaeManipulator(new AlgaeManipulatorIOSim(), new AlgaeManipulatorSensorIOSim());
         break;
 
       default:
@@ -83,6 +96,8 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
+        algaeManipulator =
+            new AlgaeManipulator(new AlgaeManipulatorIOSim(), new AlgaeManipulatorSensorIOSim());
         break;
     }
 
@@ -148,6 +163,15 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
+
+    controller
+        .rightTrigger()
+        .and(() -> algaeManipulator.getGamepieceState() == GamepieceState.NONE)
+        .whileTrue(algaeManipulator.setDesiredStateCommand(ManipulatorState.INTAKING));
+
+    controller
+        .rightBumper()
+        .whileTrue(algaeManipulator.setDesiredStateCommand(ManipulatorState.SHOOTING));
   }
 
   /**

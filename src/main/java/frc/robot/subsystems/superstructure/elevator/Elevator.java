@@ -11,8 +11,6 @@ public class Elevator {
 
   private final ElevatorIO io;
   private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
-  private final ElevatorVisualizer visualizer =
-      new ElevatorVisualizer(ElevatorConstants.elevatorPose);
 
   // private static final LoggedTunableNumber kP =
   //   new LoggedTunableNumber("Elevator/kP", gains.kP());
