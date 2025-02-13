@@ -1,5 +1,7 @@
 package frc.robot.subsystems.coralmanipulator.CoralManipulatorWrist;
 
+import java.util.function.DoubleSupplier;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -29,6 +31,7 @@ public class CoralManipulatorWristIOKraken implements CoralManipulatorWristIO {
 
   private final TalonFXConfiguration config = new TalonFXConfiguration();
   private final NeutralOut neutralout = new NeutralOut();
+  private double prevDesiredArmPosition = 0;
 
   public CoralManipulatorWristIOKraken(){
 
@@ -69,17 +72,36 @@ public class CoralManipulatorWristIOKraken implements CoralManipulatorWristIO {
         BaseStatusSignal.setUpdateFrequencyForAll(
         50, positionRotations, velocityRps, appliedVoltage, supplyCurrent);
 
+        wristMotor.optimizeBusUtilization(1.0);
+
     }
 
     @Override
     public void updateInputs(CoralManipulatorWristIOInputs inputs){
-        
+        BaseStatusSignal.refreshAll(
+                velocityRps,
+                appliedVoltage,
+                supplyCurrent,
+                positionRotations)
+            .isOK();
+
         inputs.appliedCurrentOut = supplyCurrent.getValueAsDouble();
         inputs.appliedVoltageOut = appliedVoltage.getValueAsDouble();
         inputs.positionRad = Units.rotationsToRadians(positionRotations.getValueAsDouble());
         inputs.velocityRadPerSec = Units.rotationsPerMinuteToRadiansPerSecond(velocityRps.getValueAsDouble() * 60);
 
 
+    }
+
+    @Override
+    public void setPosition(DoubleSupplier positionSetpoint){
+        wristMotor.setControl(positionControl.withPosition(positionSetpoint.getAsDouble()));
+        this.prevDesiredArmPosition = positionSetpoint.getAsDouble();
+    }
+
+    @Override
+    public void stop(){
+        wristMotor.stopMotor();
     }
 
     
