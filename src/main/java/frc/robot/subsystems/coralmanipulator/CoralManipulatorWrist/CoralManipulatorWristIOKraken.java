@@ -1,21 +1,17 @@
 package frc.robot.subsystems.coralmanipulator.CoralManipulatorWrist;
 
-import java.util.function.DoubleSupplier;
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.NeutralOut;
-import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
-
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
+import java.util.function.DoubleSupplier;
 
 public class CoralManipulatorWristIOKraken implements CoralManipulatorWristIO {
 
@@ -33,9 +29,9 @@ public class CoralManipulatorWristIOKraken implements CoralManipulatorWristIO {
   private final NeutralOut neutralout = new NeutralOut();
   private double prevDesiredArmPosition = 0;
 
-  public CoralManipulatorWristIOKraken(){
+  public CoralManipulatorWristIOKraken() {
 
-        wristMotor = new TalonFX(0);
+    wristMotor = new TalonFX(0);
 
     // numbers from Wrist Constants that will be implemented later.
     // config.Slot0.kP = gains.kP();
@@ -64,45 +60,36 @@ public class CoralManipulatorWristIOKraken implements CoralManipulatorWristIO {
     // config.MotionMagic.MotionMagicJerk = cruiseJerk;
     // armTalon.getConfigurator().apply(config, 1.0);
 
-
-        positionRotations = wristMotor.getPosition();
-        velocityRps = wristMotor.getVelocity();
-        appliedVoltage = wristMotor.getMotorVoltage();
-        supplyCurrent = wristMotor.getSupplyCurrent();
-        BaseStatusSignal.setUpdateFrequencyForAll(
+    positionRotations = wristMotor.getPosition();
+    velocityRps = wristMotor.getVelocity();
+    appliedVoltage = wristMotor.getMotorVoltage();
+    supplyCurrent = wristMotor.getSupplyCurrent();
+    BaseStatusSignal.setUpdateFrequencyForAll(
         50, positionRotations, velocityRps, appliedVoltage, supplyCurrent);
 
-        wristMotor.optimizeBusUtilization(1.0);
+    wristMotor.optimizeBusUtilization(1.0);
+  }
 
-    }
+  @Override
+  public void updateInputs(CoralManipulatorWristIOInputs inputs) {
+    BaseStatusSignal.refreshAll(velocityRps, appliedVoltage, supplyCurrent, positionRotations)
+        .isOK();
 
-    @Override
-    public void updateInputs(CoralManipulatorWristIOInputs inputs){
-        BaseStatusSignal.refreshAll(
-                velocityRps,
-                appliedVoltage,
-                supplyCurrent,
-                positionRotations)
-            .isOK();
+    inputs.appliedCurrentOut = supplyCurrent.getValueAsDouble();
+    inputs.appliedVoltageOut = appliedVoltage.getValueAsDouble();
+    inputs.positionRad = Units.rotationsToRadians(positionRotations.getValueAsDouble());
+    inputs.velocityRadPerSec =
+        Units.rotationsPerMinuteToRadiansPerSecond(velocityRps.getValueAsDouble() * 60);
+  }
 
-        inputs.appliedCurrentOut = supplyCurrent.getValueAsDouble();
-        inputs.appliedVoltageOut = appliedVoltage.getValueAsDouble();
-        inputs.positionRad = Units.rotationsToRadians(positionRotations.getValueAsDouble());
-        inputs.velocityRadPerSec = Units.rotationsPerMinuteToRadiansPerSecond(velocityRps.getValueAsDouble() * 60);
+  @Override
+  public void setPosition(DoubleSupplier positionSetpoint) {
+    wristMotor.setControl(positionControl.withPosition(positionSetpoint.getAsDouble()));
+    this.prevDesiredArmPosition = positionSetpoint.getAsDouble();
+  }
 
-
-    }
-
-    @Override
-    public void setPosition(DoubleSupplier positionSetpoint){
-        wristMotor.setControl(positionControl.withPosition(positionSetpoint.getAsDouble()));
-        this.prevDesiredArmPosition = positionSetpoint.getAsDouble();
-    }
-
-    @Override
-    public void stop(){
-        wristMotor.stopMotor();
-    }
-
-    
+  @Override
+  public void stop() {
+    wristMotor.stopMotor();
+  }
 }
