@@ -1,0 +1,79 @@
+{
+    "name": "1625-25-A-0000",
+    "disableSimplification": true,
+    "position": [0, 0, 0],
+    "rotations": [
+    {
+      "axis": "x",
+      "degrees": 90
+    },
+    {
+      "axis": "z",
+      "degrees": 90
+    }
+  ],
+    "cameras": [ 
+    ],
+    "components": [      
+      {
+        "zeroedRotations": [
+          {
+            "axis": "x",
+            "degrees": 90
+          },
+          {
+            "axis": "z",
+            "degrees": 90
+          }
+        ]
+      },
+      {
+        "zeroedRotations": [
+          {
+            "axis": "x",
+            "degrees": 90
+          },
+          {
+            "axis": "z",
+            "degrees": 90
+          }
+        ]
+      },
+      {
+        "zeroedRotations": [
+          {
+            "axis": "x",
+            "degrees": 90
+          },
+          {
+            "axis": "z",
+            "degrees": 90
+          }
+        ]
+      },
+      {
+        "zeroedRotations": [
+          {
+            "axis": "x",
+            "degrees": 90
+          },
+          {
+            "axis": "z",
+            "degrees": 90
+          }
+        ]
+      },
+      {
+        "zeroedRotations": [
+          {
+            "axis": "x",
+            "degrees": 90
+          },
+          {
+            "axis": "z",
+            "degrees": 90
+          }
+        ]
+      }
+    ]
+  }
