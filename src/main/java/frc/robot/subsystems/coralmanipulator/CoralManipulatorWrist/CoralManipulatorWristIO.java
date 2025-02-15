@@ -19,4 +19,6 @@ public interface CoralManipulatorWristIO {
   public default void setPosition(DoubleSupplier positionSetpoint) {}
 
   public default void stop() {}
+
+  public default void setBrakeMode(boolean isBrake) {}
 }

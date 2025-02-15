@@ -1,5 +1,7 @@
 package frc.robot.subsystems.coralmanipulator.CoralManipulatorWrist;
 
+import static frc.robot.subsystems.coralmanipulator.CoralManipulatorWrist.CoralManipulatorWristConstants.*;
+
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.util.EqualsUtil;
@@ -8,10 +10,11 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import frc.robot.subsystems.coralmanipulator.*;
 import lombok.Setter;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean;
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
 public class CoralManipulatorWrist {
 
@@ -20,26 +23,28 @@ public class CoralManipulatorWrist {
       new CoralManipulatorWristIOInputsAutoLogged();
   // private final IntakeArmVisualizer visualizer =
   //   new IntakeArmVisualizer(IntakeArmConstants.intakePose);
-  // private static final LoggedTunableNumber kP = new LoggedTunableNumber("IntakeArm/kP",
-  // gains.kP());
-  // private static final LoggedTunableNumber kI = new LoggedTunableNumber("IntakeArm/kI",
-  // gains.kI());
-  // private static final LoggedTunableNumber kD = new LoggedTunableNumber("IntakeArm/kD",
-  // gains.kD());
-  // private static final LoggedTunableNumber kS =
-  //     new LoggedTunableNumber("IntakeArm/kS", gains.ffkS());
-  // private static final LoggedTunableNumber kV =
-  //     new LoggedTunableNumber("IntakeArm/kV", gains.ffkV());
-  // private static final LoggedTunableNumber kA =
-  //     new LoggedTunableNumber("IntakeArm/kA", gains.ffkA());
-  // private static final LoggedTunableNumber kG =
-  //     new LoggedTunableNumber("IntakeArm/kG", gains.ffkG());
-  // private static final LoggedTunableNumber cruiseV =
-  //     new LoggedTunableNumber("IntakeArm/cruiseV", cruiseVelocity);
-  // private static final LoggedTunableNumber cruiseA =
-  //     new LoggedTunableNumber("IntakeArm/cruiseA", cruiseAcceleration);
-  // private static final LoggedTunableNumber cruiseJ =
-  //     new LoggedTunableNumber("IntakeArm/cruiseJ", cruiseJerk);
+  private static final LoggedTunableNumber kP = new LoggedTunableNumber("CoralManipulatorWrist/kP",
+  gains.kP());
+  private static final LoggedTunableNumber kI = new LoggedTunableNumber("CoralManipulatorWrist/kI",
+  gains.kI());
+  private static final LoggedTunableNumber kD = new LoggedTunableNumber("CoralManipulatorWrist/kD",
+  gains.kD());
+  private static final LoggedTunableNumber kS =
+      new LoggedTunableNumber("CoralManipulatorWrist/kS", gains.ffkS());
+  private static final LoggedTunableNumber kV =
+      new LoggedTunableNumber("CoralManipulatorWrist/kV", gains.ffkV());
+  private static final LoggedTunableNumber kA =
+      new LoggedTunableNumber("CoralManipulatorWrist/kA", gains.ffkA());
+  private static final LoggedTunableNumber kG =
+      new LoggedTunableNumber("CoralManipulatorWrist/kG", gains.ffkG());
+  private static final LoggedTunableNumber cruiseV =
+      new LoggedTunableNumber("CoralManipulatorWrist/cruiseV", cruiseVelocity);
+  private static final LoggedTunableNumber cruiseA =
+      new LoggedTunableNumber("CoralManipulatorWrist/cruiseA", cruiseAcceleration);
+  private static final LoggedTunableNumber cruiseJ =
+      new LoggedTunableNumber("CoralManipulatorWrist/cruiseJ", cruiseJerk);
+  private static final LoggedNetworkBoolean coastSupplier = 
+      new LoggedNetworkBoolean("CoralManipulatorWrist/coastSupplier", false);
 
   public CoralManipulatorWrist(CoralManipulatorWristIO io) {
     this.io = io;
@@ -47,9 +52,7 @@ public class CoralManipulatorWrist {
 
   @AutoLogOutput @Getter @Setter private WristState wristState = WristState.STOW;
   private boolean characterizing;
-  private boolean brakeModeEnabled;
   private BooleanSupplier disableSupplier = DriverStation::isDisabled;
-  private BooleanSupplier coastSupplier = () -> false;
 
   @RequiredArgsConstructor
   public enum WristState {
@@ -84,7 +87,6 @@ public class CoralManipulatorWrist {
       io.stop();
     }
     if (!characterizing
-        && brakeModeEnabled
         && !disableSupplier.getAsBoolean()
         && wristState != WristState.STOP) {
 
@@ -94,11 +96,14 @@ public class CoralManipulatorWrist {
 
   }
 
-  @AutoLogOutput(key = "Superstructure/IntakeArm/AtGoal")
+  @AutoLogOutput(key = "Superstructure/CoralManiuplatorWrist/AtGoal")
   public boolean atGoal() {
-    return EqualsUtil.epsilonEquals(inputs.positionRad, wristState.wristSetpointSupplier, armTolerance);
+    return EqualsUtil.epsilonEquals(inputs.positionRad, wristState.wristSetpointSupplier.getAsDouble(), CoralManipulatorWristConstants.armTolerance);
   }
 
+  public void setBrakeMode(boolean coastSupplier) {
+    setBrakeMode(coastSupplier);
+  }
 
 
 }
