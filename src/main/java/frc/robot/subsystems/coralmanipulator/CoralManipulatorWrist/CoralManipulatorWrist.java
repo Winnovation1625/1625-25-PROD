@@ -2,6 +2,7 @@ package frc.robot.subsystems.coralmanipulator.CoralManipulatorWrist;
 
 import static frc.robot.subsystems.coralmanipulator.CoralManipulatorWrist.CoralManipulatorWristConstants.*;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -51,17 +52,17 @@ public class CoralManipulatorWrist extends SubsystemBase {
   }
 
   @AutoLogOutput @Getter @Setter private WristState wristState = WristState.IDLE;
-  private boolean characterizing;
+  private boolean characterizing = false;
   private BooleanSupplier disableSupplier = DriverStation::isDisabled;
 
   @RequiredArgsConstructor
   public enum WristState {
     STOP(() -> 0),
     IDLE(new LoggedTunableNumber("Wrist/Stow", Integer.MIN_VALUE)),
-    TROUGH(new LoggedTunableNumber("Wrist/Trough", 10)),
-    LEVEL_ONE(new LoggedTunableNumber("Wrist/LevelOne", 20)),
-    LEVEL_TWO(new LoggedTunableNumber("Wrist/LevelTwo", 30)),
-    LEVEL_THREE(new LoggedTunableNumber("Wrist/LevelThree", 40));
+    TROUGH(new LoggedTunableNumber("Wrist/Trough", Units.degreesToRadians(20))),
+    LEVEL_ONE(new LoggedTunableNumber("Wrist/LevelOne", Units.degreesToRadians(30))),
+    LEVEL_TWO(new LoggedTunableNumber("Wrist/LevelTwo", Units.degreesToRadians(35))),
+    LEVEL_THREE(new LoggedTunableNumber("Wrist/LevelThree", Units.degreesToRadians(40)));
 
     private final DoubleSupplier wristSetpointSupplier;
   }
@@ -87,7 +88,7 @@ public class CoralManipulatorWrist extends SubsystemBase {
     if (wristState == WristState.IDLE && atGoal()) {
       io.stop();
     }
-    if (!characterizing && !disableSupplier.getAsBoolean() && wristState != WristState.STOP) {
+    if (!disableSupplier.getAsBoolean() && wristState != WristState.STOP) {
 
       io.setPosition(wristState.wristSetpointSupplier);
     }
