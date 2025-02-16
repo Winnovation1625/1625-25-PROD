@@ -2,10 +2,9 @@ package frc.robot.subsystems.coralmanipulator.CoralManipulatorWrist;
 
 import static frc.robot.subsystems.coralmanipulator.CoralManipulatorWrist.CoralManipulatorWristConstants.*;
 
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.superstructure.elevator.Elevator.ElevatorState;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.EqualsUtil;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.BooleanSupplier;
@@ -15,9 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class CoralManipulatorWrist extends SubsystemBase {
 
@@ -26,12 +23,12 @@ public class CoralManipulatorWrist extends SubsystemBase {
       new CoralManipulatorWristIOInputsAutoLogged();
   // private final IntakeArmVisualizer visualizer =
   //   new IntakeArmVisualizer(IntakeArmConstants.intakePose);
-  private static final LoggedTunableNumber kP = new LoggedTunableNumber("CoralManipulatorWrist/kP",
-  gains.kP());
-  private static final LoggedTunableNumber kI = new LoggedTunableNumber("CoralManipulatorWrist/kI",
-  gains.kI());
-  private static final LoggedTunableNumber kD = new LoggedTunableNumber("CoralManipulatorWrist/kD",
-  gains.kD());
+  private static final LoggedTunableNumber kP =
+      new LoggedTunableNumber("CoralManipulatorWrist/kP", gains.kP());
+  private static final LoggedTunableNumber kI =
+      new LoggedTunableNumber("CoralManipulatorWrist/kI", gains.kI());
+  private static final LoggedTunableNumber kD =
+      new LoggedTunableNumber("CoralManipulatorWrist/kD", gains.kD());
   private static final LoggedTunableNumber kS =
       new LoggedTunableNumber("CoralManipulatorWrist/kS", gains.ffkS());
   private static final LoggedTunableNumber kV =
@@ -46,7 +43,7 @@ public class CoralManipulatorWrist extends SubsystemBase {
       new LoggedTunableNumber("CoralManipulatorWrist/cruiseA", cruiseAcceleration);
   private static final LoggedTunableNumber cruiseJ =
       new LoggedTunableNumber("CoralManipulatorWrist/cruiseJ", cruiseJerk);
-  private static final LoggedNetworkBoolean coastSupplier = 
+  private static final LoggedNetworkBoolean coastSupplier =
       new LoggedNetworkBoolean("CoralManipulatorWrist/coastSupplier", false);
 
   public CoralManipulatorWrist(CoralManipulatorWristIO io) {
@@ -76,7 +73,8 @@ public class CoralManipulatorWrist extends SubsystemBase {
     if (disableSupplier.getAsBoolean() || wristState == wristState.STOP) {
       io.stop();
     }
-    //LoggedTunableNumber.ifChanged(hashCode(), pid -> io.setPID(pid[0], pid[1], pid[2]), kP, kI, kD);
+    // LoggedTunableNumber.ifChanged(hashCode(), pid -> io.setPID(pid[0], pid[1], pid[2]), kP, kI,
+    // kD);
     // LoggedTunableNumber.ifChanged(
     //     hashCode(), kSVA -> io.setFF(kSVA[0], kSVA[1], kSVA[2], kSVA[3]), kS, kV, kA, kG);
     // LoggedTunableNumber.ifChanged(
@@ -89,37 +87,30 @@ public class CoralManipulatorWrist extends SubsystemBase {
     if (wristState == WristState.IDLE && atGoal()) {
       io.stop();
     }
-    if (!characterizing
-        && !disableSupplier.getAsBoolean()
-        && wristState != WristState.STOP) {
+    if (!characterizing && !disableSupplier.getAsBoolean() && wristState != WristState.STOP) {
 
       io.setPosition(wristState.wristSetpointSupplier);
-
     }
-
   }
 
-  @AutoLogOutput(key = "Superstructure/CoralManiuplatorWrist/AtGoal")
+  @AutoLogOutput(key = "CoralManiuplatorWrist/AtGoal")
   public boolean atGoal() {
-    return EqualsUtil.epsilonEquals(inputs.positionRad, wristState.wristSetpointSupplier.getAsDouble(), CoralManipulatorWristConstants.armTolerance);
+    return EqualsUtil.epsilonEquals(
+        inputs.positionRad,
+        wristState.wristSetpointSupplier.getAsDouble(),
+        CoralManipulatorWristConstants.armTolerance);
   }
 
   public void setBrakeMode(boolean coastSupplier) {
     setBrakeMode(coastSupplier);
   }
 
-  public void changeLevel() {
-    wristState = WristState.LEVEL_ONE;
-    io.setPosition(WristState.LEVEL_ONE.wristSetpointSupplier);
-  }
-
   public void tempStop() {
     io.stop();
   }
 
-  public Command tempCommand() {
-    return startEnd(() -> changeLevel(), () -> tempStop());
+  public Command setDesiredStateCommand(WristState goal) {
+    return startEnd(() -> this.wristState = goal, () -> this.wristState = WristState.IDLE)
+        .withName("AlgaeManipulator " + goal);
   }
-
-
 }

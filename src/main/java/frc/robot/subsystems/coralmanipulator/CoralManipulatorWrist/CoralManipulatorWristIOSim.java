@@ -1,5 +1,8 @@
 package frc.robot.subsystems.coralmanipulator.CoralManipulatorWrist;
 
+import static frc.robot.Constants.*;
+import static frc.robot.subsystems.coralmanipulator.CoralManipulatorWrist.CoralManipulatorWristConstants.*;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.numbers.N1;
@@ -11,14 +14,10 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
-import static frc.robot.Constants.*;
-
-import static frc.robot.subsystems.coralmanipulator.CoralManipulatorWrist.CoralManipulatorWristConstants.*;
-
 import java.util.function.DoubleSupplier;
 
-public class CoralManiuplatorWristIOSim implements CoralManipulatorWristIO {
-    
+public class CoralManipulatorWristIOSim implements CoralManipulatorWristIO {
+
   private DCMotor wristMotors = DCMotor.getKrakenX60Foc(1);
 
   private LinearSystem<N2, N1, N2> wristId =
@@ -31,21 +30,20 @@ public class CoralManiuplatorWristIOSim implements CoralManipulatorWristIO {
           WRIST_PID_D,
           new TrapezoidProfile.Constraints(WRIST_MAX_VELOCITY, WRIST_MAX_ACCELERATION));
 
+  private final SingleJointedArmSim sim =
+      new SingleJointedArmSim(
+          wristId,
+          wristMotors, // needs real number
+          WRIST_GEARING,
+          WRIST_LENGTH,
+          Units.degreesToRadians(minAngle),
+          Units.degreesToRadians(maxAngle),
+          true,
+          Double.MIN_VALUE
+          // Add noise with a std-dev of 1 tick
+          );
 
-    private final SingleJointedArmSim sim =
-        new SingleJointedArmSim(
-              wristId,
-              wristMotors, //needs real number
-              WRIST_GEARING,
-              WRIST_LENGTH,
-              Units.degreesToRadians(minAngle),
-              Units.degreesToRadians(maxAngle),
-              true,
-              Double.MIN_VALUE,
-              1.0 // Add noise with a std-dev of 1 tick
-              );
-
-    public CoralManiuplatorWristIOSim() {}
+  public CoralManipulatorWristIOSim() {}
 
   @Override
   public void updateInputs(CoralManipulatorWristIOInputs inputs) {
@@ -59,8 +57,9 @@ public class CoralManiuplatorWristIOSim implements CoralManipulatorWristIO {
       inputs.appliedVoltageOut = appliedVolts;
       setInputVoltage(inputs.appliedVoltageOut);
     }
-    inputs.positionRad = sim.getAngleRads();
+    inputs.positionRad = Units.degreesToRadians(sim.getAngleRads());
     inputs.velocityRadPerSec = sim.getVelocityRadPerSec();
+    inputs.appliedCurrentOut = sim.getCurrentDrawAmps();
   }
 
   private void setInputVoltage(double volts) {
@@ -71,5 +70,4 @@ public class CoralManiuplatorWristIOSim implements CoralManipulatorWristIO {
   public void setPosition(DoubleSupplier desiredArmPosition) {
     pidController.setGoal(desiredArmPosition.getAsDouble());
   }
-    
 }

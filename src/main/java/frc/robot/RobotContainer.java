@@ -25,12 +25,15 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.algaemanipulator.AlgaeManipulator;
-import frc.robot.subsystems.algaemanipulator.AlgaeManipulator.GamepieceState;
-import frc.robot.subsystems.algaemanipulator.AlgaeManipulator.ManipulatorState;
 import frc.robot.subsystems.algaemanipulator.AlgaeManipulatorIOKraken;
 import frc.robot.subsystems.algaemanipulator.AlgaeManipulatorIOSim;
 import frc.robot.subsystems.algaemanipulator.AlgaeManipulatorSensorIOLaserCan;
 import frc.robot.subsystems.algaemanipulator.AlgaeManipulatorSensorIOSim;
+import frc.robot.subsystems.coralmanipulator.CoralManipulatorWrist.CoralManipulatorWrist;
+import frc.robot.subsystems.coralmanipulator.CoralManipulatorWrist.CoralManipulatorWrist.WristState;
+import frc.robot.subsystems.coralmanipulator.CoralManipulatorWrist.CoralManipulatorWristIO;
+import frc.robot.subsystems.coralmanipulator.CoralManipulatorWrist.CoralManipulatorWristIOKraken;
+import frc.robot.subsystems.coralmanipulator.CoralManipulatorWrist.CoralManipulatorWristIOSim;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -49,7 +52,7 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final AlgaeManipulator algaeManipulator;
-
+  private final CoralManipulatorWrist coralManipulatorWrist;
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
 
@@ -72,6 +75,9 @@ public class RobotContainer {
         algaeManipulator =
             new AlgaeManipulator(
                 new AlgaeManipulatorIOKraken(), new AlgaeManipulatorSensorIOLaserCan());
+
+        coralManipulatorWrist = new CoralManipulatorWrist(new CoralManipulatorWristIOKraken());
+
         break;
 
       case SIM:
@@ -85,6 +91,9 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.BackRight));
         algaeManipulator =
             new AlgaeManipulator(new AlgaeManipulatorIOSim(), new AlgaeManipulatorSensorIOSim());
+
+        coralManipulatorWrist = new CoralManipulatorWrist(new CoralManipulatorWristIOSim());
+
         break;
 
       default:
@@ -98,6 +107,9 @@ public class RobotContainer {
                 new ModuleIO() {});
         algaeManipulator =
             new AlgaeManipulator(new AlgaeManipulatorIOSim(), new AlgaeManipulatorSensorIOSim());
+
+        coralManipulatorWrist = new CoralManipulatorWrist(new CoralManipulatorWristIO() {});
+
         break;
     }
 
@@ -164,14 +176,24 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    controller
-        .rightTrigger()
-        .and(() -> algaeManipulator.getGamepieceState() == GamepieceState.NONE)
-        .whileTrue(algaeManipulator.setDesiredStateCommand(ManipulatorState.INTAKING));
+    // controller
+    //     .rightTrigger()
+    //     .and(() -> algaeManipulator.getGamepieceState() == GamepieceState.NONE)
+    //     .whileTrue(algaeManipulator.setDesiredStateCommand(ManipulatorState.INTAKING));
+
+    // controller
+    //     .rightBumper()
+    //     .whileTrue(algaeManipulator.setDesiredStateCommand(ManipulatorState.SHOOTING));
 
     controller
         .rightBumper()
-        .whileTrue(algaeManipulator.setDesiredStateCommand(ManipulatorState.SHOOTING));
+        .and(() -> coralManipulatorWrist.getWristState() != WristState.LEVEL_ONE)
+        .onTrue(coralManipulatorWrist.setDesiredStateCommand(WristState.LEVEL_ONE));
+
+    controller
+        .rightTrigger()
+        .and(() -> coralManipulatorWrist.getWristState() != WristState.LEVEL_TWO)
+        .onTrue(coralManipulatorWrist.setDesiredStateCommand(WristState.LEVEL_TWO));
   }
 
   /**

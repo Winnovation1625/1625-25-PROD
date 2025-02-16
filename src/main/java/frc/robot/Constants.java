@@ -39,7 +39,7 @@ public final class Constants {
     REPLAY
   }
 
-   public static RobotType getRobot() {
+  public static RobotType getRobot() {
     if (RobotBase.isReal() && robotType == RobotType.SIMBOT) {
       new Alert("Invalid Robot Selected, using COMPBOT as default", Alert.AlertType.kError)
           .set(true);
@@ -47,7 +47,6 @@ public final class Constants {
     }
     return robotType;
   }
-
 
   public enum RobotType {
     SIMBOT,

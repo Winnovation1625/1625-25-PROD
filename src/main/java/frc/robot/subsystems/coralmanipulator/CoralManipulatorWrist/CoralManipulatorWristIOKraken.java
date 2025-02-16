@@ -7,14 +7,11 @@ import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import lombok.Getter;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
-import lombok.Setter;
-
 import java.util.function.DoubleSupplier;
 
 public class CoralManipulatorWristIOKraken implements CoralManipulatorWristIO {
@@ -99,14 +96,12 @@ public class CoralManipulatorWristIOKraken implements CoralManipulatorWristIO {
   }
 
   @Override
-  public void setBrakeMode(boolean isBrake){
-      
-    if(isBrake != this.isBrake){
+  public void setBrakeMode(boolean isBrake) {
+
+    if (isBrake != this.isBrake) {
       this.isBrake = isBrake;
       config.MotorOutput.NeutralMode = isBrake ? NeutralModeValue.Brake : NeutralModeValue.Coast;
       wristMotor.getConfigurator().apply(config);
     }
-    
   }
-
 }
