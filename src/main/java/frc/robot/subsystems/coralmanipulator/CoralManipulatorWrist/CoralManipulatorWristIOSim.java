@@ -57,7 +57,7 @@ public class CoralManipulatorWristIOSim implements CoralManipulatorWristIO {
       inputs.appliedVoltageOut = appliedVolts;
       setInputVoltage(inputs.appliedVoltageOut);
     }
-    inputs.positionRad = Units.degreesToRadians(sim.getAngleRads());
+    inputs.positionRad = sim.getAngleRads();
     inputs.velocityRadPerSec = sim.getVelocityRadPerSec();
     inputs.appliedCurrentOut = sim.getCurrentDrawAmps();
   }

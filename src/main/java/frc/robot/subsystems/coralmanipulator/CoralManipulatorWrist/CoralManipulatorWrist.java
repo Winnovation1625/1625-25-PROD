@@ -58,7 +58,7 @@ public class CoralManipulatorWrist extends SubsystemBase {
   @RequiredArgsConstructor
   public enum WristState {
     STOP(() -> 0),
-    IDLE(new LoggedTunableNumber("Wrist/Stow", Integer.MIN_VALUE)),
+    IDLE(new LoggedTunableNumber("Wrist/Stow", Units.degreesToRadians(0))),
     TROUGH(new LoggedTunableNumber("Wrist/Trough", Units.degreesToRadians(20))),
     LEVEL_ONE(new LoggedTunableNumber("Wrist/LevelOne", Units.degreesToRadians(30))),
     LEVEL_TWO(new LoggedTunableNumber("Wrist/LevelTwo", Units.degreesToRadians(35))),
