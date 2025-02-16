@@ -4,6 +4,8 @@ import static frc.robot.subsystems.coralmanipulator.CoralManipulatorWrist.CoralM
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.superstructure.elevator.Elevator.ElevatorState;
 import frc.robot.util.EqualsUtil;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.BooleanSupplier;
@@ -15,8 +17,9 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class CoralManipulatorWrist {
+public class CoralManipulatorWrist extends SubsystemBase {
 
   private final CoralManipulatorWristIO io;
   private final CoralManipulatorWristIOInputsAutoLogged inputs =
@@ -50,18 +53,18 @@ public class CoralManipulatorWrist {
     this.io = io;
   }
 
-  @AutoLogOutput @Getter @Setter private WristState wristState = WristState.STOW;
+  @AutoLogOutput @Getter @Setter private WristState wristState = WristState.IDLE;
   private boolean characterizing;
   private BooleanSupplier disableSupplier = DriverStation::isDisabled;
 
   @RequiredArgsConstructor
   public enum WristState {
     STOP(() -> 0),
-    STOW(new LoggedTunableNumber("Wrist/Stow", 5)),
+    IDLE(new LoggedTunableNumber("Wrist/Stow", Integer.MIN_VALUE)),
     TROUGH(new LoggedTunableNumber("Wrist/Trough", 10)),
-    LEVELONE(new LoggedTunableNumber("Wrist/LevelOne", 20)),
-    LEVELTWO(new LoggedTunableNumber("Wrist/LevelTwo", 30)),
-    LEVELTHREE(new LoggedTunableNumber("Wrist/LevelThree", 40));
+    LEVEL_ONE(new LoggedTunableNumber("Wrist/LevelOne", 20)),
+    LEVEL_TWO(new LoggedTunableNumber("Wrist/LevelTwo", 30)),
+    LEVEL_THREE(new LoggedTunableNumber("Wrist/LevelThree", 40));
 
     private final DoubleSupplier wristSetpointSupplier;
   }
@@ -73,7 +76,7 @@ public class CoralManipulatorWrist {
     if (disableSupplier.getAsBoolean() || wristState == wristState.STOP) {
       io.stop();
     }
-    // LoggedTunableNumber.ifChanged(hashCode(), pid -> io.setPID(pid[0], pid[1], pid[2]), kP, kI, kD);
+    //LoggedTunableNumber.ifChanged(hashCode(), pid -> io.setPID(pid[0], pid[1], pid[2]), kP, kI, kD);
     // LoggedTunableNumber.ifChanged(
     //     hashCode(), kSVA -> io.setFF(kSVA[0], kSVA[1], kSVA[2], kSVA[3]), kS, kV, kA, kG);
     // LoggedTunableNumber.ifChanged(
@@ -83,7 +86,7 @@ public class CoralManipulatorWrist {
     //     cruiseA,
     //     cruiseJ);
     // visualizer.updateVisualizer(inputs.positionRads);
-    if (wristState == WristState.STOW && atGoal()) {
+    if (wristState == WristState.IDLE && atGoal()) {
       io.stop();
     }
     if (!characterizing
@@ -103,6 +106,19 @@ public class CoralManipulatorWrist {
 
   public void setBrakeMode(boolean coastSupplier) {
     setBrakeMode(coastSupplier);
+  }
+
+  public void changeLevel() {
+    wristState = WristState.LEVEL_ONE;
+    io.setPosition(WristState.LEVEL_ONE.wristSetpointSupplier);
+  }
+
+  public void tempStop() {
+    io.stop();
+  }
+
+  public Command tempCommand() {
+    return startEnd(() -> changeLevel(), () -> tempStop());
   }
 
 

@@ -17,6 +17,9 @@ public class CoralManipulatorWristConstants {
     public static final double WRIST_PID_D = 0.125;
     public static final double WRIST_MASS_KG = 0.125;
     public static final double WRIST_GEARING = 0.125;
+    public static final double WRIST_LENGTH = 0.0; // need real number
+    public static final double WRIST_MAX_VELOCITY = 0.125;
+    public static final double WRIST_MAX_ACCELERATION = 0.125;
 
 
     public static Gains gains =
