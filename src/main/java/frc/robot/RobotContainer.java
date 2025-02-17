@@ -29,11 +29,11 @@ import frc.robot.subsystems.algaemanipulator.AlgaeManipulatorIOKraken;
 import frc.robot.subsystems.algaemanipulator.AlgaeManipulatorIOSim;
 import frc.robot.subsystems.algaemanipulator.AlgaeManipulatorSensorIOLaserCan;
 import frc.robot.subsystems.algaemanipulator.AlgaeManipulatorSensorIOSim;
-import frc.robot.subsystems.coralmanipulator.CoralManipulatorWrist.CoralManipulatorWrist;
-import frc.robot.subsystems.coralmanipulator.CoralManipulatorWrist.CoralManipulatorWrist.WristState;
-import frc.robot.subsystems.coralmanipulator.CoralManipulatorWrist.CoralManipulatorWristIO;
-import frc.robot.subsystems.coralmanipulator.CoralManipulatorWrist.CoralManipulatorWristIOKraken;
-import frc.robot.subsystems.coralmanipulator.CoralManipulatorWrist.CoralManipulatorWristIOSim;
+import frc.robot.subsystems.coralmanipulator.CoralManipulatorRollers.CoralManipulatorRollers;
+import frc.robot.subsystems.coralmanipulator.CoralManipulatorRollers.CoralManipulatorRollers.RollersState;
+import frc.robot.subsystems.coralmanipulator.CoralManipulatorRollers.CoralManipulatorRollersIO;
+import frc.robot.subsystems.coralmanipulator.CoralManipulatorRollers.CoralManipulatorRollersIOKraken;
+import frc.robot.subsystems.coralmanipulator.CoralManipulatorRollers.CoralManipulatorRollersIOSim;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -52,7 +52,7 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final AlgaeManipulator algaeManipulator;
-  private final CoralManipulatorWrist coralManipulatorWrist;
+  private final CoralManipulatorRollers coralManipulatorRollers;
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
 
@@ -76,7 +76,8 @@ public class RobotContainer {
             new AlgaeManipulator(
                 new AlgaeManipulatorIOKraken(), new AlgaeManipulatorSensorIOLaserCan());
 
-        coralManipulatorWrist = new CoralManipulatorWrist(new CoralManipulatorWristIOKraken());
+        coralManipulatorRollers =
+            new CoralManipulatorRollers(new CoralManipulatorRollersIOKraken());
 
         break;
 
@@ -92,7 +93,7 @@ public class RobotContainer {
         algaeManipulator =
             new AlgaeManipulator(new AlgaeManipulatorIOSim(), new AlgaeManipulatorSensorIOSim());
 
-        coralManipulatorWrist = new CoralManipulatorWrist(new CoralManipulatorWristIOSim());
+        coralManipulatorRollers = new CoralManipulatorRollers(new CoralManipulatorRollersIOSim());
 
         break;
 
@@ -108,7 +109,7 @@ public class RobotContainer {
         algaeManipulator =
             new AlgaeManipulator(new AlgaeManipulatorIOSim(), new AlgaeManipulatorSensorIOSim());
 
-        coralManipulatorWrist = new CoralManipulatorWrist(new CoralManipulatorWristIO() {});
+        coralManipulatorRollers = new CoralManipulatorRollers(new CoralManipulatorRollersIO() {});
 
         break;
     }
@@ -187,13 +188,13 @@ public class RobotContainer {
 
     controller
         .rightBumper()
-        .and(() -> coralManipulatorWrist.getWristState() != WristState.LEVEL_ONE)
-        .onTrue(coralManipulatorWrist.setDesiredStateCommand(WristState.LEVEL_ONE));
+        .and(() -> coralManipulatorRollers.getRollersState() != RollersState.INTAKING)
+        .whileTrue(coralManipulatorRollers.setDesiredStateCommand(RollersState.EJECTING));
 
     controller
         .rightTrigger()
-        .and(() -> coralManipulatorWrist.getWristState() != WristState.LEVEL_TWO)
-        .onTrue(coralManipulatorWrist.setDesiredStateCommand(WristState.LEVEL_TWO));
+        .and(() -> coralManipulatorRollers.getRollersState() != RollersState.EJECTING)
+        .whileTrue(coralManipulatorRollers.setDesiredStateCommand(RollersState.INTAKING));
   }
 
   /**

@@ -112,6 +112,6 @@ public class CoralManipulatorWrist extends SubsystemBase {
 
   public Command setDesiredStateCommand(WristState goal) {
     return startEnd(() -> this.wristState = goal, () -> this.wristState = WristState.IDLE)
-        .withName("AlgaeManipulator " + goal);
+        .withName("CoralManipulatorWrist " + goal);
   }
 }

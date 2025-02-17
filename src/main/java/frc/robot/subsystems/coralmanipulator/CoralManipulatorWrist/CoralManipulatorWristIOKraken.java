@@ -69,7 +69,7 @@ public class CoralManipulatorWristIOKraken implements CoralManipulatorWristIO {
     BaseStatusSignal.setUpdateFrequencyForAll(
         50, positionRotations, velocityRps, appliedVoltage, supplyCurrent);
 
-    wristMotor.optimizeBusUtilization(1.0);
+    wristMotor.optimizeBusUtilization(0, 1.0);
   }
 
   @Override
