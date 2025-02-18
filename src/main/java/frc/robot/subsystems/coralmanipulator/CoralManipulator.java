@@ -1,5 +1,3 @@
 package frc.robot.subsystems.coralmanipulator;
 
-public class CoralManipulator{
-
-}
+public class CoralManipulator {}
