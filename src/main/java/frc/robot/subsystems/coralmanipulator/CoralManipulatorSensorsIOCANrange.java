@@ -1,53 +1,37 @@
 package frc.robot.subsystems.coralmanipulator;
 
+import static frc.robot.subsystems.coralmanipulator.CoralManipulatorConstants.constCoralOuttake;
+
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.CANrange;
-
-import au.grapplerobotics.ConfigurationFailedException;
-import au.grapplerobotics.LaserCan;
-
-
-import com.ctre.phoenix6.configs.CANrangeConfiguration;
+import frc.robot.subsystems.coralmanipulator.CoralManipulatorConstants.constCoralOuttake;
 
 public class CoralManipulatorSensorsIOCANrange implements CoralManipulatorSensorIO {
+
+  private final CANrange backSensor;
+  private final CANrange frontSensor;
+  private final StatusSignal<Boolean> isFrontDetected;
+  private final StatusSignal<Boolean> isBackDetected;
+
+  public CoralManipulatorSensorsIOCANrange() {
+
+    backSensor = new CANrange(0);
+    frontSensor = new CANrange(1);
+
+    backSensor.getConfigurator().apply(constCoralOuttake.CORAL_SENSOR_CONFIG);
+    frontSensor.getConfigurator().apply(constCoralOuttake.CORAL_SENSOR_CONFIG);
+
+    isFrontDetected = frontSensor.getIsDetected();
+    isBackDetected = backSensor.getIsDetected();
+  }
+
+  @Override
+  public void updateInputs(CoralManipulatorSensorIOInputs inputs) {
+
+    inputs.frontSensorMeasurment = frontSensor.getDistance().getValueAsDouble();
+    inputs.backSensorMeasurment = backSensor.getDistance().getValueAsDouble();
+    inputs.isBackDetected = backSensor.getIsDetected().getValue();
+    inputs.isFrontDetected = frontSensor.getIsDetected().getValue();
     
-    private final CANrange backSensor;
-    private final CANrange frontSensor;
-    private final CANrangeConfiguration config = new CANrangeConfiguration();
-
-    public CoralManipulatorSensorsIOCANrange(){
-
-        backSensor = new CANrange(0);
-        frontSensor = new CANrange(1);
-
-        try{
-            configureSensor(backSensor);
-        }
-        catch(ConfigurationFailedException e){
-            System.out.println("initial intake cannot config " + e.getMessage());
-        }
-        try{
-            configureSensor(frontSensor);
-        }
-        catch(ConfigurationFailedException e){
-            System.out.println("initial intake cannot config " + e.getMessage());
-        }
-    }
-
-    @Override
-    public void updateInputs(CoralManipulatorSensorIOInputs inputs) {
-    measurements[0] = backSensor.getMeasurement();
-    for (int i = 0; i < 5; i++) {
-      if (measurements[i] != null
-          && measurements[i].status == ) {
-        switch (i) {
-          case 0 -> inputs.SensorMeasurement = measurements[i].distance_mm;
-        }
-      }
-    }
   }
-
-     private void configureSensor(CANrange sensor) throws ConfigurationFailedException {
-        config.ProximityParams.MinSignalStrengthForValidMeasurement = 2;
-  }
-
 }

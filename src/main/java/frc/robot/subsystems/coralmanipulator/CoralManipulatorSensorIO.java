@@ -4,13 +4,16 @@ import org.littletonrobotics.junction.AutoLog;
 
 public interface CoralManipulatorSensorIO {
 
-    @AutoLog
-    public class CoralManipulatorSensorIOInputs{
+  @AutoLog
+  public static class CoralManipulatorSensorIOInputs {
 
-        public double sensorMeasurment = 200;
+    public double frontSensorMeasurment = 0.0;
+    public double backSensorMeasurment = 0.0;
+    public Boolean isBackDetected;
+    public Boolean isFrontDetected; 
 
-    }
+  }
 
-    public default void updateInputs(CoralManipulatorSensorIOInputs inputs) {}
-    
+  public default void updateInputs(CoralManipulatorSensorIOInputs inputs) {}
+  
 }
