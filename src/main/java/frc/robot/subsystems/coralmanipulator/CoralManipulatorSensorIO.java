@@ -9,8 +9,8 @@ public interface CoralManipulatorSensorIO {
 
     public double frontSensorMeasurment = 0.0;
     public double backSensorMeasurment = 0.0;
-    public Boolean isBackDetected;
-    public Boolean isFrontDetected;
+    public boolean isBackDetected = false;
+    public boolean isFrontDetected = false;
   }
 
   public default void updateInputs(CoralManipulatorSensorIOInputs inputs) {}

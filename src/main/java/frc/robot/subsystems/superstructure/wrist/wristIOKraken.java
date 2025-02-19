@@ -14,7 +14,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import java.util.function.DoubleSupplier;
 
-public class wristIOKraken implements wristIO {
+public class WristIOKraken implements WristIO {
 
   private final TalonFX wristMotor;
 
@@ -31,7 +31,7 @@ public class wristIOKraken implements wristIO {
   private double prevDesiredArmPosition = 0;
   private boolean isBrake = false;
 
-  public wristIOKraken() {
+  public WristIOKraken() {
 
     wristMotor = new TalonFX(0);
 

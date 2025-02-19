@@ -3,7 +3,7 @@ package frc.robot.subsystems.superstructure.wrist;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
 
-public class wristConstants {
+public class WristConstants {
 
   public static final double armTolerance = Units.degreesToRadians(2);
   public static final double minAngle = -33;

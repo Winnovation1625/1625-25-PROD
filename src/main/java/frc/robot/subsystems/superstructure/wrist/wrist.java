@@ -1,6 +1,6 @@
 package frc.robot.subsystems.superstructure.wrist;
 
-import static frc.robot.subsystems.superstructure.wrist.wristConstants.*;
+import static frc.robot.subsystems.superstructure.wrist.WristConstants.*;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -17,9 +17,9 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
-public class wrist extends SubsystemBase {
+public class Wrist extends SubsystemBase {
 
-  private final wristIO io;
+  private final WristIO io;
   private final WristIOInputsAutoLogged inputs = new WristIOInputsAutoLogged();
   // private final IntakeArmVisualizer visualizer =
   //   new IntakeArmVisualizer(IntakeArmConstants.intakePose);
@@ -46,7 +46,7 @@ public class wrist extends SubsystemBase {
   private static final LoggedNetworkBoolean coastSupplier =
       new LoggedNetworkBoolean("CoralManipulatorWrist/coastSupplier", false);
 
-  public wrist(wristIO io) {
+  public Wrist(WristIO io) {
     this.io = io;
   }
 
@@ -98,7 +98,7 @@ public class wrist extends SubsystemBase {
     return EqualsUtil.epsilonEquals(
         inputs.positionRad,
         wristState.wristSetpointSupplier.getAsDouble(),
-        wristConstants.armTolerance);
+        WristConstants.armTolerance);
   }
 
   public void setBrakeMode(boolean coastSupplier) {

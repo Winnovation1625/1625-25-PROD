@@ -3,7 +3,7 @@ package frc.robot.subsystems.superstructure.wrist;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLog;
 
-public interface wristIO {
+public interface WristIO {
 
   @AutoLog
   public static class WristIOInputs {

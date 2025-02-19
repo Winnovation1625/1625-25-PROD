@@ -24,11 +24,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.algaemanipulator.AlgaeManipulator;
-import frc.robot.subsystems.algaemanipulator.AlgaeManipulatorIOKraken;
-import frc.robot.subsystems.algaemanipulator.AlgaeManipulatorIOSim;
-import frc.robot.subsystems.algaemanipulator.AlgaeManipulatorSensorIOLaserCan;
-import frc.robot.subsystems.algaemanipulator.AlgaeManipulatorSensorIOSim;
 import frc.robot.subsystems.coralmanipulator.*;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -68,9 +63,6 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
-        algaeManipulator =
-            new AlgaeManipulator(
-                new AlgaeManipulatorIOKraken(), new AlgaeManipulatorSensorIOLaserCan());
 
         coralManipulator = new CoralManipulator(new CoralManipulatorIOKraken());
 
@@ -85,8 +77,6 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
-        algaeManipulator =
-            new AlgaeManipulator(new AlgaeManipulatorIOSim(), new AlgaeManipulatorSensorIOSim());
 
         coralManipulator = new CoralManipulator(new CoralManipulatorIOSim());
 
@@ -101,8 +91,6 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-        algaeManipulator =
-            new AlgaeManipulator(new AlgaeManipulatorIOSim(), new AlgaeManipulatorSensorIOSim());
 
         coralManipulator = new CoralManipulator(new CoralManipulatoIO() {});
 

@@ -1,7 +1,7 @@
 package frc.robot.subsystems.superstructure.wrist;
 
 import static frc.robot.Constants.*;
-import static frc.robot.subsystems.superstructure.wrist.wristConstants.*;
+import static frc.robot.subsystems.superstructure.wrist.WristConstants.*;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import java.util.function.DoubleSupplier;
 
-public class wristIOSim implements wristIO {
+public class WristIOSim implements WristIO {
 
   private DCMotor wristMotors = DCMotor.getKrakenX60Foc(1);
 
@@ -43,7 +43,7 @@ public class wristIOSim implements wristIO {
           // Add noise with a std-dev of 1 tick
           );
 
-  public wristIOSim() {}
+  public WristIOSim() {}
 
   @Override
   public void updateInputs(WristIOInputs inputs) {
