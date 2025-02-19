@@ -1,6 +1,6 @@
-package frc.robot.subsystems.coralmanipulator.CoralManipulatorWrist;
+package frc.robot.subsystems.superstructure.wrist;
 
-import static frc.robot.subsystems.coralmanipulator.CoralManipulatorWrist.CoralManipulatorWristConstants.*;
+import static frc.robot.subsystems.superstructure.wrist.wristConstants.*;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -17,11 +17,10 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
-public class CoralManipulatorWrist extends SubsystemBase {
+public class wrist extends SubsystemBase {
 
-  private final CoralManipulatorWristIO io;
-  private final CoralManipulatorWristIOInputsAutoLogged inputs =
-      new CoralManipulatorWristIOInputsAutoLogged();
+  private final wristIO io;
+  private final WristIOInputsAutoLogged inputs = new WristIOInputsAutoLogged();
   // private final IntakeArmVisualizer visualizer =
   //   new IntakeArmVisualizer(IntakeArmConstants.intakePose);
   private static final LoggedTunableNumber kP =
@@ -47,7 +46,7 @@ public class CoralManipulatorWrist extends SubsystemBase {
   private static final LoggedNetworkBoolean coastSupplier =
       new LoggedNetworkBoolean("CoralManipulatorWrist/coastSupplier", false);
 
-  public CoralManipulatorWrist(CoralManipulatorWristIO io) {
+  public wrist(wristIO io) {
     this.io = io;
   }
 
@@ -69,7 +68,7 @@ public class CoralManipulatorWrist extends SubsystemBase {
 
   public void periodic() {
     io.updateInputs(inputs);
-    Logger.processInputs("CoralManipulatorWrist", inputs);
+    Logger.processInputs("wrist", inputs);
     // Check if disabled
     if (disableSupplier.getAsBoolean() || wristState == wristState.STOP) {
       io.stop();
@@ -94,12 +93,12 @@ public class CoralManipulatorWrist extends SubsystemBase {
     }
   }
 
-  @AutoLogOutput(key = "CoralManiuplatorWrist/AtGoal")
+  @AutoLogOutput(key = "wrist/AtGoal")
   public boolean atGoal() {
     return EqualsUtil.epsilonEquals(
         inputs.positionRad,
         wristState.wristSetpointSupplier.getAsDouble(),
-        CoralManipulatorWristConstants.armTolerance);
+        wristConstants.armTolerance);
   }
 
   public void setBrakeMode(boolean coastSupplier) {

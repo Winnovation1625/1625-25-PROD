@@ -32,6 +32,5 @@ public class CoralManipulatorSensorsIOCANrange implements CoralManipulatorSensor
     inputs.backSensorMeasurment = backSensor.getDistance().getValueAsDouble();
     inputs.isBackDetected = backSensor.getIsDetected().getValue();
     inputs.isFrontDetected = frontSensor.getIsDetected().getValue();
-    
   }
 }

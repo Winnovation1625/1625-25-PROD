@@ -1,12 +1,12 @@
-package frc.robot.subsystems.coralmanipulator.CoralManipulatorRollers;
+package frc.robot.subsystems.coralmanipulator;
 
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLog;
 
-public interface CoralManipulatorRollersIO {
+public interface CoralManipulatoIO {
 
   @AutoLog
-  public static class CoralManipulatorRollersIOInputs {
+  public static class CoralManipulatorIOInputs {
 
     public double appliedVoltageOut = 0.0;
     public double positionRad = 0.0;
@@ -14,7 +14,7 @@ public interface CoralManipulatorRollersIO {
     public double appliedCurrentOut = 0.0;
   }
 
-  public default void updateInputs(CoralManipulatorRollersIOInputs inputs) {}
+  public default void updateInputs(CoralManipulatorIOInputs inputs) {}
 
   public default void setVoltage(DoubleSupplier voltageSetpoint) {}
 

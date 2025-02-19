@@ -1,13 +1,13 @@
-package frc.robot.subsystems.coralmanipulator.CoralManipulatorRollers;
+package frc.robot.subsystems.coralmanipulator;
 
-import static frc.robot.subsystems.coralmanipulator.CoralManipulatorRollers.CoralManipulatorRollersConstants.*;
+import static frc.robot.subsystems.coralmanipulator.CoralManipulatorConstants.*;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import java.util.function.DoubleSupplier;
 
-public class CoralManipulatorRollersIOSim implements CoralManipulatorRollersIO {
+public class CoralManipulatorIOSim implements CoralManipulatoIO {
 
   DCMotorSim rollersMotor =
       new DCMotorSim(
@@ -15,10 +15,10 @@ public class CoralManipulatorRollersIOSim implements CoralManipulatorRollersIO {
           DCMotor.getKrakenX60Foc(1));
   private double appliedVolts = 0.0;
 
-  public CoralManipulatorRollersIOSim() {}
+  public CoralManipulatorIOSim() {}
 
   @Override
-  public void updateInputs(CoralManipulatorRollersIOInputs inputs) {
+  public void updateInputs(CoralManipulatorIOInputs inputs) {
     inputs.appliedVoltageOut = appliedVolts;
     inputs.appliedCurrentOut = rollersMotor.getCurrentDrawAmps();
     inputs.velocityRadPerSec = rollersMotor.getAngularVelocityRadPerSec();

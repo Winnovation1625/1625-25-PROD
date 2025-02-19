@@ -1,4 +1,4 @@
-package frc.robot.subsystems.coralmanipulator.CoralManipulatorWrist;
+package frc.robot.subsystems.superstructure.wrist;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
@@ -14,7 +14,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import java.util.function.DoubleSupplier;
 
-public class CoralManipulatorWristIOKraken implements CoralManipulatorWristIO {
+public class wristIOKraken implements wristIO {
 
   private final TalonFX wristMotor;
 
@@ -31,7 +31,7 @@ public class CoralManipulatorWristIOKraken implements CoralManipulatorWristIO {
   private double prevDesiredArmPosition = 0;
   private boolean isBrake = false;
 
-  public CoralManipulatorWristIOKraken() {
+  public wristIOKraken() {
 
     wristMotor = new TalonFX(0);
 
@@ -73,7 +73,7 @@ public class CoralManipulatorWristIOKraken implements CoralManipulatorWristIO {
   }
 
   @Override
-  public void updateInputs(CoralManipulatorWristIOInputs inputs) {
+  public void updateInputs(WristIOInputs inputs) {
     BaseStatusSignal.refreshAll(velocityRps, appliedVoltage, supplyCurrent, positionRotations)
         .isOK();
 

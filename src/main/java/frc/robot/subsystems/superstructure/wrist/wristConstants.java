@@ -1,9 +1,9 @@
-package frc.robot.subsystems.coralmanipulator.CoralManipulatorWrist;
+package frc.robot.subsystems.superstructure.wrist;
 
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
 
-public class CoralManipulatorWristConstants {
+public class wristConstants {
 
   public static final double armTolerance = Units.degreesToRadians(2);
   public static final double minAngle = -33;

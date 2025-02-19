@@ -1,12 +1,12 @@
-package frc.robot.subsystems.coralmanipulator.CoralManipulatorWrist;
+package frc.robot.subsystems.superstructure.wrist;
 
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLog;
 
-public interface CoralManipulatorWristIO {
+public interface wristIO {
 
   @AutoLog
-  public static class CoralManipulatorWristIOInputs {
+  public static class WristIOInputs {
 
     public double positionRad = 0.0;
     public double appliedVoltageOut = 0.0;
@@ -14,7 +14,7 @@ public interface CoralManipulatorWristIO {
     public double appliedCurrentOut = 0.0;
   }
 
-  public default void updateInputs(CoralManipulatorWristIOInputs inputs) {}
+  public default void updateInputs(WristIOInputs inputs) {}
 
   public default void setPosition(DoubleSupplier positionSetpoint) {}
 

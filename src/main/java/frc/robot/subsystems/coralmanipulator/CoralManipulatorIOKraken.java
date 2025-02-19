@@ -1,4 +1,4 @@
-package frc.robot.subsystems.coralmanipulator.CoralManipulatorRollers;
+package frc.robot.subsystems.coralmanipulator;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
@@ -12,7 +12,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import java.util.function.DoubleSupplier;
 
-public class CoralManipulatorRollersIOKraken implements CoralManipulatorRollersIO {
+public class CoralManipulatorIOKraken implements CoralManipulatoIO {
 
   TalonFX rollersMotor;
 
@@ -26,7 +26,7 @@ public class CoralManipulatorRollersIOKraken implements CoralManipulatorRollersI
 
   private final TalonFXConfiguration config = new TalonFXConfiguration();
 
-  public CoralManipulatorRollersIOKraken() {
+  public CoralManipulatorIOKraken() {
 
     rollersMotor = new TalonFX(0);
 
@@ -64,7 +64,7 @@ public class CoralManipulatorRollersIOKraken implements CoralManipulatorRollersI
   }
 
   @Override
-  public void updateInputs(CoralManipulatorRollersIOInputs inputs) {
+  public void updateInputs(CoralManipulatorIOInputs inputs) {
     inputs.appliedCurrentOut = supplyCurrent.getValueAsDouble();
     inputs.appliedVoltageOut = appliedVoltage.getValueAsDouble();
     inputs.positionRad = Units.rotationsToRadians(position.getValueAsDouble());

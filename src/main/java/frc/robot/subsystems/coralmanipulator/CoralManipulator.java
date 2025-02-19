@@ -1,48 +1,53 @@
 package frc.robot.subsystems.coralmanipulator;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.coralmanipulator.CoralManipulatorRollers.CoralManipulatorRollers;
-import frc.robot.subsystems.coralmanipulator.CoralManipulatorRollers.CoralManipulatorRollersIO;
-import frc.robot.subsystems.coralmanipulator.CoralManipulatorWrist.CoralManipulatorWrist;
-import frc.robot.subsystems.coralmanipulator.CoralManipulatorWrist.CoralManipulatorWristIO;
+import frc.robot.util.LoggedTunableNumber;
+import java.util.function.DoubleSupplier;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
-public class CoralManipulator extends SubsystemBase{
+public class CoralManipulator extends SubsystemBase {
 
-    private final CoralManipulatorWrist wrist;
-    private final CoralManipulatorRollers rollers;
-    private final CoralManipulatorSensorIO sensorsIO;
-    private final CoralManipulatorSensorIOInputsAutoLogged sensorInputs = new CoralManipulatorSensorIOInputsAutoLogged();
+  private final CoralManipulatoIO io;
+  private final CoralManipulatorIOInputsAutoLogged inputs =
+      new CoralManipulatorIOInputsAutoLogged();
 
-    public CoralManipulator(CoralManipulatorWristIO wristIO, CoralManipulatorRollersIO rollersIO, CoralManipulatorSensorIO sensorsIO){
-        wrist = new CoralManipulatorWrist(wristIO);
-        rollers = new CoralManipulatorRollers(rollersIO);
-        this.sensorsIO = sensorsIO;
+  @RequiredArgsConstructor
+  public enum RollersState {
+    INTAKING(new LoggedTunableNumber("CoralManipulator/Intaking", 10)),
+    SHOOTING(new LoggedTunableNumber("CoralManipulator/Shooting", 10)),
+    EJECTING(new LoggedTunableNumber("CoralManipulator/Ejecting", 20)),
+    IDLE(() -> 0);
+
+    private final DoubleSupplier voltageSupplier;
+  }
+
+  public CoralManipulator(CoralManipulatoIO io) {
+    this.io = io;
+  }
+
+  @AutoLogOutput(key = "CoralManipulator/State")
+  @Getter
+  private RollersState rollersState = RollersState.IDLE;
+
+  @Override
+  public void periodic() {
+    io.updateInputs(inputs);
+    Logger.processInputs("CoralManipulator", inputs);
+
+    if (DriverStation.isDisabled()) {
+      rollersState = RollersState.IDLE;
     }
 
-    public enum CoralManipulatorStates{
+    io.setVoltage(rollersState.voltageSupplier);
+  }
 
-        INTAKING,
-        INDEXING,
-        LEVEL_ONE,
-        LEVEL_MID,
-        LEVEL_FOUR,
-        START_CONFIG,
-        STOW,
-        STOP,
-
-
-    }
-
-    @Override
-    public void periodic(){
-
-        wrist.periodic();
-        rollers.periodic();
-        sensorsIO.updateInputs(sensorInputs);
-
-
-
-    }
-
-
+  public Command setDesiredStateCommand(RollersState goal) {
+    return startEnd(() -> this.rollersState = goal, () -> this.rollersState = RollersState.IDLE)
+        .withName("CoralManipulator " + goal);
+  }
 }

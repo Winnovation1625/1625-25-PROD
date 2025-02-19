@@ -12,7 +12,7 @@ import edu.wpi.first.units.measure.Time;
 public class CoralManipulatorConstants {
 
   public static final Distance REQUIRED_CORAL_DISTANCE = Units.Meters.of(0.1);
-
+  public static final double ROLLERS_REDUCTION = 12.0;
   public static CANrangeConfiguration CORAL_SENSOR_CONFIG = new CANrangeConfiguration();
 
   static {

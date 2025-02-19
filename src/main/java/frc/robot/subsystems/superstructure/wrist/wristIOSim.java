@@ -1,7 +1,7 @@
-package frc.robot.subsystems.coralmanipulator.CoralManipulatorWrist;
+package frc.robot.subsystems.superstructure.wrist;
 
 import static frc.robot.Constants.*;
-import static frc.robot.subsystems.coralmanipulator.CoralManipulatorWrist.CoralManipulatorWristConstants.*;
+import static frc.robot.subsystems.superstructure.wrist.wristConstants.*;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import java.util.function.DoubleSupplier;
 
-public class CoralManipulatorWristIOSim implements CoralManipulatorWristIO {
+public class wristIOSim implements wristIO {
 
   private DCMotor wristMotors = DCMotor.getKrakenX60Foc(1);
 
@@ -43,10 +43,10 @@ public class CoralManipulatorWristIOSim implements CoralManipulatorWristIO {
           // Add noise with a std-dev of 1 tick
           );
 
-  public CoralManipulatorWristIOSim() {}
+  public wristIOSim() {}
 
   @Override
-  public void updateInputs(CoralManipulatorWristIOInputs inputs) {
+  public void updateInputs(WristIOInputs inputs) {
     sim.update(loopPeriodSecs);
     // Reset voltages when disabled
     if (DriverStation.isDisabled()) {
