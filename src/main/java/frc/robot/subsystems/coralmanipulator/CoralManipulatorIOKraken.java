@@ -1,5 +1,7 @@
 package frc.robot.subsystems.coralmanipulator;
 
+import static frc.robot.subsystems.coralmanipulator.CoralManipulatorConstants.*;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -30,9 +32,9 @@ public class CoralManipulatorIOKraken implements CoralManipulatoIO {
 
     rollersMotor = new TalonFX(0);
 
-    // config.Slot0.kP = gains.kP();
-    // config.Slot0.kI = gains.kI();
-    // config.Slot0.kD = gains.kD();
+    config.Slot0.kP = gains.kP();
+    config.Slot0.kI = gains.kI();
+    config.Slot0.kD = gains.kD();
     // config.Slot0.kS = gains.ffkS();
     // config.Slot0.kV = gains.ffkV();
     // config.Slot0.kG = gains.ffkG();

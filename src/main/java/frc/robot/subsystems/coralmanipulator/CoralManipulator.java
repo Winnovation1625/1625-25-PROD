@@ -13,8 +13,13 @@ import org.littletonrobotics.junction.Logger;
 public class CoralManipulator extends SubsystemBase {
 
   private final CoralManipulatoIO io;
+  private final CoralManipulatorSensorIO sensorIO;
   private final CoralManipulatorIOInputsAutoLogged inputs =
       new CoralManipulatorIOInputsAutoLogged();
+  private final CoralManipulatorSensorIOInputsAutoLogged sensorInputs =
+      new CoralManipulatorSensorIOInputsAutoLogged();
+  private boolean algaeInSensor = false;
+  private boolean onlyBackSensor = false;
 
   @RequiredArgsConstructor
   public enum RollersState {
@@ -26,9 +31,18 @@ public class CoralManipulator extends SubsystemBase {
     private final DoubleSupplier voltageSupplier;
   }
 
-  public CoralManipulator(CoralManipulatoIO io) {
-    this.io = io;
+  @RequiredArgsConstructor
+  public enum GamepieceState{
+    NONE,
+    IN_INTAKE;
   }
+
+  public CoralManipulator(CoralManipulatoIO io, CoralManipulatorSensorIO sensorIO){
+    this.io = io;
+    this.sensorIO = sensorIO;
+  }
+
+  @AutoLogOutput @Getter private GamepieceState gamepieceState = GamepieceState.NONE;
 
   @AutoLogOutput(key = "CoralManipulator/State")
   @Getter
@@ -37,6 +51,23 @@ public class CoralManipulator extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
+
+
+    algaeInSensor = sensorInputs.isBackDetected && sensorInputs.isFrontDetected;
+    
+    if(sensorInputs.isBackDetected == true && sensorInputs.isFrontDetected == false){
+      onlyBackSensor = true;
+    }
+
+    if(algaeInSensor == true){
+      gamepieceState = GamepieceState.IN_INTAKE;
+      rollersState = RollersState.IDLE;
+    }
+    else if(onlyBackSensor == true){
+      rollersState = RollersState.INTAKING;
+    }
+
+
     Logger.processInputs("CoralManipulator", inputs);
 
     if (DriverStation.isDisabled()) {
