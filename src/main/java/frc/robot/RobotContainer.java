@@ -42,7 +42,6 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
-  private final CoralManipulator coralManipulator;
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
 
@@ -63,8 +62,6 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
 
-        coralManipulator = new CoralManipulator(new CoralManipulatorIOKraken());
-
         break;
 
       case SIM:
@@ -77,8 +74,6 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
 
-        coralManipulator = new CoralManipulator(new CoralManipulatorIOSim());
-
         break;
 
       default:
@@ -90,8 +85,6 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-
-        coralManipulator = new CoralManipulator(new CoralManipulatoIO() {});
 
         break;
     }

@@ -1,7 +1,5 @@
 package frc.robot.subsystems.coralmanipulator;
 
-import frc.robot.Constants;
-
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -10,6 +8,7 @@ import com.ctre.phoenix6.signals.UpdateModeValue;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Time;
+import frc.robot.Constants;
 
 public class CoralManipulatorConstants {
 
@@ -53,5 +52,4 @@ public class CoralManipulatorConstants {
       };
 
   public record Gains(double kP, double kI, double kD, double kS, double kV, double kA) {}
-
 }

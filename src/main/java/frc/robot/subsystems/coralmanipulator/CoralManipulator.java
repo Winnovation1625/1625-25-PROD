@@ -32,41 +32,41 @@ public class CoralManipulator extends SubsystemBase {
   }
 
   @RequiredArgsConstructor
-  public enum GamepieceState{
+  public enum GamepieceState {
     NONE,
     IN_INTAKE;
   }
 
-  public CoralManipulator(CoralManipulatoIO io, CoralManipulatorSensorIO sensorIO){
+  public CoralManipulator(CoralManipulatoIO io, CoralManipulatorSensorIO sensorIO) {
     this.io = io;
     this.sensorIO = sensorIO;
   }
 
-  @AutoLogOutput @Getter private GamepieceState gamepieceState = GamepieceState.NONE;
+  @AutoLogOutput(key = "CoralManipulator/GamepieceState")
+  @Getter
+  private GamepieceState gamepieceState = GamepieceState.NONE;
 
-  @AutoLogOutput(key = "CoralManipulator/State")
+  @AutoLogOutput(key = "CoralManipulator/RollersState")
   @Getter
   private RollersState rollersState = RollersState.IDLE;
 
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-
+    sensorIO.updateInputs(sensorInputs);
 
     algaeInSensor = sensorInputs.isBackDetected && sensorInputs.isFrontDetected;
-    
-    if(sensorInputs.isBackDetected == true && sensorInputs.isFrontDetected == false){
+
+    if (sensorInputs.isBackDetected == true && sensorInputs.isFrontDetected == false) {
       onlyBackSensor = true;
     }
 
-    if(algaeInSensor == true){
+    if (algaeInSensor == true) {
       gamepieceState = GamepieceState.IN_INTAKE;
       rollersState = RollersState.IDLE;
-    }
-    else if(onlyBackSensor == true){
+    } else if (onlyBackSensor == true) {
       rollersState = RollersState.INTAKING;
     }
-
 
     Logger.processInputs("CoralManipulator", inputs);
 
