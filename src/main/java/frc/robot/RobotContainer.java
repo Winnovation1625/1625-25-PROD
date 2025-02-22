@@ -30,6 +30,11 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.superstructure.arm.Arm;
+import frc.robot.subsystems.superstructure.arm.Arm.ArmState;
+import frc.robot.subsystems.superstructure.arm.ArmIO;
+import frc.robot.subsystems.superstructure.arm.ArmIOKrakenx60;
+import frc.robot.subsystems.superstructure.arm.ArmIOSim;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -41,6 +46,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
+  private final Arm arm;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -61,6 +67,7 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
+        arm = new Arm(new ArmIOKrakenx60());
         break;
 
       case SIM:
@@ -72,6 +79,9 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
+
+        arm = new Arm(new ArmIOSim());
+
         break;
 
       default:
@@ -83,6 +93,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
+        arm = new Arm(new ArmIO() {});
         break;
     }
 
@@ -148,6 +159,19 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
+
+    controller
+        .leftTrigger()
+        .and(() -> arm.getArmState() == ArmState.STOW)
+        .onTrue(arm.setDesiredStateCommand(ArmState.CLVL1));
+    controller
+        .rightBumper()
+        .and(() -> arm.getArmState() == ArmState.CLVL1)
+        .onTrue(arm.setDesiredStateCommand(ArmState.CLVL2));
+    controller
+        .leftBumper()
+        .and(() -> arm.getArmState() != ArmState.STOW)
+        .onTrue(arm.setDesiredStateCommand(ArmState.STOW));
   }
 
   /**
