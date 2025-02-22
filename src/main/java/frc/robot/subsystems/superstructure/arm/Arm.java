@@ -46,7 +46,7 @@ public class Arm extends SubsystemBase {
     ALVL3(new LoggedTunableNumber("Superstructure/Arm/ALVL3", .3)),
     CLVL1(new LoggedTunableNumber("Superstructure/Arm/CLVL1", 2)),
     CLVL2(new LoggedTunableNumber("Superstructure/Arm/CLVL2", .5)),
-    ClVL3(new LoggedTunableNumber("Superstructure/Arm/CLVL3", .6)),
+    CLVL3(new LoggedTunableNumber("Superstructure/Arm/CLVL3", .6)),
     CLVL4(new LoggedTunableNumber("Superstructure/Arm/CLVL4", .7)),
     INTAKE(new LoggedTunableNumber("Superstructure/Arm/INTAKE", .8)),
     PROCESS(new LoggedTunableNumber("Superstructure/Arm/PROCESS", .9)),
