@@ -43,14 +43,14 @@ public class Arm extends SubsystemBase {
   public enum ArmState {
     STOW(new LoggedTunableNumber("Superstructure/Arm/STOW", 0)),
     ALVL2(new LoggedTunableNumber("Superstructure/Arm/ALGL", .2)),
-    ALVL3(new LoggedTunableNumber("Superstructure/Arm/STOW", .3)),
-    CLVL1(new LoggedTunableNumber("Superstructure/Arm/STOW", .4)),
-    CLVL2(new LoggedTunableNumber("Superstructure/Arm/STOW", .5)),
-    ClVL3(new LoggedTunableNumber("Superstructure/Arm/STOW", .6)),
-    CLVL4(new LoggedTunableNumber("Superstructure/Arm/STOW", .7)),
-    INTAKE(new LoggedTunableNumber("Superstructure/Arm/STOW", .8)),
-    PROCESS(new LoggedTunableNumber("Superstructure/Arm/STOW", .9)),
-    BARGE(new LoggedTunableNumber("Superstructure/Arm/STOW", 1)),
+    ALVL3(new LoggedTunableNumber("Superstructure/Arm/ALVL3", .3)),
+    CLVL1(new LoggedTunableNumber("Superstructure/Arm/CLVL1", .4)),
+    CLVL2(new LoggedTunableNumber("Superstructure/Arm/CLVL2", .5)),
+    ClVL3(new LoggedTunableNumber("Superstructure/Arm/CLVL3", .6)),
+    CLVL4(new LoggedTunableNumber("Superstructure/Arm/CLVL4", .7)),
+    INTAKE(new LoggedTunableNumber("Superstructure/Arm/INTAKE", .8)),
+    PROCESS(new LoggedTunableNumber("Superstructure/Arm/PROCESS", .9)),
+    BARGE(new LoggedTunableNumber("Superstructure/Arm/BARGE", 1)),
     STOP(() -> 0);
 
     private final DoubleSupplier armSetpointSupplier;
@@ -77,10 +77,11 @@ public class Arm extends SubsystemBase {
     if (disableSupplier.getAsBoolean() || armState == ArmState.STOP) {
       io.stop();
     }
-    io.setBrakeMode(!coastSupplier.getAsBoolean() || armState == ArmState.STOW);
+
+    // io.setBrakeMode(!coastSupplier.getAsBoolean() || armState == ArmState.STOW);
 
     if (!disableSupplier.getAsBoolean() && armState != ArmState.STOP) {
-      io.setArmPosition(armState.armSetpointSupplier.getAsDouble());
+      io.setArmPosition(armState.armSetpointSupplier);
     }
   }
 
@@ -107,15 +108,6 @@ public class Arm extends SubsystemBase {
 
   public void endCharacterization() {
     // characterizing = false;
-  }
-
-  public void moveArm() {
-    armState = ArmState.CLVL1;
-    io.setArmPosition(ArmState.CLVL1.armSetpointSupplier.getAsDouble());
-  }
-
-  public void tempStop() {
-    io.stop();
   }
 
   public Command setDesiredStateCommand(ArmState goal) {

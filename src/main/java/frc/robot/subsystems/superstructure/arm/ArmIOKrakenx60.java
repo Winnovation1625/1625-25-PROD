@@ -15,6 +15,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.subsystems.superstructure.arm.ArmIO.ArmIOInputs;
+import java.util.function.DoubleSupplier;
 
 public class ArmIOKrakenx60 implements ArmIO {
   private final StatusSignal<Angle> positionRotations;
@@ -79,8 +80,9 @@ public class ArmIOKrakenx60 implements ArmIO {
   }
 
   @Override
-  public void setArmPosition(double desiredPositionRad) {
-    armTalon.setControl(positionControl.withPosition(Units.radiansToRotations(desiredPositionRad)));
+  public void setArmPosition(DoubleSupplier desiredPositionRad) {
+    armTalon.setControl(
+        positionControl.withPosition(Units.radiansToRotations(desiredPositionRad.getAsDouble())));
   }
 
   @Override

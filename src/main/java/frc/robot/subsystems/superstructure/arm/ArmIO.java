@@ -1,5 +1,6 @@
 package frc.robot.subsystems.superstructure.arm;
 
+import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface ArmIO {
@@ -17,7 +18,7 @@ public interface ArmIO {
   public default void updateInputs(ArmIOInputs inputs) {}
   ;
 
-  public default void setArmPosition(double desiredPosition) {}
+  public default void setArmPosition(DoubleSupplier desiredPosition) {}
   ;
 
   public default void setBrakeMode(boolean enabled) {}

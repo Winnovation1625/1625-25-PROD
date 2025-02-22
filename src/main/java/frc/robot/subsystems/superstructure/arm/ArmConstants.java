@@ -3,7 +3,7 @@ package frc.robot.subsystems.superstructure.arm;
 import edu.wpi.first.math.util.Units;
 
 public class ArmConstants {
-  public static final double ARM_TOLERANCE = Units.degreesToRadians(2);
+  public static final double ARM_TOLERANCE = Units.degreesToRadians(0);
   public static final double ARM_KV = 0.0;
   public static final double ARM_KA = 0.0;
   public static final double ARM_GEARING = 1.0;

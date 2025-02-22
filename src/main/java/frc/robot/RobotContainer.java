@@ -170,7 +170,7 @@ public class RobotContainer {
         .and(() -> arm.getArmState() == ArmState.STOW)
         .onTrue(arm.setDesiredStateCommand(ArmState.CLVL1));
     controller
-        .leftTrigger()
+        .rightBumper()
         .and(() -> arm.getArmState() == ArmState.CLVL1)
         .onTrue(arm.setDesiredStateCommand(ArmState.CLVL2));
     controller

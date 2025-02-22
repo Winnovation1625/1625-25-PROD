@@ -12,9 +12,10 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import java.util.function.DoubleSupplier;
 
 public class ArmIOSim implements ArmIO {
-  private DCMotor armMotorSim = DCMotor.getKrakenX60(1);
+  private DCMotor armMotorSim = DCMotor.getKrakenX60Foc(1);
   private LinearSystem<N2, N1, N2> armID =
       LinearSystemId.createSingleJointedArmSystem(armMotorSim, ARM_MOI, ARM_GEARING);
   private final ProfiledPIDController pidController =
@@ -32,7 +33,7 @@ public class ArmIOSim implements ArmIO {
           ARM_MIN_ANGLE_RADS,
           ARM_MAX_ANGLE_RADS,
           true,
-          0);
+          .1);
 
   public ArmIOSim() {}
 
@@ -62,7 +63,7 @@ public class ArmIOSim implements ArmIO {
   }
 
   @Override
-  public void setArmPosition(double positionSetpoint) {
-    pidController.setGoal(positionSetpoint);
+  public void setArmPosition(DoubleSupplier positionSetpoint) {
+    pidController.setGoal(positionSetpoint.getAsDouble());
   }
 }
