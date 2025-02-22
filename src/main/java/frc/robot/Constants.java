@@ -21,8 +21,10 @@ import edu.wpi.first.wpilibj.RobotBase;
  * (log replay from a file).
  */
 public final class Constants {
-  public static final Mode simMode = Mode.SIM;
-  public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
+  public static final double LOOP_PERIOD_SECS = 0.02;
+  public static final boolean TUNING_MODE = false;
+  public static final Mode SIM_MODE = Mode.SIM;
+  public static final Mode CURRENT_MODE = RobotBase.isReal() ? Mode.REAL : SIM_MODE;
 
   public static enum Mode {
     /** Running on a real robot. */
@@ -33,5 +35,11 @@ public final class Constants {
 
     /** Replaying from a log file. */
     REPLAY
+  }
+
+  public static boolean disableHAL = false;
+
+  public static void disableHAL() {
+    disableHAL = true;
   }
 }
