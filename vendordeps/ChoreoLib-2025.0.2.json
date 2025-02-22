@@ -1,7 +1,13 @@
 {
+<<<<<<<< HEAD:vendordeps/ChoreoLib-2025.0.2.json
   "fileName": "ChoreoLib-2025.0.2.json",
   "name": "ChoreoLib",
   "version": "2025.0.2",
+========
+  "fileName": "ChoreoLib-2025.0.3.json",
+  "name": "ChoreoLib",
+  "version": "2025.0.3",
+>>>>>>>> main:vendordeps/ChoreoLib-2025.0.3.json
   "uuid": "b5e23f0a-dac9-4ad2-8dd6-02767c520aca",
   "frcYear": "2025",
   "mavenUrls": [
@@ -13,7 +19,11 @@
     {
       "groupId": "choreo",
       "artifactId": "ChoreoLib-java",
+<<<<<<<< HEAD:vendordeps/ChoreoLib-2025.0.2.json
       "version": "2025.0.2"
+========
+      "version": "2025.0.3"
+>>>>>>>> main:vendordeps/ChoreoLib-2025.0.3.json
     },
     {
       "groupId": "com.google.code.gson",
@@ -26,7 +36,11 @@
     {
       "groupId": "choreo",
       "artifactId": "ChoreoLib-cpp",
+<<<<<<<< HEAD:vendordeps/ChoreoLib-2025.0.2.json
       "version": "2025.0.2",
+========
+      "version": "2025.0.3",
+>>>>>>>> main:vendordeps/ChoreoLib-2025.0.3.json
       "libName": "ChoreoLib",
       "headerClassifier": "headers",
       "sharedLibrary": false,
