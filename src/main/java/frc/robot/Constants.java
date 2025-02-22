@@ -13,7 +13,6 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -26,8 +25,6 @@ public final class Constants {
   public static final Mode simMode = Mode.SIM;
   public static final boolean tuningMode = true;
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
-  public static final boolean tuningMode = true;
-  private static RobotType robotType = RobotType.SIMBOT;
 
   public static enum Mode {
     /** Running on a real robot. */
@@ -38,20 +35,5 @@ public final class Constants {
 
     /** Replaying from a log file. */
     REPLAY
-  }
-
-  public static RobotType getRobot() {
-    if (RobotBase.isReal() && robotType == RobotType.SIMBOT) {
-      new Alert("Invalid Robot Selected, using COMPBOT as default", Alert.AlertType.kError)
-          .set(true);
-      robotType = RobotType.COMPBOT;
-    }
-    return robotType;
-  }
-
-  public enum RobotType {
-    SIMBOT,
-    TESTBOT,
-    COMPBOT
   }
 }

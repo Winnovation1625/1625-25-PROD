@@ -1,5 +1,7 @@
 package frc.robot.subsystems.coralmanipulator;
 
+import static frc.robot.Constants.*;
+
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -45,10 +47,9 @@ public class CoralManipulatorConstants {
   }
 
   public static final Gains gains =
-      switch (Constants.getRobot()) {
-        case COMPBOT -> new Gains(0.3, 0, 0.0016, 0.17523, 0.084, 0);
-        case TESTBOT -> new Gains(0.0003, 0.0, 0.0, 0.33329, 0.00083, 0.0);
-        case SIMBOT -> new Gains(0.05, 0.0, 0.0, 0.01, 0.00103, 0.0);
+      switch (Constants.currentMode) {
+        case REAL, REPLAY -> new Gains(0.3, 0, 0.0016, 0.17523, 0.084, 0);
+        case SIM -> new Gains(0.05, 0.0, 0.0, 0.01, 0.00103, 0.0);
       };
 
   public record Gains(double kP, double kI, double kD, double kS, double kV, double kA) {}

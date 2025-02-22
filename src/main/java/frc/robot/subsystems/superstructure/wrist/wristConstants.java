@@ -22,10 +22,9 @@ public class WristConstants {
   public static final double WRIST_MAX_ACCELERATION = 0.125;
 
   public static Gains gains =
-      switch (Constants.getRobot()) {
-        case SIMBOT -> new Gains(90.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-        case TESTBOT -> new Gains(0, 0.0, 0, 0, 21.35, 0.02, 0.12);
-        case COMPBOT -> new Gains(600.0, 0.0, 40.0, 3.0, 0.0, 0.0, 4.0);
+      switch (Constants.currentMode) {
+        case SIM -> new Gains(90.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        case REAL, REPLAY -> new Gains(600.0, 0.0, 40.0, 3.0, 0.0, 0.0, 4.0);
       };
 
   public record Gains(
