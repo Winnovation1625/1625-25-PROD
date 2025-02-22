@@ -46,10 +46,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
-  //   private final Superstructure superstructure;
-  // private final Elevator elevator;
   private final Arm arm;
-  //   private final Arm arm;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -71,8 +68,6 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
         arm = new Arm(new ArmIOKrakenx60());
-        // arm = new Arm(new ArmIOKraken());
-        // superstructure = new Superstructure(elevator, arm);
         break;
 
       case SIM:
