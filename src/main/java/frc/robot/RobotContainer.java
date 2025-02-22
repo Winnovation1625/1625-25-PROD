@@ -35,6 +35,10 @@ import frc.robot.subsystems.superstructure.arm.Arm.ArmState;
 import frc.robot.subsystems.superstructure.arm.ArmIO;
 import frc.robot.subsystems.superstructure.arm.ArmIOKrakenx60;
 import frc.robot.subsystems.superstructure.arm.ArmIOSim;
+import frc.robot.subsystems.superstructure.elevator.Elevator;
+import frc.robot.subsystems.superstructure.elevator.ElevatorIO;
+import frc.robot.subsystems.superstructure.elevator.ElevatorIOKraken;
+import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -47,6 +51,7 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final Arm arm;
+  private final Elevator elevator;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -68,6 +73,7 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
         arm = new Arm(new ArmIOKrakenx60());
+        elevator = new Elevator(new ElevatorIOKraken());
         break;
 
       case SIM:
@@ -82,6 +88,8 @@ public class RobotContainer {
 
         arm = new Arm(new ArmIOSim());
 
+        elevator = new Elevator(new ElevatorIOSim());
+
         break;
 
       default:
@@ -94,6 +102,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {});
         arm = new Arm(new ArmIO() {});
+        elevator = new Elevator(new ElevatorIO() {});
         break;
     }
 
@@ -172,6 +181,8 @@ public class RobotContainer {
         .leftBumper()
         .and(() -> arm.getArmState() != ArmState.STOW)
         .onTrue(arm.setDesiredStateCommand(ArmState.STOW));
+
+    controller.leftTrigger().whileTrue(elevator.tempCommand());
   }
 
   /**

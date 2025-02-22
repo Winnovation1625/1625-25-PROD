@@ -1,3 +1,10 @@
+// Copyright (c) 2025 FRC 6328
+// http://github.com/Mechanical-Advantage
+//
+// Use of this source code is governed by an MIT-style
+// license that can be found in the LICENSE file at
+// the root directory of this project.
+
 package frc.robot.util;
 
 import frc.robot.Constants;
@@ -13,7 +20,7 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
  * value not in dashboard.
  */
 public class LoggedTunableNumber implements DoubleSupplier {
-  private static final String tableKey = "TunableNumbers";
+  private static final String tableKey = "/Tuning";
 
   private final String key;
   private boolean hasDefault = false;
