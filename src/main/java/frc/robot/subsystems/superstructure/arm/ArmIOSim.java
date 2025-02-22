@@ -44,7 +44,8 @@ public class ArmIOSim implements ArmIO {
       stop();
       inputs.appliedVolts = 0;
     } else {
-      var appliedVolts = MathUtil.clamp(pidController.calculate(inputs.positionRad), -12.0, 12.0);
+      var appliedVolts =
+          MathUtil.clamp(pidController.calculate(armSim.getAngleRads()), -12.0, 12.0);
       inputs.appliedVolts = appliedVolts;
       setInputVoltage(inputs.appliedVolts);
     }
