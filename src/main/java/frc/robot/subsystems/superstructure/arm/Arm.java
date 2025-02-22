@@ -1,123 +1,125 @@
 package frc.robot.subsystems.superstructure.arm;
 
+import static frc.robot.subsystems.superstructure.arm.ArmConstants.*;
+
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.util.EqualsUtil;
+import frc.robot.util.LoggedTunableNumber;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
-
-import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.Logger;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
-import frc.robot.subsystems.superstructure.elevator.Elevator.ElevatorState;
-import frc.robot.subsystems.superstructure.elevator.ElevatorIO;
 import lombok.Setter;
+import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
-public class Arm {
-    private final ArmIO io;
-    private final ArmIOInputsAutoLogged inputs = new ArmIoInputsAutoLogged();
-    private final ArmVisualizer visualizer = new ArmVisualizer();
-    // private static final LoggedTunableNumber kP =
-    //     new LoggedTunableNumber("Arm/kP", gains.kP());
-    // private static final LoggedTunableNumber kI =
-    //     new LoggedTunableNumber("Arm/kI", gains.kI());
-    // private static final LoggedTunableNumber kD =
-    //     new LoggedTunableNumber("Arm/kD", gains.kD());
-    // private static final LoggedTunableNumber kS =
-    //     new LoggedTunableNumber("Arm/kS", gains.ffkS());
-    // private static final LoggedTunableNumber kV =
-    //     new LoggedTunableNumber("Arm/kV", gains.ffkV());
-    // private static final LoggedTunableNumber kA =
-    //     new LoggedTunableNumber("Arm/kA", gains.ffkA());
-    // private static final LoggedTunableNumber kG =
-    //     new LoggedTunableNumber("Arm/kG", gains.ffkG());
-    // private static final LoggedTunableNumber cruiseV =
-    //     new LoggedTunableNumber("Arm/cruiseV", cruiseVelocity);
-    // private static final LoggedTunableNumber cruiseA =
-    //     new LoggedTunableNumber("Arm/cruiseA", cruiseAcceleration);
-    // private static final LoggedTunableNumber cruiseJ =
-    //     new LoggedTunableNumber("Arm/cruiseJ", cruiseJerk);
-    @RequiredArgsConstructor
-    public enum ArmState{
-        STOP(),
-        STOW(),
-        ALGL(),
-        ALGH(),
-        CLVL1(),
-        CLVL2(),
-        ClVL3(),
-        CLVL4(),
-        INTAKE(),
-        PROCESS(),
-        BARGE();
-        private  DoubleSupplier armSetpointSupplier;
+public class Arm extends SubsystemBase {
+  private final ArmIO io;
+  private final ArmIOInputsAutoLogged inputs = new ArmIOInputsAutoLogged();
+  // private final ArmVisualizer visualizer = new ArmVisualizer();
+  // private static final LoggedTunableNumber kP =
+  //     new LoggedTunableNumber("Arm/kP", gains.kP());
+  // private static final LoggedTunableNumber kI =
+  //     new LoggedTunableNumber("Arm/kI", gains.kI());
+  // private static final LoggedTunableNumber kD =
+  //     new LoggedTunableNumber("Arm/kD", gains.kD());
+  // private static final LoggedTunableNumber kS =
+  //     new LoggedTunableNumber("Arm/kS", gains.ffkS());
+  // private static final LoggedTunableNumber kV =
+  //     new LoggedTunableNumber("Arm/kV", gains.ffkV());
+  // private static final LoggedTunableNumber kA =
+  //     new LoggedTunableNumber("Arm/kA", gains.ffkA());
+  // private static final LoggedTunableNumber kG =
+  //     new LoggedTunableNumber("Arm/kG", gains.ffkG());
+  // private static final LoggedTunableNumber cruiseV =
+  //     new LoggedTunableNumber("Arm/cruiseV", cruiseVelocity);
+  // private static final LoggedTunableNumber cruiseA =
+  //     new LoggedTunableNumber("Arm/cruiseA", cruiseAcceleration);
+  // private static final LoggedTunableNumber cruiseJ =
+  //     new LoggedTunableNumber("Arm/cruiseJ", cruiseJerk);
+  @RequiredArgsConstructor
+  public enum ArmState {
+    STOW(new LoggedTunableNumber("Superstructure/Arm/STOW", 0)),
+    ALVL2(new LoggedTunableNumber("Superstructure/Arm/ALGL", .2)),
+    ALVL3(new LoggedTunableNumber("Superstructure/Arm/STOW", .3)),
+    CLVL1(new LoggedTunableNumber("Superstructure/Arm/STOW", .4)),
+    CLVL2(new LoggedTunableNumber("Superstructure/Arm/STOW", .5)),
+    ClVL3(new LoggedTunableNumber("Superstructure/Arm/STOW", .6)),
+    CLVL4(new LoggedTunableNumber("Superstructure/Arm/STOW", .7)),
+    INTAKE(new LoggedTunableNumber("Superstructure/Arm/STOW", .8)),
+    PROCESS(new LoggedTunableNumber("Superstructure/Arm/STOW", .9)),
+    BARGE(new LoggedTunableNumber("Superstructure/Arm/STOW", 1)),
+    STOP(() -> 0);
 
-        private double getRads(){
-            return Units.degreesToRadians(armSetpointSupplier.getAsDouble());
-        }
+    private final DoubleSupplier armSetpointSupplier;
+  }
+
+  @AutoLogOutput(key = "Superstructure/Arm/ArmState")
+  @Getter
+  @Setter
+  private ArmState armState = ArmState.STOW;
+
+  public Arm(ArmIO io) {
+    this.io = io;
+  }
+
+  // private boolean characterizing;
+  private boolean brakeModeEnabled;
+  private BooleanSupplier disableSupplier = DriverStation::isDisabled;
+  private BooleanSupplier coastSupplier = () -> false;
+
+  public void periodic() {
+    io.updateInputs(inputs);
+
+    Logger.processInputs("Superstructre/Arm", inputs);
+    if (disableSupplier.getAsBoolean() || armState == ArmState.STOP) {
+      io.stop();
     }
-    @AutoLogOutput(key = "Superstructure/Arm/ArmState")
-    //@Getter
-    //@Setter
-    private ArmState armState = ArmState.STOW;
+    io.setBrakeMode(!coastSupplier.getAsBoolean() || armState == ArmState.STOW);
 
-    public Arm(ArmIO io) {
-      this.io = io;
+    if (!disableSupplier.getAsBoolean() && armState != ArmState.STOP) {
+      io.setArmPosition(armState.armSetpointSupplier.getAsDouble());
     }
+  }
 
-    private boolean characterizing;
-    private boolean brakeModeEnabled;
-    private BooleanSupplier disableSupplier = DriverStation::isDisabled;
-    private BooleanSupplier coastSupplier = () -> false;
+  @AutoLogOutput(key = "Superstructre/Arm/AtGoal")
+  public boolean atGoal() {
+    return EqualsUtil.epsilonEquals(
+        inputs.positionRad, armState.armSetpointSupplier.getAsDouble(), ARM_TOLERANCE);
+  }
 
-    public void periodic(){
-        io.updateInputs(inputs);
+  public void setBreakMode(boolean enabled) {
+    if (brakeModeEnabled == enabled) return;
+    brakeModeEnabled = enabled;
+    io.setBrakeMode(enabled);
+  }
 
-        Logger.processInputs("Superstructre/Arm", inputs);
-        if(disableSupplier.getAsBoolean()||armState==ArmState.STOP){
-            io.stop();
-        }
-        io.setBrakeMode(!coastSupplier.getAsBoolean()||armState==ArmState.STOW);
+  public void runCharacterizaiton(double amps) {
+    // characterizing = true;
+    io.runCurrent(amps);
+  }
 
-        if(!characterizing&&!disableSupplier.getAsBoolean()&&armState!=ArmState.STOP){
-            Logger.recordOutput("Superstructure/Arm/ArmSetpoint",Units.radiansToDegrees(armState.getRads()));
-        }
+  public double getCharacterizationVelocity() {
+    return inputs.velocityRadPerSec;
+  }
 
-        @AutoLogOutput(key = "Superstructre/Arm/AtGoal");
-        public boolean atGoal(){
-            return Equals.util.epsilonEquals(inputs.positionRad,armState.getRads,ARM_TOLERANCE);
-        }
+  public void endCharacterization() {
+    // characterizing = false;
+  }
 
-        public void setBreakMode(boolean enabled){
-            if(brakeModeEnabled==enabled)return;
-            brakeModeEnabled=enabled;
-            io.setBrakeMode(enabled);
-        }
+  public void moveArm() {
+    armState = ArmState.CLVL1;
+    io.setArmPosition(ArmState.CLVL1.armSetpointSupplier.getAsDouble());
+  }
 
-        public void runCharacterizaiton(double amps){
-            characterizing=true;
-            io.runCurrent(amps);
-        }
+  public void tempStop() {
+    io.stop();
+  }
 
-        public double getCharacterizationVelocity(){
-            return inputs.velocityRadPerSec;
-        }
-
-        public void endCharacterization(){
-            characterizing=false;
-        }
-
-        public void moveArm(){
-            armState=ArmState.CLVL1;
-            io.setArmPosition(ArmState.CLVL1.getRads());
-        }
-
-        public void tempStop(){
-            io.stop();
-        }
-
-        public Command tempCommand(){
-            return startEnd(()->moveArm(),()->tempStop());
-        }
-    }
+  public Command setDesiredStateCommand(ArmState goal) {
+    return startEnd(() -> this.armState = goal, () -> this.armState = ArmState.STOW)
+        .withName("Arm " + goal);
+  }
 }

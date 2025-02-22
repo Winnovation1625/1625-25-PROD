@@ -1,3 +1,5 @@
+package frc.robot.subsystems.superstructure.arm;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -14,20 +16,21 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.subsystems.superstructure.arm.ArmIO.ArmIOInputs;
 
-public class ArmIOKrakenx60 implements ArmIO{
-    private final StatusSignal<Angle> positionRotations;
-    private final StatusSignal<Voltage> appliedVolts;
-    private final StatusSignal<AngularVelocity> velocityRadPerSec;
-    private final StatusSignal<Current> supplyCurrentAmps;
-    private final StatusSignal<Temperature> tempCelsius;
-    private final TorqueCurrentFOC currentControl = new TorqueCurrentFOC(0.0);
-    private final MotionMagicTorqueCurrentFOC positionControl = new MotionMagicTorqueCurrentFOC(0.0);
-    private final TalonFX armTalon;
-    private final TalonFXConfiguration armConfig;
-    private final NeutralOut neutralOut = new NeutralOut();
-    public ArmIOKrakenx60(){
-        armTalon = new TalonFX(0);
-        armConfig = new TalonFXConfiguration();
+public class ArmIOKrakenx60 implements ArmIO {
+  private final StatusSignal<Angle> positionRotations;
+  private final StatusSignal<Voltage> appliedVolts;
+  private final StatusSignal<AngularVelocity> velocityRadPerSec;
+  private final StatusSignal<Current> supplyCurrentAmps;
+  private final StatusSignal<Temperature> tempCelsius;
+  private final TorqueCurrentFOC currentControl = new TorqueCurrentFOC(0.0);
+  private final MotionMagicTorqueCurrentFOC positionControl = new MotionMagicTorqueCurrentFOC(0.0);
+  private final TalonFX armTalon;
+  private final TalonFXConfiguration armConfig;
+  private final NeutralOut neutralOut = new NeutralOut();
+
+  public ArmIOKrakenx60() {
+    armTalon = new TalonFX(0);
+    armConfig = new TalonFXConfiguration();
 
     // armConfig.Slot0.kP = gains.kP();
     // armConfig.Slot0.kI = gains.kI();
@@ -60,47 +63,46 @@ public class ArmIOKrakenx60 implements ArmIO{
     appliedVolts = armTalon.getMotorVoltage();
     supplyCurrentAmps = armTalon.getSupplyCurrent();
     tempCelsius = armTalon.getDeviceTemp();
-    BaseStatusSignal.setUpdateFrequencyForAll(50, positionRotations,velocityRadPerSec,appliedVolts,supplyCurrentAmps,tempCelsius);
-    
-    }
+    BaseStatusSignal.setUpdateFrequencyForAll(
+        50, positionRotations, velocityRadPerSec, appliedVolts, supplyCurrentAmps, tempCelsius);
+  }
 
-    @Override
-    public void updateInputs(ArmIOInputs inputs){
-        BaseStatusSignal.refreshAll(positionRotations,appliedVolts,velocityRadPerSec,supplyCurrentAmps,tempCelsius);
-        inputs.appliedVolts = appliedVolts.getValueAsDouble();
-        inputs.positionRad = Units.rotationsToRadians(positionRotations.getValueAsDouble());
-        inputs.supplyCurrentAmps = supplyCurrentAmps.getValueAsDouble();
-        inputs.tempCelsius = tempCelsius.getValueAsDouble();
-        inputs.velocityRadPerSec = velocityRadPerSec.getValueAsDouble();
-    }
+  @Override
+  public void updateInputs(ArmIOInputs inputs) {
+    BaseStatusSignal.refreshAll(
+        positionRotations, appliedVolts, velocityRadPerSec, supplyCurrentAmps, tempCelsius);
+    inputs.appliedVolts = appliedVolts.getValueAsDouble();
+    inputs.positionRad = Units.rotationsToRadians(positionRotations.getValueAsDouble());
+    inputs.supplyCurrentAmps = supplyCurrentAmps.getValueAsDouble();
+    inputs.tempCelsius = tempCelsius.getValueAsDouble();
+    inputs.velocityRadPerSec = velocityRadPerSec.getValueAsDouble();
+  }
 
-    @Override
-    public void setArmPosition(double desiredPositionRad){
-        armTalon.setControl(positionControl.withPosition(Units.radiansToRotations(desiredPositionRad)));
-    }
+  @Override
+  public void setArmPosition(double desiredPositionRad) {
+    armTalon.setControl(positionControl.withPosition(Units.radiansToRotations(desiredPositionRad)));
+  }
 
-    @Override
-    public void stop(){
-        armTalon.setControl(neutralOut);
-    }
+  @Override
+  public void stop() {
+    armTalon.setControl(neutralOut);
+  }
 
-    @Override
-    public void runCurrent(double currentSetpoint){
-        armTalon.setControl(currentControl.withOutput(currentSetpoint));
-    }
+  @Override
+  public void runCurrent(double currentSetpoint) {
+    armTalon.setControl(currentControl.withOutput(currentSetpoint));
+  }
 
-    @Override
-    public void setBrakeMode(boolean enabled){
-        armTalon.setNeutralMode(enabled ? NeutralModeValue.Brake : NeutralModeValue.Coast);
-    }
+  @Override
+  public void setBrakeMode(boolean enabled) {
+    armTalon.setNeutralMode(enabled ? NeutralModeValue.Brake : NeutralModeValue.Coast);
+  }
 
-    @Override
-    public void setPID(double p, double i, double d){
-        armConfig.Slot0.kP = p;
-        armConfig.Slot0.kI = i;
-        armConfig.Slot0.kP = p;
-        armTalon.getConfigurator().apply(armConfig);
-    }
-
-    
+  @Override
+  public void setPID(double p, double i, double d) {
+    armConfig.Slot0.kP = p;
+    armConfig.Slot0.kI = i;
+    armConfig.Slot0.kP = p;
+    armTalon.getConfigurator().apply(armConfig);
+  }
 }
