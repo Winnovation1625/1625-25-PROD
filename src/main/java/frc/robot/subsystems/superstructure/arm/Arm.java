@@ -15,7 +15,7 @@ import lombok.Setter;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-public class Arm extends SubsystemBase {
+public class Arm{
   private final ArmIO io;
   private final ArmIOInputsAutoLogged inputs = new ArmIOInputsAutoLogged();
   // private final ArmVisualizer visualizer = new ArmVisualizer();
@@ -108,10 +108,5 @@ public class Arm extends SubsystemBase {
 
   public void endCharacterization() {
     // characterizing = false;
-  }
-
-  public Command setDesiredStateCommand(ArmState goal) {
-    return startEnd(() -> this.armState = goal, () -> this.armState = ArmState.STOW)
-        .withName("Arm " + goal);
   }
 }

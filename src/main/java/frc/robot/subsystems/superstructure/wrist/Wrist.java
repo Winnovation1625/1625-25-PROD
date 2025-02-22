@@ -17,7 +17,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
-public class Wrist extends SubsystemBase {
+public class Wrist{
 
   private final WristIO io;
   private final WristIOInputsAutoLogged inputs = new WristIOInputsAutoLogged();
@@ -107,10 +107,5 @@ public class Wrist extends SubsystemBase {
 
   public void tempStop() {
     io.stop();
-  }
-
-  public Command setDesiredStateCommand(WristState goal) {
-    return startEnd(() -> this.wristState = goal, () -> this.wristState = WristState.IDLE)
-        .withName("CoralManipulatorWrist " + goal);
   }
 }

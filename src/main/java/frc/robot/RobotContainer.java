@@ -169,21 +169,6 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
-
-    controller
-        .leftTrigger()
-        .and(() -> arm.getArmState() == ArmState.STOW)
-        .onTrue(arm.setDesiredStateCommand(ArmState.CLVL1));
-    controller
-        .rightBumper()
-        .and(() -> arm.getArmState() == ArmState.CLVL1)
-        .onTrue(arm.setDesiredStateCommand(ArmState.CLVL2));
-    controller
-        .leftBumper()
-        .and(() -> arm.getArmState() != ArmState.STOW)
-        .onTrue(arm.setDesiredStateCommand(ArmState.STOW));
-
-    controller.leftTrigger().whileTrue(elevator.tempCommand());
   }
 
   /**

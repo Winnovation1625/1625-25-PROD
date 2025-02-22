@@ -16,6 +16,7 @@ public class WristConstants {
   public static final double WRIST_PID_I = 0.125;
   public static final double WRIST_PID_D = 0.125;
   public static final double WRIST_MASS_KG = 0.125;
+  public static final double WRIST_MOI = 0.0040065078;
   public static final double WRIST_GEARING = 0.125;
   public static final double WRIST_LENGTH = 2.0; // need real number
   public static final double WRIST_MAX_VELOCITY = 0.125;

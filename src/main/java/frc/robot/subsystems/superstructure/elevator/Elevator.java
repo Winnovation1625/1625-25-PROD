@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-public class Elevator extends SubsystemBase {
+public class Elevator{
 
   private final ElevatorIO io;
   private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
@@ -128,9 +128,5 @@ public class Elevator extends SubsystemBase {
 
   public void tempStop() {
     io.stop();
-  }
-
-  public Command tempCommand() {
-    return startEnd(() -> changeLevel(), () -> tempStop());
   }
 }
