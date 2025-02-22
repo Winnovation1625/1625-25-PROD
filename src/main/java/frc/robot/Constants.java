@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.RobotBase;
  * (log replay from a file).
  */
 public final class Constants {
+  public static final double loopPeriodSecs = 0.02;
   public static final Mode simMode = Mode.SIM;
   public static final boolean tuningMode = true;
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
