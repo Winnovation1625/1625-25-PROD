@@ -36,6 +36,7 @@ import frc.robot.subsystems.superstructure.arm.ArmIO;
 import frc.robot.subsystems.superstructure.arm.ArmIOKrakenx60;
 import frc.robot.subsystems.superstructure.arm.ArmIOSim;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
+import frc.robot.subsystems.superstructure.elevator.ElevatorIO;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOKraken;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -50,9 +51,7 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final Arm arm;
-  //   private final Superstructure superstructure;
   private final Elevator elevator;
-  //   private final Arm arm;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -75,8 +74,6 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.BackRight));
         arm = new Arm(new ArmIOKrakenx60());
         elevator = new Elevator(new ElevatorIOKraken());
-        // arm = new Arm(new ArmIOKraken());
-        // superstructure = new Superstructure(elevator, arm);
         break;
 
       case SIM:
@@ -90,7 +87,6 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.BackRight));
 
         arm = new Arm(new ArmIOSim());
-
 
         elevator = new Elevator(new ElevatorIOSim());
 
@@ -106,7 +102,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {});
         arm = new Arm(new ArmIO() {});
-        elevator = new Elevator(new ElevatorIOSim());
+        elevator = new Elevator(new ElevatorIO() {});
         break;
     }
 
