@@ -23,9 +23,9 @@ public class CoralManipulator extends SubsystemBase {
 
   @RequiredArgsConstructor
   public enum RollersState {
-    INTAKING(new LoggedTunableNumber("CoralManipulator/Intaking", 10)),
-    SHOOTING(new LoggedTunableNumber("CoralManipulator/Shooting", 10)),
-    EJECTING(new LoggedTunableNumber("CoralManipulator/Ejecting", 20)),
+    INTAKING(new LoggedTunableNumber("CoralManipulator/Intaking", 7)),
+    SHOOTING(new LoggedTunableNumber("CoralManipulator/Shooting", 7)),
+    EJECTING(new LoggedTunableNumber("CoralManipulator/Ejecting", 10)),
     IDLE(() -> 0);
 
     private final DoubleSupplier voltageSupplier;

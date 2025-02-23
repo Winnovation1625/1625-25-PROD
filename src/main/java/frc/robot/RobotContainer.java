@@ -25,21 +25,24 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.coralmanipulator.*;
+import frc.robot.subsystems.coralmanipulator.CoralManipulator.GamepieceState;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.superstructure.Superstructure;
+import frc.robot.subsystems.superstructure.Superstructure.SuperstructureStates;
 import frc.robot.subsystems.superstructure.arm.Arm;
-import frc.robot.subsystems.superstructure.arm.Arm.ArmState;
 import frc.robot.subsystems.superstructure.arm.ArmIO;
-import frc.robot.subsystems.superstructure.arm.ArmIOKrakenx60;
+import frc.robot.subsystems.superstructure.arm.ArmIOKraken;
 import frc.robot.subsystems.superstructure.arm.ArmIOSim;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIO;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOKraken;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
+import frc.robot.subsystems.superstructure.wrist.*;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -53,6 +56,9 @@ public class RobotContainer {
   private final Drive drive;
   private final Arm arm;
   private final Elevator elevator;
+  private final Wrist wrist;
+  private final Superstructure superstructure;
+  private final CoralManipulator coralManipulator;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -73,8 +79,13 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
-        arm = new Arm(new ArmIOKrakenx60());
+        arm = new Arm(new ArmIOKraken());
         elevator = new Elevator(new ElevatorIOKraken());
+        wrist = new Wrist(new WristIOKraken());
+        superstructure = new Superstructure(arm, elevator, wrist);
+        coralManipulator =
+            new CoralManipulator(
+                new CoralManipulatorIOKraken(), new CoralManipulatorSensorsIOCANrange());
         break;
 
       case SIM:
@@ -86,10 +97,12 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
-
         arm = new Arm(new ArmIOSim());
-
         elevator = new Elevator(new ElevatorIOSim());
+        wrist = new Wrist(new WristIOSim());
+        superstructure = new Superstructure(arm, elevator, wrist);
+        coralManipulator =
+            new CoralManipulator(new CoralManipulatorIOSim(), new CoralManipulatorSensorIOSim());
 
         break;
 
@@ -104,6 +117,10 @@ public class RobotContainer {
                 new ModuleIO() {});
         arm = new Arm(new ArmIO() {});
         elevator = new Elevator(new ElevatorIO() {});
+        wrist = new Wrist(new WristIO() {});
+        superstructure = new Superstructure(arm, elevator, wrist);
+        coralManipulator =
+            new CoralManipulator(new CoralManipulatoIO() {}, new CoralManipulatorSensorIO() {});
         break;
     }
 
@@ -169,6 +186,20 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
+
+    controller
+        .leftBumper()
+        .and(
+            () ->
+                (superstructure.getSuperstructureGoal() == SuperstructureStates.STOW
+                        || superstructure.getSuperstructureGoal() == SuperstructureStates.INTAKING)
+                    && coralManipulator.getGamepieceState() != GamepieceState.IN_INTAKE)
+        .whileTrue(superstructure.setGoalCommand(SuperstructureStates.INTAKING));
+
+    controller
+        .rightTrigger()
+        .and(() -> coralManipulator.getGamepieceState() == GamepieceState.IN_INTAKE)
+        .onTrue(superstructure.setGoalCommand(SuperstructureStates.CLVL3));
   }
 
   /**

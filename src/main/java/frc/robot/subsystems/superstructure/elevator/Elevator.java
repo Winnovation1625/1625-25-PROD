@@ -4,18 +4,17 @@ import static frc.robot.subsystems.superstructure.elevator.ElevatorConstants.*;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.EqualsUtil;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-public class Elevator{
+public class Elevator {
 
   private final ElevatorIO io;
   private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
@@ -45,20 +44,24 @@ public class Elevator{
 
   @RequiredArgsConstructor
   public enum ElevatorState {
-    STOP(() -> 0),
-    STOW(new LoggedTunableNumber("Superstructure/Elevator/Stow", 0)),
-    LEVEL_0NE(new LoggedTunableNumber("Superstructure/Elevator/L1", 12)),
-    LEVEL_TWO(new LoggedTunableNumber("Superstructure/Elevator/L2", 22)),
-    LEVEL_THREE(new LoggedTunableNumber("Superstructure/Elevator/L3", 33)),
-    LEVEL_FOUR(new LoggedTunableNumber("Superstructure/Elevator/L4", 44)),
-    BARGE(new LoggedTunableNumber("Superstructure/Elevator/Barge", 55));
+    STOW(new LoggedTunableNumber("Superstructure/Arm/STOW", 0)),
+    ALVL2(new LoggedTunableNumber("Superstructure/Arm/ALGL", .2)),
+    ALVL3(new LoggedTunableNumber("Superstructure/Arm/ALVL3", .3)),
+    CLVL1(new LoggedTunableNumber("Superstructure/Arm/CLVL1", 2)),
+    CLVL2(new LoggedTunableNumber("Superstructure/Arm/CLVL2", .5)),
+    CLVL3(new LoggedTunableNumber("Superstructure/Arm/CLVL3", .6)),
+    CLVL4(new LoggedTunableNumber("Superstructure/Arm/CLVL4", .7)),
+    INTAKE(new LoggedTunableNumber("Superstructure/Arm/INTAKE", .8)),
+    PROCESS(new LoggedTunableNumber("Superstructure/Arm/PROCESS", .9)),
+    BARGE(new LoggedTunableNumber("Superstructure/Arm/BARGE", 1)),
+    STOP(() -> 0);
 
     @Getter private final DoubleSupplier elevatorSetpointFromGround;
   }
 
   @AutoLogOutput(key = "Superstructure/Elevator/ElevatorState")
-  // @Getter
-  // @Setter
+  @Getter
+  @Setter
   private ElevatorState elevatorState = ElevatorState.STOW;
 
   public Elevator(ElevatorIO io) {
@@ -101,7 +104,7 @@ public class Elevator{
         elevatorState.getElevatorSetpointFromGround().getAsDouble(),
         ELEVATOR_TOLERANCE_METERS);
   }
-
+  
   public void setBrakeMode(boolean enabled) {
     if (brakeModeEnabled == enabled) return;
     brakeModeEnabled = enabled;
@@ -119,14 +122,5 @@ public class Elevator{
 
   public void endCharacterization() {
     characterizing = false;
-  }
-
-  public void changeLevel() {
-    elevatorState = ElevatorState.LEVEL_0NE;
-    io.setPosition(ElevatorState.LEVEL_0NE.getElevatorSetpointFromGround().getAsDouble());
-  }
-
-  public void tempStop() {
-    io.stop();
   }
 }

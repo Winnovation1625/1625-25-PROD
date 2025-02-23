@@ -12,13 +12,13 @@ public class WristConstants {
   public static final double cruiseAcceleration = 2;
   public static final double cruiseJerk = 20;
   public static final double WRIST_TOLERANCE_METERS = Units.inchesToMeters(0.125);
-  public static final double WRIST_PID_P = 0.125;
+  public static final double WRIST_PID_P = 4.0;
   public static final double WRIST_PID_I = 0.125;
   public static final double WRIST_PID_D = 0.125;
   public static final double WRIST_MASS_KG = 0.125;
   public static final double WRIST_MOI = 0.0040065078;
-  public static final double WRIST_GEARING = 0.125;
-  public static final double WRIST_LENGTH = 2.0; // need real number
+  public static final double WRIST_GEARING = 81;
+  public static final double WRIST_LENGTH = Units.inchesToMeters(6.5);
   public static final double WRIST_MAX_VELOCITY = 0.125;
   public static final double WRIST_MAX_ACCELERATION = 0.125;
 

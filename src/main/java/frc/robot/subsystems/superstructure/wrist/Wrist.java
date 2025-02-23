@@ -4,8 +4,6 @@ import static frc.robot.subsystems.superstructure.wrist.WristConstants.*;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.EqualsUtil;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.BooleanSupplier;
@@ -17,7 +15,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
-public class Wrist{
+public class Wrist {
 
   private final WristIO io;
   private final WristIOInputsAutoLogged inputs = new WristIOInputsAutoLogged();
@@ -59,11 +57,11 @@ public class Wrist{
     STOP(() -> 0),
     IDLE(new LoggedTunableNumber("Wrist/Stow", Units.degreesToRadians(0))),
     TROUGH(new LoggedTunableNumber("Wrist/Trough", Units.degreesToRadians(20))),
-    LEVEL_ONE(new LoggedTunableNumber("Wrist/LevelOne", Units.degreesToRadians(30))),
-    LEVEL_TWO(new LoggedTunableNumber("Wrist/LevelTwo", Units.degreesToRadians(35))),
-    LEVEL_THREE(new LoggedTunableNumber("Wrist/LevelThree", Units.degreesToRadians(40)));
+    LEVEL_TWO(new LoggedTunableNumber("Wrist/LevelOne", Units.degreesToRadians(30))),
+    LEVEL_THREE(new LoggedTunableNumber("Wrist/LevelTwo", Units.degreesToRadians(35))),
+    LEVEL_FOUR(new LoggedTunableNumber("Wrist/LevelThree", Units.degreesToRadians(40)));
 
-    private final DoubleSupplier wristSetpointSupplier;
+    @Getter private final DoubleSupplier wristSetpointSupplier;
   }
 
   public void periodic() {

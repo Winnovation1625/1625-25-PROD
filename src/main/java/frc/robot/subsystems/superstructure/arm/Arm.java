@@ -3,8 +3,6 @@ package frc.robot.subsystems.superstructure.arm;
 import static frc.robot.subsystems.superstructure.arm.ArmConstants.*;
 
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.EqualsUtil;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.BooleanSupplier;
@@ -15,7 +13,7 @@ import lombok.Setter;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-public class Arm{
+public class Arm {
   private final ArmIO io;
   private final ArmIOInputsAutoLogged inputs = new ArmIOInputsAutoLogged();
   // private final ArmVisualizer visualizer = new ArmVisualizer();
@@ -53,7 +51,7 @@ public class Arm{
     BARGE(new LoggedTunableNumber("Superstructure/Arm/BARGE", 1)),
     STOP(() -> 0);
 
-    private final DoubleSupplier armSetpointSupplier;
+    @Getter private final DoubleSupplier armSetpointSupplier;
   }
 
   @AutoLogOutput(key = "Superstructure/Arm/ArmState")

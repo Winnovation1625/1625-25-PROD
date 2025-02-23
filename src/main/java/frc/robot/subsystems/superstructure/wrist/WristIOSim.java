@@ -21,8 +21,7 @@ public class WristIOSim implements WristIO {
   private DCMotor wristMotors = DCMotor.getKrakenX60Foc(1);
 
   private LinearSystem<N2, N1, N2> wristId =
-      LinearSystemId.createSingleJointedArmSystem(
-          wristMotors, WRIST_MOI, WRIST_GEARING);
+      LinearSystemId.createSingleJointedArmSystem(wristMotors, WRIST_MOI, WRIST_GEARING);
   private final ProfiledPIDController pidController =
       new ProfiledPIDController(
           WRIST_PID_P,
