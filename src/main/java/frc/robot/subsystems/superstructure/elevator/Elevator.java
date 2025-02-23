@@ -104,7 +104,7 @@ public class Elevator {
         elevatorState.getElevatorSetpointFromGround().getAsDouble(),
         ELEVATOR_TOLERANCE_METERS);
   }
-  
+
   public void setBrakeMode(boolean enabled) {
     if (brakeModeEnabled == enabled) return;
     brakeModeEnabled = enabled;

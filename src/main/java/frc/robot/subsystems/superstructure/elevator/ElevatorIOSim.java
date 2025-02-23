@@ -41,19 +41,24 @@ public class ElevatorIOSim implements ElevatorIO {
   @Override
   public void updateInputs(ElevatorIOInputs inputs) {
 
-    inputs.positionRad = elevatorSim.getPositionMeters() / ELEVATOR_DRUM_RADIUS;
-    inputs.velocityRadPerSec = elevatorSim.getVelocityMetersPerSecond();
-    inputs.supplyCurrentAmps = Math.abs(elevatorSim.getCurrentDrawAmps());
-
     elevatorSim.update(0.02);
     if (DriverStation.isDisabled()) {
       stop();
       inputs.appliedVolts = 0;
     } else {
-      var output = MathUtil.clamp(pidController.calculate(inputs.positionRad), -12, 12);
-      elevatorSim.setInputVoltage(output);
-      inputs.appliedVolts = output;
+      var output =
+          MathUtil.clamp(pidController.calculate(elevatorSim.getPositionMeters()), -12, 12);
+      inputs.appliedVolts = output * -1;
+      setInputVoltage(inputs.appliedVolts);
     }
+
+    inputs.positionRad = elevatorSim.getPositionMeters();
+    inputs.velocityRadPerSec = elevatorSim.getVelocityMetersPerSecond();
+    inputs.supplyCurrentAmps = Math.abs(elevatorSim.getCurrentDrawAmps());
+  }
+
+  public void setInputVoltage(double volts) {
+    elevatorSim.setInputVoltage(volts * -1);
   }
 
   @Override
