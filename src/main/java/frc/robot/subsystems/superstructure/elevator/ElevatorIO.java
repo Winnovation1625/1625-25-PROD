@@ -30,6 +30,6 @@ public interface ElevatorIO {
   public default void stop() {}
   ;
 
-  public default void setPosition(double positionSetpoint) {}
+  public default void setPosition(double positionSetpointRads) {}
   ;
 }

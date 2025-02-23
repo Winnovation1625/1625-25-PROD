@@ -46,9 +46,12 @@ public class ElevatorIOSim implements ElevatorIO {
     inputs.supplyCurrentAmps = Math.abs(elevatorSim.getCurrentDrawAmps());
 
     elevatorSim.update(0.02);
-    if (DriverStation.isDisabled()) {
+    if (DriverStation
+        .isDisabled()) { // TODO: This is probably not the only time you want to make sure it
+      // doesn't move
       stop();
       inputs.appliedVolts = 0;
+      pidController.reset(inputs.positionRad);
     } else {
       var output = MathUtil.clamp(pidController.calculate(inputs.positionRad), -12, 12);
       elevatorSim.setInputVoltage(output);
@@ -62,7 +65,7 @@ public class ElevatorIOSim implements ElevatorIO {
   }
 
   @Override
-  public void setPosition(double positionSetpoint) {
-    pidController.setGoal(positionSetpoint / ELEVATOR_DRUM_RADIUS);
+  public void setPosition(double positionSetpointRads) {
+    pidController.setGoal(positionSetpointRads);
   }
 }

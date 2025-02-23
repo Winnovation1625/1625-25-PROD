@@ -106,4 +106,8 @@ public class Wrist {
   public void tempStop() {
     io.stop();
   }
+
+  public double getWristPos() {
+    return inputs.positionRad;
+  }
 }

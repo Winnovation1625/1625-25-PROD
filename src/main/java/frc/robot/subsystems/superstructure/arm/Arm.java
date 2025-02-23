@@ -107,4 +107,8 @@ public class Arm {
   public void endCharacterization() {
     // characterizing = false;
   }
+
+  public double getArmPos() {
+    return inputs.positionRad;
+  }
 }

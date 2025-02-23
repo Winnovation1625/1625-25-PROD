@@ -117,10 +117,10 @@ public class ElevatorIOKraken implements ElevatorIO {
   }
 
   @Override
-  public void setPosition(double positionSetpoint) {
+  public void setPosition(double positionSetpointRads) {
     elevatorTalon.setControl(
         positionControl
-            .withPosition(Units.radiansToRotations(positionSetpoint))
+            .withPosition(Units.radiansToRotations(positionSetpointRads))
             .withUpdateFreqHz(50));
   }
 }

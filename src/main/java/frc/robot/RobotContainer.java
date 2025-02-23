@@ -197,9 +197,9 @@ public class RobotContainer {
         .whileTrue(superstructure.setGoalCommand(SuperstructureStates.INTAKING));
 
     controller
-        .rightTrigger()
-        .and(() -> coralManipulator.getGamepieceState() == GamepieceState.IN_INTAKE)
-        .onTrue(superstructure.setGoalCommand(SuperstructureStates.CLVL3));
+        .x()
+        // .and(() -> coralManipulator.getGamepieceState() == GamepieceState.IN_INTAKE)
+        .whileTrue(superstructure.setGoalCommand(SuperstructureStates.CLVL3));
   }
 
   /**
