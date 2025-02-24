@@ -1,3 +1,5 @@
 package frc.robot.subsystem.superstructure;
 
-public class Superstructure {}
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+public class Superstructure extends SubsystemBase {}

@@ -1,6 +1,6 @@
-package frc.robot.subsystems.coralmanipulator;
+package frc.robot.subsystem.coralmanipulator;
 
-import static frc.robot.subsystems.coralmanipulator.CoralManipulatorConstants.*;
+import static frc.robot.subsystem.coralmanipulator.CoralManipulatorConstants.*;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;

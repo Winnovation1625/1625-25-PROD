@@ -1,6 +1,6 @@
-package frc.robot.subsystems.coralmanipulator;
+package frc.robot.subsystem.coralmanipulator;
 
-import static frc.robot.subsystems.coralmanipulator.CoralManipulatorConstants.*;
+import static frc.robot.subsystem.coralmanipulator.CoralManipulatorConstants.*;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;

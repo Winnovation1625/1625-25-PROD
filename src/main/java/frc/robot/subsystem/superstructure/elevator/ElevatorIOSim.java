@@ -1,6 +1,6 @@
-package frc.robot.subsystems.superstructure.elevator;
+package frc.robot.subsystem.superstructure.elevator;
 
-import static frc.robot.subsystems.superstructure.elevator.ElevatorConstants.*;
+import static frc.robot.subsystem.superstructure.elevator.ElevatorConstants.*;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -12,6 +12,7 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
+import frc.robot.Constants;
 
 public class ElevatorIOSim implements ElevatorIO {
   private DCMotor elevatorMotors = DCMotor.getKrakenX60Foc(2);
@@ -45,7 +46,7 @@ public class ElevatorIOSim implements ElevatorIO {
     inputs.velocityRadPerSec = elevatorSim.getVelocityMetersPerSecond();
     inputs.supplyCurrentAmps = Math.abs(elevatorSim.getCurrentDrawAmps());
 
-    elevatorSim.update(0.02);
+    elevatorSim.update(Constants.LOOP_PERIOD_SECS);
     if (DriverStation.isDisabled()) {
       stop();
       inputs.appliedVolts = 0;

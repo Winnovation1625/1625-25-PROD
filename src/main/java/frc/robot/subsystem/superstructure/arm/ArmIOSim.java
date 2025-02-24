@@ -1,6 +1,6 @@
-package frc.robot.subsystems.superstructure.arm;
+package frc.robot.subsystem.superstructure.arm;
 
-import static frc.robot.subsystems.superstructure.arm.ArmConstants.*;
+import static frc.robot.subsystem.superstructure.arm.ArmConstants.*;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;

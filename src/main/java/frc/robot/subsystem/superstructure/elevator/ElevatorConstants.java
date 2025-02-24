@@ -1,4 +1,4 @@
-package frc.robot.subsystems.superstructure.elevator;
+package frc.robot.subsystem.superstructure.elevator;
 
 import edu.wpi.first.math.util.Units;
 

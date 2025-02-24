@@ -43,11 +43,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
-import frc.robot.subsystems.drive.GyroIOInputsAutoLogged;
 import frc.robot.RobotState;
 import frc.robot.RobotState.OdometryObservation;
 import frc.robot.util.LocalADStarAK;
-
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -190,7 +188,10 @@ public class Drive extends SubsystemBase {
       }
 
       // Apply update
-      RobotState.getInstance().addOdometryObservation(new OdometryObservation(modulePositions, Optional.of(rawGyroRotation), sampleTimestamps[i]));
+      RobotState.getInstance()
+          .addOdometryObservation(
+              new OdometryObservation(
+                  modulePositions, Optional.of(rawGyroRotation), sampleTimestamps[i]));
     }
 
     // Update gyro alert

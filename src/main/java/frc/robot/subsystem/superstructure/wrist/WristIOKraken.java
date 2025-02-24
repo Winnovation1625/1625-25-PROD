@@ -1,4 +1,4 @@
-package frc.robot.subsystems.superstructure.wrist;
+package frc.robot.subsystem.superstructure.wrist;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;

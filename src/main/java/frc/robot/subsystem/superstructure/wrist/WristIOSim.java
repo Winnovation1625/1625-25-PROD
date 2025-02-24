@@ -1,7 +1,7 @@
-package frc.robot.subsystems.superstructure.wrist;
+package frc.robot.subsystem.superstructure.wrist;
 
 import static frc.robot.Constants.*;
-import static frc.robot.subsystems.superstructure.wrist.WristConstants.*;
+import static frc.robot.subsystem.superstructure.wrist.WristConstants.*;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -47,7 +47,7 @@ public class WristIOSim implements WristIO {
 
   @Override
   public void updateInputs(WristIOInputs inputs) {
-    sim.update(loopPeriodSecs);
+    sim.update(LOOP_PERIOD_SECS);
     // Reset voltages when disabled
     if (DriverStation.isDisabled()) {
       sim.setInputVoltage(0);

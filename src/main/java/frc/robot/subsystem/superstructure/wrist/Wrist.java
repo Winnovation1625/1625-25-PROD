@@ -1,6 +1,6 @@
-package frc.robot.subsystems.superstructure.wrist;
+package frc.robot.subsystem.superstructure.wrist;
 
-import static frc.robot.subsystems.superstructure.wrist.WristConstants.*;
+import static frc.robot.subsystem.superstructure.wrist.WristConstants.*;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;

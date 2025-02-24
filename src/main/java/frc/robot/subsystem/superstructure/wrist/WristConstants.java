@@ -1,4 +1,4 @@
-package frc.robot.subsystems.superstructure.wrist;
+package frc.robot.subsystem.superstructure.wrist;
 
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
@@ -22,7 +22,7 @@ public class WristConstants {
   public static final double WRIST_MAX_ACCELERATION = 0.125;
 
   public static Gains gains =
-      switch (Constants.currentMode) {
+      switch (Constants.CURRENT_MODE) {
         case SIM -> new Gains(90.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
         case REAL, REPLAY -> new Gains(600.0, 0.0, 40.0, 3.0, 0.0, 0.0, 4.0);
       };

@@ -7,24 +7,20 @@
 
 package frc.robot.subsystem.apriltagvision;
 
+import static frc.robot.subsystem.apriltagvision.VisionConstants.*;
+
 import edu.wpi.first.apriltag.*;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.FieldConstants;
 import frc.robot.RobotState;
 import frc.robot.RobotState.VisionObservation;
-import frc.robot.subsystem.drive.DriveConstants;
-import frc.robot.subsystems.apriltagvision.AprilTagVisionIOInputsAutoLogged;
 import frc.robot.util.Alert;
-import frc.robot.FieldConstants;
 import frc.robot.util.GeomUtil;
 import frc.robot.util.VirtualSubsystem;
-
-import static frc.robot.subsystem.apriltagvision.VisionConstants.*;
-
 import java.util.*;
 import lombok.experimental.ExtensionMethod;
 import org.littletonrobotics.junction.Logger;
@@ -36,7 +32,7 @@ public class AprilTagVision extends VirtualSubsystem {
 
   private final Map<Integer, Double> lastFrameTimes = new HashMap<>();
   private final Map<Integer, Double> lastTagDetectionTimes = new HashMap<>();
-  //TODO: Update camera locations
+  // TODO: Update camera locations
   private final Alert[] cameraDisconnects =
       new Alert[] {
         new Alert("Front Left Cam disconnected!", Alert.AlertType.WARNING),
@@ -56,7 +52,8 @@ public class AprilTagVision extends VirtualSubsystem {
       lastFrameTimes.put(i, 0.0);
     }
     // Create map of last detection times for tags
-    FieldConstants.AprilTagLayoutType.OFFICIAL.getLayout()
+    FieldConstants.AprilTagLayoutType.OFFICIAL
+        .getLayout()
         .getTags()
         .forEach(
             (AprilTag tag) -> {
@@ -91,7 +88,8 @@ public class AprilTagVision extends VirtualSubsystem {
       boolean useVisionRotation = false;
       if (inputs[instanceIndex].isMultiTag) {
         cameraPose = inputs[instanceIndex].cameraPoses[0];
-        robotPose3d = null; //TODO Convert this from Translation3d to Pose3d cameraPose.plus(cameraPoses.get(instanceIndex).inverse());
+        robotPose3d = null; // TODO Convert this from Translation3d to Pose3d
+        // cameraPose.plus(cameraPoses.get(instanceIndex).inverse());
         useVisionRotation = true;
       } else {
         if (inputs[instanceIndex].cameraPoses.length < 2
@@ -102,18 +100,22 @@ public class AprilTagVision extends VirtualSubsystem {
         // Two poses (one tag), disambiguate
         Pose3d cameraPose0 = inputs[instanceIndex].cameraPoses[0];
         Pose3d fieldToCamPose0 =
-            FieldConstants.AprilTagLayoutType.OFFICIAL.getLayout()
+            FieldConstants.AprilTagLayoutType.OFFICIAL
+                .getLayout()
                 .getTagPose(inputs[instanceIndex].tagId[0])
                 .get()
                 .transformBy(cameraPose0.toTransform3d().inverse());
         Pose3d cameraPose1 = inputs[instanceIndex].cameraPoses[1];
         Pose3d fieldToCamPose1 =
-            FieldConstants.AprilTagLayoutType.OFFICIAL.getLayout()
+            FieldConstants.AprilTagLayoutType.OFFICIAL
+                .getLayout()
                 .getTagPose(inputs[instanceIndex].tagId[0])
                 .get()
                 .transformBy(cameraPose1.toTransform3d().inverse());
-        Pose3d robotPose3d0 = null; //TODO Convert this from Translation3d to Pose3d fieldToCamPose0.plus(cameraPoses[instanceIndex].inverse());
-        Pose3d robotPose3d1 = null; //TODO Convert this from Translation3d to Pose3d fieldToCamPose1.plus(cameraPoses[instanceIndex].inverse());
+        Pose3d robotPose3d0 = null; // TODO Convert this from Translation3d to Pose3d
+        // fieldToCamPose0.plus(cameraPoses[instanceIndex].inverse());
+        Pose3d robotPose3d1 = null; // TODO Convert this from Translation3d to Pose3d
+        // fieldToCamPose1.plus(cameraPoses[instanceIndex].inverse());
 
         // Check for ambiguity and select based on estimated rotation
         if (inputs[instanceIndex].ambiguity < ambiguityThreshold) {
@@ -153,7 +155,8 @@ public class AprilTagVision extends VirtualSubsystem {
       List<Pose3d> tagPoses = new ArrayList<>();
       for (int tagId : inputs[instanceIndex].tagId) {
         lastTagDetectionTimes.put(tagId, Timer.getFPGATimestamp());
-        Optional<Pose3d> tagPose = FieldConstants.AprilTagLayoutType.OFFICIAL.getLayout().getTagPose(tagId);
+        Optional<Pose3d> tagPose =
+            FieldConstants.AprilTagLayoutType.OFFICIAL.getLayout().getTagPose(tagId);
         tagPose.ifPresent(tagPoses::add);
       }
 
@@ -223,7 +226,11 @@ public class AprilTagVision extends VirtualSubsystem {
     List<Pose3d> allTagPoses = new ArrayList<>();
     for (Map.Entry<Integer, Double> detectionEntry : lastTagDetectionTimes.entrySet()) {
       if (Timer.getFPGATimestamp() - detectionEntry.getValue() < targetLogTimeSecs) {
-        allTagPoses.add(FieldConstants.AprilTagLayoutType.OFFICIAL.getLayout().getTagPose(detectionEntry.getKey()).get());
+        allTagPoses.add(
+            FieldConstants.AprilTagLayoutType.OFFICIAL
+                .getLayout()
+                .getTagPose(detectionEntry.getKey())
+                .get());
       }
     }
     Logger.recordOutput("AprilTagVision/TagPoses", allTagPoses.toArray(Pose3d[]::new));

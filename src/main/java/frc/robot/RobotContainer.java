@@ -17,30 +17,32 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
+import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.coralmanipulator.*;
+import frc.robot.subsystem.coralmanipulator.*;
 import frc.robot.subsystem.drive.Drive;
 import frc.robot.subsystem.drive.GyroIO;
 import frc.robot.subsystem.drive.GyroIOPigeon2;
 import frc.robot.subsystem.drive.ModuleIO;
 import frc.robot.subsystem.drive.ModuleIOSim;
 import frc.robot.subsystem.drive.ModuleIOTalonFX;
-import frc.robot.subsystems.superstructure.arm.Arm;
-import frc.robot.subsystems.superstructure.arm.Arm.ArmState;
-import frc.robot.subsystems.superstructure.arm.ArmIO;
-import frc.robot.subsystems.superstructure.arm.ArmIOKrakenx60;
-import frc.robot.subsystems.superstructure.arm.ArmIOSim;
-import frc.robot.subsystems.superstructure.elevator.Elevator;
-import frc.robot.subsystems.superstructure.elevator.ElevatorIO;
-import frc.robot.subsystems.superstructure.elevator.ElevatorIOKraken;
-import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
-
+import frc.robot.subsystem.superstructure.arm.Arm;
+import frc.robot.subsystem.superstructure.arm.Arm.ArmState;
+import frc.robot.subsystem.superstructure.arm.ArmIO;
+import frc.robot.subsystem.superstructure.arm.ArmIOKrakenx60;
+import frc.robot.subsystem.superstructure.arm.ArmIOSim;
+import frc.robot.subsystem.superstructure.elevator.Elevator;
+import frc.robot.subsystem.superstructure.elevator.ElevatorIO;
+import frc.robot.subsystem.superstructure.elevator.ElevatorIOKraken;
+import frc.robot.subsystem.superstructure.elevator.ElevatorIOSim;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -57,6 +59,8 @@ public class RobotContainer {
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandPS4Controller ps5Controller = new CommandPS4Controller(1);
+  
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -185,6 +189,7 @@ public class RobotContainer {
         .onTrue(arm.setDesiredStateCommand(ArmState.STOW));
 
     controller.leftTrigger().whileTrue(elevator.tempCommand());
+    controller.getHID().setRumble(null, 0);
   }
 
   /**

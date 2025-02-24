@@ -1,4 +1,4 @@
-package frc.robot.subsystems.superstructure.arm;
+package frc.robot.subsystem.superstructure.arm;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
@@ -14,7 +14,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
-import frc.robot.subsystems.superstructure.arm.ArmIO.ArmIOInputs;
+import frc.robot.subsystem.superstructure.arm.ArmIO.ArmIOInputs;
 import java.util.function.DoubleSupplier;
 
 public class ArmIOKrakenx60 implements ArmIO {
