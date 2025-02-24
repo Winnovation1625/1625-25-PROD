@@ -1,3 +1,10 @@
+// Copyright (c) 2025 FRC 6328
+// http://github.com/Mechanical-Advantage
+//
+// Use of this source code is governed by an MIT-style
+// license that can be found in the LICENSE file at
+// the root directory of this project.
+
 package frc.robot.util;
 
 import frc.robot.Constants;
@@ -50,7 +57,7 @@ public class LoggedTunableNumber implements DoubleSupplier {
     if (!hasDefault) {
       hasDefault = true;
       this.defaultValue = defaultValue;
-      if (Constants.TUNING_MODE) {
+      if (Constants.tuningMode) {
         dashboardNumber = new LoggedNetworkNumber(key, defaultValue);
       }
     }
@@ -65,7 +72,7 @@ public class LoggedTunableNumber implements DoubleSupplier {
     if (!hasDefault) {
       return 0.0;
     } else {
-      return Constants.TUNING_MODE ? dashboardNumber.get() : defaultValue;
+      return Constants.tuningMode ? dashboardNumber.get() : defaultValue;
     }
   }
 
