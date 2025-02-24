@@ -20,9 +20,9 @@ public class ElevatorIOSim implements ElevatorIO {
           elevatorMotors, ELEVATOR_MASS_KG, ELEVATOR_TOLERANCE_METERS, ELEVATOR_GEARING);
   private final ProfiledPIDController pidController =
       new ProfiledPIDController(
-          ELEVATOR_PID_P,
-          ELEVATOR_PID_I,
-          ELEVATOR_PID_D,
+          gains.kP(),
+          gains.kI(),
+          gains.kD(),
           new TrapezoidProfile.Constraints(ELEVATOR_MAX_VELOCITY, ELEVATOR_MAX_ACCELERATION));
 
   private final ElevatorSim elevatorSim =

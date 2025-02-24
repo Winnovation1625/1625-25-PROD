@@ -39,7 +39,7 @@ public class Arm {
   //     new LoggedTunableNumber("Arm/cruiseJ", cruiseJerk);
   @RequiredArgsConstructor
   public enum ArmState {
-    STOW(new LoggedTunableNumber("Superstructure/Arm/STOW", 0)),
+    STOW(new LoggedTunableNumber("Superstructure/Arm/STOW", Math.PI / 2)),
     ALVL2(new LoggedTunableNumber("Superstructure/Arm/ALGL", .2)),
     ALVL3(new LoggedTunableNumber("Superstructure/Arm/ALVL3", .3)),
     CLVL1(new LoggedTunableNumber("Superstructure/Arm/CLVL1", 2)),

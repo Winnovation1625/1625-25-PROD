@@ -21,12 +21,12 @@ public class Elevator {
   //  private final ElevatorVisualizer visualizer =
   //   new ElevatorVisualizer(ElevatorConstants.elevatorPose);
 
-  // private static final LoggedTunableNumber kP =
-  //   new LoggedTunableNumber("Elevator/kP", gains.kP());
-  // private static final LoggedTunableNumber kI =
-  //   new LoggedTunableNumber("Elevator/kI", gains.kI());
-  // private static final LoggedTunableNumber kD =
-  //   new LoggedTunableNumber("Elevator/kD", gains.kD());
+  private static final LoggedTunableNumber kP =
+    new LoggedTunableNumber("Elevator/kP", gains.kP());
+  private static final LoggedTunableNumber kI =
+    new LoggedTunableNumber("Elevator/kI", gains.kI());
+  private static final LoggedTunableNumber kD =
+    new LoggedTunableNumber("Elevator/kD", gains.kD());
   // private static final LoggedTunableNumber kS =
   //   new LoggedTunableNumber("Elevator/kS", gains.ffkS());
   // private static final LoggedTunableNumber kV =
