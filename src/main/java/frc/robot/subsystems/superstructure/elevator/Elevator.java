@@ -21,12 +21,9 @@ public class Elevator {
   //  private final ElevatorVisualizer visualizer =
   //   new ElevatorVisualizer(ElevatorConstants.elevatorPose);
 
-  private static final LoggedTunableNumber kP =
-    new LoggedTunableNumber("Elevator/kP", gains.kP());
-  private static final LoggedTunableNumber kI =
-    new LoggedTunableNumber("Elevator/kI", gains.kI());
-  private static final LoggedTunableNumber kD =
-    new LoggedTunableNumber("Elevator/kD", gains.kD());
+  private static final LoggedTunableNumber kP = new LoggedTunableNumber("Elevator/kP", gains.kP());
+  private static final LoggedTunableNumber kI = new LoggedTunableNumber("Elevator/kI", gains.kI());
+  private static final LoggedTunableNumber kD = new LoggedTunableNumber("Elevator/kD", gains.kD());
   // private static final LoggedTunableNumber kS =
   //   new LoggedTunableNumber("Elevator/kS", gains.ffkS());
   // private static final LoggedTunableNumber kV =
@@ -44,16 +41,16 @@ public class Elevator {
 
   @RequiredArgsConstructor
   public enum ElevatorState {
-    STOW(new LoggedTunableNumber("Superstructure/Arm/STOW", Units.inchesToMeters(11.75))),
-    ALVL2(new LoggedTunableNumber("Superstructure/Arm/ALGL", Units.inchesToMeters(30))),
-    ALVL3(new LoggedTunableNumber("Superstructure/Arm/ALVL3", Units.inchesToMeters(35))),
-    CLVL1(new LoggedTunableNumber("Superstructure/Arm/CLVL1", Units.inchesToMeters(40))),
-    CLVL2(new LoggedTunableNumber("Superstructure/Arm/CLVL2", Units.inchesToMeters(45))),
-    CLVL3(new LoggedTunableNumber("Superstructure/Arm/CLVL3", Units.inchesToMeters(50))),
-    CLVL4(new LoggedTunableNumber("Superstructure/Arm/CLVL4", Units.inchesToMeters(60))),
-    INTAKE(new LoggedTunableNumber("Superstructure/Arm/INTAKE", Units.inchesToMeters(15))),
-    PROCESS(new LoggedTunableNumber("Superstructure/Arm/PROCESS", Units.inchesToMeters(13))),
-    BARGE(new LoggedTunableNumber("Superstructure/Arm/BARGE", Units.inchesToMeters(80))),
+    STOW(new LoggedTunableNumber("Superstructure/Elevator/STOW", Units.inchesToMeters(11.75))),
+    ALVL2(new LoggedTunableNumber("Superstructure/Elevator/ALGL", Units.inchesToMeters(30))),
+    ALVL3(new LoggedTunableNumber("Superstructure/Elevator/ALVL3", Units.inchesToMeters(35))),
+    CLVL1(new LoggedTunableNumber("Superstructure/Elevator/CLVL1", Units.inchesToMeters(40))),
+    CLVL2(new LoggedTunableNumber("Superstructure/Elevator/CLVL2", Units.inchesToMeters(45))),
+    CLVL3(new LoggedTunableNumber("Superstructure/Elevator/CLVL3", Units.inchesToMeters(50))),
+    CLVL4(new LoggedTunableNumber("Superstructure/Elevator/CLVL4", Units.inchesToMeters(60))),
+    INTAKE(new LoggedTunableNumber("Superstructure/Elevator/INTAKE", Units.inchesToMeters(15))),
+    PROCESS(new LoggedTunableNumber("Superstructure/Elevator/PROCESS", Units.inchesToMeters(13))),
+    BARGE(new LoggedTunableNumber("Superstructure/Elevator/BARGE", Units.inchesToMeters(80))),
     STOP(() -> 0);
 
     @Getter private final DoubleSupplier elevatorSetpointFromGround;
@@ -81,6 +78,8 @@ public class Elevator {
     if (disableSupplier.getAsBoolean() || elevatorState == ElevatorState.STOP) {
       io.stop();
     }
+
+    LoggedTunableNumber.ifChanged(hashCode(), pid -> io.setPID(pid[0], pid[1], pid[2]), kP, kI, kD);
 
     setBrakeMode(!coastSupplier.getAsBoolean() || DriverStation.isEnabled());
 

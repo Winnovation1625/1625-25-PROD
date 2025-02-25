@@ -74,7 +74,7 @@ public class SuperstructureVisualizer {
                 .plus(
                     new Translation3d(0, Units.inchesToMeters(-12.5), Units.inchesToMeters(12))
                         .rotateBy(armPose.getRotation())),
-            armPose.getRotation().plus(new Rotation3d(wristAngleRad, 0, 0)));
+            new Rotation3d(wristAngleRad, 0, 0));
     Logger.recordOutput("SuperstructureVisualizer/" + name + "/wrist", wristTemp);
   }
 

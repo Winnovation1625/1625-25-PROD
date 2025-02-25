@@ -24,5 +24,4 @@ public class ArmConstants {
 
   public record Gains(
       double kP, double kI, double kD, double ffkS, double ffkV, double ffkA, double ffkG) {}
-
 }

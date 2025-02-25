@@ -76,6 +76,9 @@ public class Arm {
       io.stop();
     }
 
+    // LoggedTunableNumber.ifChanged(hashCode(), pid -> io.setPID(pid[0], pid[1], pid[2]), kP, kI,
+    // kD);
+
     // io.setBrakeMode(!coastSupplier.getAsBoolean() || armState == ArmState.STOW);
 
     if (!disableSupplier.getAsBoolean() && armState != ArmState.STOP) {
