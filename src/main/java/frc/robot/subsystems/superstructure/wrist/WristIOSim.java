@@ -24,9 +24,9 @@ public class WristIOSim implements WristIO {
       LinearSystemId.createSingleJointedArmSystem(wristMotors, WRIST_MOI, WRIST_GEARING);
   private final ProfiledPIDController pidController =
       new ProfiledPIDController(
-          WRIST_PID_P,
-          WRIST_PID_I,
-          WRIST_PID_D,
+          gains.kP(),
+          gains.kI(),
+          gains.kD(),
           new TrapezoidProfile.Constraints(WRIST_MAX_VELOCITY, WRIST_MAX_ACCELERATION));
 
   private final SingleJointedArmSim sim =

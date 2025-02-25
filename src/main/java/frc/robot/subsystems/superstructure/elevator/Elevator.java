@@ -21,12 +21,12 @@ public class Elevator {
   //  private final ElevatorVisualizer visualizer =
   //   new ElevatorVisualizer(ElevatorConstants.elevatorPose);
 
-  // private static final LoggedTunableNumber kP =
-  //   new LoggedTunableNumber("Elevator/kP", gains.kP());
-  // private static final LoggedTunableNumber kI =
-  //   new LoggedTunableNumber("Elevator/kI", gains.kI());
-  // private static final LoggedTunableNumber kD =
-  //   new LoggedTunableNumber("Elevator/kD", gains.kD());
+  private static final LoggedTunableNumber kP =
+    new LoggedTunableNumber("Elevator/kP", gains.kP());
+  private static final LoggedTunableNumber kI =
+    new LoggedTunableNumber("Elevator/kI", gains.kI());
+  private static final LoggedTunableNumber kD =
+    new LoggedTunableNumber("Elevator/kD", gains.kD());
   // private static final LoggedTunableNumber kS =
   //   new LoggedTunableNumber("Elevator/kS", gains.ffkS());
   // private static final LoggedTunableNumber kV =
@@ -44,16 +44,16 @@ public class Elevator {
 
   @RequiredArgsConstructor
   public enum ElevatorState {
-    STOW(new LoggedTunableNumber("Superstructure/Arm/STOW", 0)),
-    ALVL2(new LoggedTunableNumber("Superstructure/Arm/ALGL", .2)),
-    ALVL3(new LoggedTunableNumber("Superstructure/Arm/ALVL3", .3)),
-    CLVL1(new LoggedTunableNumber("Superstructure/Arm/CLVL1", 2)),
-    CLVL2(new LoggedTunableNumber("Superstructure/Arm/CLVL2", .5)),
-    CLVL3(new LoggedTunableNumber("Superstructure/Arm/CLVL3", .6)),
-    CLVL4(new LoggedTunableNumber("Superstructure/Arm/CLVL4", .7)),
-    INTAKE(new LoggedTunableNumber("Superstructure/Arm/INTAKE", .8)),
-    PROCESS(new LoggedTunableNumber("Superstructure/Arm/PROCESS", .9)),
-    BARGE(new LoggedTunableNumber("Superstructure/Arm/BARGE", 1)),
+    STOW(new LoggedTunableNumber("Superstructure/Arm/STOW", Units.inchesToMeters(11.75))),
+    ALVL2(new LoggedTunableNumber("Superstructure/Arm/ALGL", Units.inchesToMeters(30))),
+    ALVL3(new LoggedTunableNumber("Superstructure/Arm/ALVL3", Units.inchesToMeters(35))),
+    CLVL1(new LoggedTunableNumber("Superstructure/Arm/CLVL1", Units.inchesToMeters(40))),
+    CLVL2(new LoggedTunableNumber("Superstructure/Arm/CLVL2", Units.inchesToMeters(45))),
+    CLVL3(new LoggedTunableNumber("Superstructure/Arm/CLVL3", Units.inchesToMeters(50))),
+    CLVL4(new LoggedTunableNumber("Superstructure/Arm/CLVL4", Units.inchesToMeters(60))),
+    INTAKE(new LoggedTunableNumber("Superstructure/Arm/INTAKE", Units.inchesToMeters(15))),
+    PROCESS(new LoggedTunableNumber("Superstructure/Arm/PROCESS", Units.inchesToMeters(13))),
+    BARGE(new LoggedTunableNumber("Superstructure/Arm/BARGE", Units.inchesToMeters(80))),
     STOP(() -> 0);
 
     @Getter private final DoubleSupplier elevatorSetpointFromGround;
@@ -90,17 +90,22 @@ public class Elevator {
         && brakeModeEnabled
         && !disableSupplier.getAsBoolean()
         && elevatorState != ElevatorState.STOP) {
-
+      io.setPosition(
+          convertDistanceMetersToRadians(elevatorState.elevatorSetpointFromGround.getAsDouble()));
       Logger.recordOutput(
-          "Superstructure/Elevator/ElevatorSetpoint",
-          Units.radiansToDegrees(elevatorState.getElevatorSetpointFromGround().getAsDouble()));
+          "Superstructure/Elevator/ElevatorSetpointInches",
+          Units.metersToInches(elevatorState.getElevatorSetpointFromGround().getAsDouble()));
+      Logger.recordOutput(
+          "Superstructure/Elevator/ElevatorSetpointRads",
+          convertDistanceMetersToRadians(
+              elevatorState.getElevatorSetpointFromGround().getAsDouble()));
     }
   }
 
   @AutoLogOutput(key = "Superstructure/Elevator/AtGoal")
   public boolean atGoal() {
     return EqualsUtil.epsilonEquals(
-        inputs.positionRad,
+        convertRadiansToDistanceMeters(inputs.positionRad),
         elevatorState.getElevatorSetpointFromGround().getAsDouble(),
         ELEVATOR_TOLERANCE_METERS);
   }
@@ -122,5 +127,17 @@ public class Elevator {
 
   public void endCharacterization() {
     characterizing = false;
+  }
+
+  public static double convertDistanceMetersToRadians(double distanceMeters) {
+    return distanceMeters / ELEVATOR_DRUM_RADIUS;
+  }
+
+  public static double convertRadiansToDistanceMeters(double posRads) {
+    return posRads * ELEVATOR_DRUM_RADIUS;
+  }
+
+  public double getElevatorHeight() {
+    return convertRadiansToDistanceMeters(inputs.positionRad);
   }
 }

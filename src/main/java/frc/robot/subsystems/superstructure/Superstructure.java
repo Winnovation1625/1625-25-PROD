@@ -16,7 +16,10 @@ public class Superstructure extends SubsystemBase {
   private final Arm arm;
   private final Elevator elevator;
   private final Wrist wrist;
-  private final SuperstructureVisualizer visualizer = new SuperstructureVisualizer();
+  private final SuperstructureVisualizer setpointVisualizer =
+      new SuperstructureVisualizer("setpoint");
+  private final SuperstructureVisualizer measuredVisualizer =
+      new SuperstructureVisualizer("measured");
 
   @AutoLogOutput @Getter
   private SuperstructureStates superstructureGoal = SuperstructureStates.STOW;
@@ -114,10 +117,12 @@ public class Superstructure extends SubsystemBase {
         wrist.setWristState(WristState.IDLE);
       }
     }
-    visualizer.updateSuperstructurePose(
+    setpointVisualizer.updateSuperstructurePose(
         elevator.getElevatorState().getElevatorSetpointFromGround().getAsDouble(),
         arm.getArmState().getArmSetpointSupplier().getAsDouble(),
         wrist.getWristState().getWristSetpointSupplier().getAsDouble());
+    measuredVisualizer.updateSuperstructurePose(
+        elevator.getElevatorHeight(), arm.getArmPos(), wrist.getWristPos());
   }
 
   public void setGoal(SuperstructureStates desiredState) {

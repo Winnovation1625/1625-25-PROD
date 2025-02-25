@@ -20,9 +20,9 @@ public class ArmIOSim implements ArmIO {
       LinearSystemId.createSingleJointedArmSystem(armMotorSim, ARM_MOI, ARM_GEARING);
   private final ProfiledPIDController pidController =
       new ProfiledPIDController(
-          ARM_PID_P,
-          ARM_PID_I,
-          ARM_PID_D,
+          gains.kP(),
+          gains.kI(),
+          gains.kD(),
           new TrapezoidProfile.Constraints(ARM_MAX_VELOCITY, ARM_MAX_ACCELERATION));
   private SingleJointedArmSim armSim =
       new SingleJointedArmSim(

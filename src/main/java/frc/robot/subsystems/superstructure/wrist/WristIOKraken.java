@@ -1,11 +1,14 @@
 package frc.robot.subsystems.superstructure.wrist;
 
+import static frc.robot.subsystems.superstructure.wrist.WristConstants.*;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
@@ -36,19 +39,19 @@ public class WristIOKraken implements WristIO {
     wristMotor = new TalonFX(0);
 
     // numbers from Wrist Constants that will be implemented later.
-    // config.Slot0.kP = gains.kP();
-    // config.Slot0.kI = gains.kI();
-    // config.Slot0.kD = gains.kD();
-    // config.Slot0.kS = gains.ffkS();
-    // config.Slot0.kV = gains.ffkV();
-    // config.Slot0.kG = gains.ffkG();
-    // config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
+    config.Slot0.kP = gains.kP();
+    config.Slot0.kI = gains.kI();
+    config.Slot0.kD = gains.kD();
+    config.Slot0.kS = gains.ffkS();
+    config.Slot0.kV = gains.ffkV();
+    config.Slot0.kG = gains.ffkG();
+    config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
     // config.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseClosedLoopSign;
     // config.TorqueCurrent.PeakForwardTorqueCurrent = 80.0;
     // config.TorqueCurrent.PeakReverseTorqueCurrent = -80.0;
     // config.MotorOutput.Inverted =
     //     inverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
-    // config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     // config.Feedback.FeedbackRemoteSensorID = Constants.getMotorIds().SHOOTER_CANCODER;
     // config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
     // config.Feedback.RotorToSensorRatio = armReduction;

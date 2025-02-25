@@ -1,5 +1,7 @@
 package frc.robot.subsystems.superstructure.elevator;
 
+import static frc.robot.subsystems.superstructure.elevator.ElevatorConstants.*;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -37,9 +39,9 @@ public class ElevatorIOKraken implements ElevatorIO {
     elevatorTalon = new TalonFX(0); // will use device Id's when created.
 
     // numbers from Elevator Constant that will be implemented later.
-    // config.Slot0.kP = gains.kP();
-    // config.Slot0.kI = gains.kI();
-    // config.Slot0.kD = gains.kD();
+    config.Slot0.kP = gains.kP();
+    config.Slot0.kI = gains.kI();
+    config.Slot0.kD = gains.kD();
     // config.Slot0.kS = gains.ffkS();
     // config.Slot0.kV = gains.ffkV();
     // config.Slot0.kG = gains.ffkG();
@@ -61,7 +63,7 @@ public class ElevatorIOKraken implements ElevatorIO {
     // config.MotionMagic.MotionMagicAcceleration = cruiseAcceleration;
     // config.MotionMagic.MotionMagicCruiseVelocity = cruiseVelocity;
     // config.MotionMagic.MotionMagicJerk = cruiseJerk;
-    // armTalon.getConfigurator().apply(config, 1.0);
+    elevatorTalon.getConfigurator().apply(config, 1.0);
 
     positionRotations = elevatorTalon.getPosition();
     // setPointError = elevatorTalon.getClosedLoopError();
@@ -117,10 +119,10 @@ public class ElevatorIOKraken implements ElevatorIO {
   }
 
   @Override
-  public void setPosition(double positionSetpoint) {
+  public void setPosition(double positionSetpointRads) {
     elevatorTalon.setControl(
         positionControl
-            .withPosition(Units.radiansToRotations(positionSetpoint))
+            .withPosition(Units.radiansToRotations(positionSetpointRads))
             .withUpdateFreqHz(50));
   }
 }

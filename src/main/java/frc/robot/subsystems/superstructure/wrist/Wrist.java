@@ -55,7 +55,7 @@ public class Wrist {
   @RequiredArgsConstructor
   public enum WristState {
     STOP(() -> 0),
-    IDLE(new LoggedTunableNumber("Wrist/Stow", Units.degreesToRadians(0))),
+    IDLE(new LoggedTunableNumber("Wrist/Stow", Units.degreesToRadians(43))),
     TROUGH(new LoggedTunableNumber("Wrist/Trough", Units.degreesToRadians(20))),
     LEVEL_TWO(new LoggedTunableNumber("Wrist/LevelOne", Units.degreesToRadians(30))),
     LEVEL_THREE(new LoggedTunableNumber("Wrist/LevelTwo", Units.degreesToRadians(35))),
@@ -105,5 +105,9 @@ public class Wrist {
 
   public void tempStop() {
     io.stop();
+  }
+
+  public double getWristPos() {
+    return inputs.positionRad;
   }
 }
