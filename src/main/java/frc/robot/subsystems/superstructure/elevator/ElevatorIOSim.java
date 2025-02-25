@@ -12,7 +12,6 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
-import frc.robot.subsystems.superstructure.elevator.*;
 
 public class ElevatorIOSim implements ElevatorIO {
   private DCMotor elevatorMotors = DCMotor.getKrakenX60Foc(2);
@@ -51,12 +50,15 @@ public class ElevatorIOSim implements ElevatorIO {
       pidController.reset(inputs.positionRad);
     } else {
       var output =
-          MathUtil.clamp(pidController.calculate(), -12, 12);
+          MathUtil.clamp(
+              pidController.calculate(elevatorSim.getPositionMeters() / ELEVATOR_DRUM_RADIUS),
+              -12,
+              12);
       inputs.appliedVolts = output;
       setInputVoltage(inputs.appliedVolts);
     }
 
-    inputs.positionRad = elevatorSim.getPositionMeters();
+    inputs.positionRad = elevatorSim.getPositionMeters() / ELEVATOR_DRUM_RADIUS;
     inputs.velocityRadPerSec = elevatorSim.getVelocityMetersPerSecond();
     inputs.supplyCurrentAmps = Math.abs(elevatorSim.getCurrentDrawAmps());
   }
@@ -80,6 +82,6 @@ public class ElevatorIOSim implements ElevatorIO {
     pidController.setP(p);
     pidController.setI(i);
     pidController.setD(d);
-    pidController.reset(elevatorSim.getPositionMeters());
+    pidController.reset(elevatorSim.getPositionMeters() / ELEVATOR_DRUM_RADIUS);
   }
 }
