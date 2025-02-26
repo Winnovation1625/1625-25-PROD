@@ -22,7 +22,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
-import frc.robot.subsystem.apriltagvision.VisionConstants;
+import frc.robot.subsystem.apriltagvision.AprilTagVisionConstants;
 import frc.robot.subsystem.drive.DriveConstants;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.GeomUtil;
@@ -218,7 +218,8 @@ public class RobotState {
     tx /= 4.0;
     ty /= 4.0;
 
-    Pose3d cameraPose = VisionConstants.cameraConfigs.get(observation.camera()).cameraToRobot();
+    Pose3d cameraPose = null;// TODO don't make this null if we use this
+    //AprilTagVisionConstants.CAMERA_CONFIGS.get(observation.camera()).cameraToRobot();
 
     // Use 3D distance and tag angles to find robot pose
     Translation2d camToTagTranslation =
