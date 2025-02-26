@@ -41,7 +41,7 @@ public class Elevator {
 
   @RequiredArgsConstructor
   public enum ElevatorState {
-    STOW(new LoggedTunableNumber("Superstructure/Elevator/STOW", Units.inchesToMeters(11.75))),
+    STOW(new LoggedTunableNumber("Superstructure/Elevator/STOW", Units.inchesToMeters(27.5591))),
     ALVL2(new LoggedTunableNumber("Superstructure/Elevator/ALGL", Units.inchesToMeters(30))),
     ALVL3(new LoggedTunableNumber("Superstructure/Elevator/ALVL3", Units.inchesToMeters(35))),
     CLVL1(new LoggedTunableNumber("Superstructure/Elevator/CLVL1", Units.inchesToMeters(40))),

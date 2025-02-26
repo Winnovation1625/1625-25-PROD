@@ -13,8 +13,8 @@ public class ArmConstants {
   public static final double ARM_LENGTH = 1.02108;
   public static final double ARM_MIN_ANGLE_RADS = Units.degreesToRadians(-40);
   public static final double ARM_MAX_ANGLE_RADS = Units.degreesToRadians(200);
-  public static final double ARM_MAX_VELOCITY = 5.0;
-  public static final double ARM_MAX_ACCELERATION = 2.0;
+  public static final double ARM_MAX_VELOCITY = 25.0;
+  public static final double ARM_MAX_ACCELERATION = 50.0;
 
   public static Gains gains =
       switch (Constants.currentMode) {

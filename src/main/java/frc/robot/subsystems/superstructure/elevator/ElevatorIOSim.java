@@ -17,7 +17,7 @@ public class ElevatorIOSim implements ElevatorIO {
   private DCMotor elevatorMotors = DCMotor.getKrakenX60Foc(2);
   private LinearSystem<N2, N1, N2> elevatorId =
       LinearSystemId.createElevatorSystem(
-          elevatorMotors, ELEVATOR_MASS_KG, ELEVATOR_TOLERANCE_METERS, ELEVATOR_GEARING);
+          elevatorMotors, ELEVATOR_MASS_KG, ELEVATOR_DRUM_RADIUS, ELEVATOR_GEARING);
   private final ProfiledPIDController pidController =
       new ProfiledPIDController(
           gains.kP(),

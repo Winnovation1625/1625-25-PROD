@@ -16,8 +16,8 @@ public class WristConstants {
   public static final double WRIST_MOI = 0.0040065078;
   public static final double WRIST_GEARING = 81;
   public static final double WRIST_LENGTH = Units.inchesToMeters(6.5);
-  public static final double WRIST_MAX_VELOCITY = 0.125;
-  public static final double WRIST_MAX_ACCELERATION = 0.125;
+  public static final double WRIST_MAX_VELOCITY = 60;
+  public static final double WRIST_MAX_ACCELERATION = 90;
 
   public static Gains gains =
       switch (Constants.currentMode) {

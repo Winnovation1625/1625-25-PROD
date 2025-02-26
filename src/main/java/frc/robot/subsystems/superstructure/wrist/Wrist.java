@@ -48,18 +48,18 @@ public class Wrist {
     this.io = io;
   }
 
-  @AutoLogOutput @Getter @Setter private WristState wristState = WristState.IDLE;
+  @AutoLogOutput @Getter @Setter private WristState wristState = WristState.STOW;
   private boolean characterizing = false;
   private BooleanSupplier disableSupplier = DriverStation::isDisabled;
 
   @RequiredArgsConstructor
   public enum WristState {
     STOP(() -> 0),
-    IDLE(new LoggedTunableNumber("Wrist/Stow", Units.degreesToRadians(43))),
+    STOW(new LoggedTunableNumber("Wrist/Stow", Units.degreesToRadians(0))),
     TROUGH(new LoggedTunableNumber("Wrist/Trough", Units.degreesToRadians(20))),
-    LEVEL_TWO(new LoggedTunableNumber("Wrist/LevelOne", Units.degreesToRadians(30))),
-    LEVEL_THREE(new LoggedTunableNumber("Wrist/LevelTwo", Units.degreesToRadians(35))),
-    LEVEL_FOUR(new LoggedTunableNumber("Wrist/LevelThree", Units.degreesToRadians(40)));
+    LEVEL_TWO(new LoggedTunableNumber("Wrist/LevelTwo", Units.degreesToRadians(30))),
+    LEVEL_THREE(new LoggedTunableNumber("Wrist/LevelThree", Units.degreesToRadians(35))),
+    LEVEL_FOUR(new LoggedTunableNumber("Wrist/LevelFour", Units.degreesToRadians(40)));
 
     @Getter private final DoubleSupplier wristSetpointSupplier;
   }
@@ -82,7 +82,7 @@ public class Wrist {
     //     cruiseA,
     //     cruiseJ);
     // visualizer.updateVisualizer(inputs.positionRads);
-    if (wristState == WristState.IDLE && atGoal()) {
+    if (wristState == WristState.STOW && atGoal()) {
       io.stop();
     }
     if (!disableSupplier.getAsBoolean() && wristState != WristState.STOP) {

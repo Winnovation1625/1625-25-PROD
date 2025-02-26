@@ -54,25 +54,25 @@ public class Superstructure extends SubsystemBase {
       case INTAKING -> {
         arm.setArmState(ArmState.INTAKE);
         elevator.setElevatorState(ElevatorState.INTAKE);
-        wrist.setWristState(WristState.IDLE);
+        wrist.setWristState(WristState.STOW);
       }
 
       case STOW -> {
         arm.setArmState(ArmState.STOW);
         elevator.setElevatorState(ElevatorState.STOW);
-        wrist.setWristState(WristState.IDLE);
+        wrist.setWristState(WristState.STOW);
       }
 
       case CLIMB -> {
         arm.setArmState(ArmState.STOW);
         elevator.setElevatorState(ElevatorState.STOW);
-        wrist.setWristState(WristState.IDLE);
+        wrist.setWristState(WristState.STOW);
       }
 
       case BARGE -> {
         arm.setArmState(ArmState.BARGE);
         elevator.setElevatorState(ElevatorState.BARGE);
-        wrist.setWristState(WristState.IDLE);
+        wrist.setWristState(WristState.STOW);
       }
 
       case CLVL1 -> {
@@ -102,19 +102,19 @@ public class Superstructure extends SubsystemBase {
       case ALVL2 -> {
         arm.setArmState(ArmState.ALVL2);
         elevator.setElevatorState(ElevatorState.ALVL2);
-        wrist.setWristState(WristState.IDLE);
+        wrist.setWristState(WristState.STOW);
       }
 
       case ALVL3 -> {
         arm.setArmState(ArmState.ALVL3);
         elevator.setElevatorState(ElevatorState.ALVL3);
-        wrist.setWristState(WristState.IDLE);
+        wrist.setWristState(WristState.STOW);
       }
 
       case PROCESS -> {
         arm.setArmState(ArmState.PROCESS);
         elevator.setElevatorState(ElevatorState.PROCESS);
-        wrist.setWristState(WristState.IDLE);
+        wrist.setWristState(WristState.STOW);
       }
     }
     setpointVisualizer.updateSuperstructurePose(
