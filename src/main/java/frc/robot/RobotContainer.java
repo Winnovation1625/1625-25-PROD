@@ -20,11 +20,15 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystem.apriltagvision.AprilTagVision;
+import frc.robot.subsystem.apriltagvision.AprilTagVisionConstants;
+import frc.robot.subsystem.apriltagvision.AprilTagVisionIO;
+import frc.robot.subsystem.apriltagvision.AprilTagVisionIOPhoton;
+import frc.robot.subsystem.apriltagvision.AprilTagVisionIOPhotonSim;
 import frc.robot.subsystem.coralmanipulator.*;
 import frc.robot.subsystem.drive.Drive;
 import frc.robot.subsystem.drive.GyroIO;
@@ -54,10 +58,10 @@ public class RobotContainer {
   private final Drive drive;
   private final Arm arm;
   private final Elevator elevator;
+  private final AprilTagVision aprilTagVision;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
-  private final CommandPS4Controller ps5Controller = new CommandPS4Controller(1);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -77,6 +81,21 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.BackRight));
         arm = new Arm(new ArmIOKrakenx60());
         elevator = new Elevator(new ElevatorIOKraken());
+        aprilTagVision =
+            new AprilTagVision(
+                drive::addVisionMeasurement,
+                new AprilTagVisionIOPhoton(
+                    AprilTagVisionConstants.CAMERA_CONFIGS.get(0),
+                    drive::getRotation,
+                    drive::getPose),
+                new AprilTagVisionIOPhoton(
+                    AprilTagVisionConstants.CAMERA_CONFIGS.get(1),
+                    drive::getRotation,
+                    drive::getPose),
+                new AprilTagVisionIOPhoton(
+                    AprilTagVisionConstants.CAMERA_CONFIGS.get(2),
+                    drive::getRotation,
+                    drive::getPose));
         break;
 
       case SIM:
@@ -92,7 +111,21 @@ public class RobotContainer {
         arm = new Arm(new ArmIOSim());
 
         elevator = new Elevator(new ElevatorIOSim());
-
+        aprilTagVision =
+            new AprilTagVision(
+                drive::addVisionMeasurement,
+                new AprilTagVisionIOPhotonSim(
+                    AprilTagVisionConstants.CAMERA_CONFIGS.get(0),
+                    drive::getRotation,
+                    drive::getPose),
+                new AprilTagVisionIOPhotonSim(
+                    AprilTagVisionConstants.CAMERA_CONFIGS.get(1),
+                    drive::getRotation,
+                    drive::getPose),
+                new AprilTagVisionIOPhotonSim(
+                    AprilTagVisionConstants.CAMERA_CONFIGS.get(2),
+                    drive::getRotation,
+                    drive::getPose));
         break;
 
       default:
@@ -106,6 +139,12 @@ public class RobotContainer {
                 new ModuleIO() {});
         arm = new Arm(new ArmIO() {});
         elevator = new Elevator(new ElevatorIO() {});
+        aprilTagVision =
+            new AprilTagVision(
+                drive::addVisionMeasurement,
+                new AprilTagVisionIO() {},
+                new AprilTagVisionIO() {},
+                new AprilTagVisionIO() {});
         break;
     }
 
@@ -186,7 +225,6 @@ public class RobotContainer {
         .onTrue(arm.setDesiredStateCommand(ArmState.STOW));
 
     controller.leftTrigger().whileTrue(elevator.tempCommand());
-    controller.getHID().setRumble(null, 0);
   }
 
   /**

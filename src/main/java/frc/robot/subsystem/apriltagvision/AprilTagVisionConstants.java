@@ -1,13 +1,13 @@
 package frc.robot.subsystem.apriltagvision;
 
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
-
+import edu.wpi.first.math.util.Units;
 import java.util.List;
 
 public class AprilTagVisionConstants {
-  public record CameraConfig(int cameraId, String cameraName, Transform3d cameraToRobot, double stdDevFactor) {}
+  public record CameraConfig(
+      int cameraId, String cameraName, Transform3d robotToCamera, double stdDevFactor) {}
 
   // Basic filtering thresholds
   public static final double MAX_AMBIGUITY = 0.3;
@@ -30,5 +30,34 @@ public class AprilTagVisionConstants {
   //     new LoggedTunableNumber("AprilTagVision/TimestampOffset", -(1.0 / 50.0));
 
   public static final List<CameraConfig> CAMERA_CONFIGS =
-      List.of(new CameraConfig(0, "camera_0", new Transform3d(0, 0, 0, new Rotation3d(0, 0, 0)), 1.0));
+      List.of(
+          new CameraConfig(
+              0,
+              "Front Right",
+              new Transform3d(
+                  Units.inchesToMeters(10.340901),
+                  Units.inchesToMeters(-12.659099),
+                  Units.inchesToMeters(8),
+                  new Rotation3d(0, Units.degreesToRadians(25), Units.degreesToRadians(-135))),
+              1.0),
+          new CameraConfig(
+              1,
+              "Back Right",
+              new Transform3d(
+                  Units.inchesToMeters(-10.340901),
+                  Units.inchesToMeters(-12.659099),
+                  Units.inchesToMeters(8),
+                  new Rotation3d(0, Units.degreesToRadians(25), Units.degreesToRadians(-45))),
+              1.0),
+          new CameraConfig(
+              0,
+              "Back Left",
+              new Transform3d(
+                  Units.inchesToMeters(-10.340901),
+                  Units.inchesToMeters(12.659099),
+                  Units.inchesToMeters(8),
+                  new Rotation3d(0, Units.degreesToRadians(25), Units.degreesToRadians(45))),
+              1.0));
+  // new CameraConfig(0, "front left", new Transform3d(Units.inchesToMeters(10.319),
+  // Units.inchesToMeters(-12.686), Units.inchesToMeters(8), new Rotation3d(0, 0, 0)), 1.0));
 }

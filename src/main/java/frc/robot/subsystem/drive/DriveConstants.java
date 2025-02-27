@@ -23,8 +23,8 @@ public class DriveConstants extends TunerConstants {
               Math.hypot(DriveConstants.BackRight.LocationX, DriveConstants.BackRight.LocationY)));
 
   // PathPlanner config constants
-  public static final double ROBOT_MASS_KG = 74.088;
-  public static final double ROBOT_MOI = 6.883;
+  public static final double ROBOT_MASS_KG = 61.507125;
+  public static final double ROBOT_MOI = 6.5666772511;
   public static final double WHEEL_COF = 1.2;
 
   public static final RobotConfig PP_CONFIG =

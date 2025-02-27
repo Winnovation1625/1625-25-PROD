@@ -1,6 +1,6 @@
 package frc.robot.subsystem.apriltagvision;
 
-import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.FieldConstants;
 import frc.robot.subsystem.apriltagvision.AprilTagVisionConstants.CameraConfig;
@@ -15,17 +15,17 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
 public class AprilTagVisionIOPhoton implements AprilTagVisionIO {
 
-  private final PhotonCamera camera;
-  private final PhotonPoseEstimator multiTagPnp;
-  private final PhotonPoseEstimator txtyPoseEstimator;
+  protected final PhotonCamera camera;
+  protected final PhotonPoseEstimator multiTagPnp;
+  protected final PhotonPoseEstimator txtyPoseEstimator;
   protected final CameraConfig config;
   protected Supplier<Rotation2d> headingSupplier;
-  protected Supplier<Pose3d> currentPoseSupplier;
+  protected Supplier<Pose2d> currentPoseSupplier;
 
   public AprilTagVisionIOPhoton(
       CameraConfig config,
       Supplier<Rotation2d> headingSupplier,
-      Supplier<Pose3d> currentPoseSupplier) {
+      Supplier<Pose2d> currentPoseSupplier) {
 
     this.config = config;
     this.headingSupplier = headingSupplier;
@@ -37,13 +37,13 @@ public class AprilTagVisionIOPhoton implements AprilTagVisionIO {
         new PhotonPoseEstimator(
             FieldConstants.defaultAprilTagType.getLayout(),
             PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-            config.cameraToRobot());
+            config.robotToCamera());
     multiTagPnp.setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_REFERENCE_POSE);
     txtyPoseEstimator =
         new PhotonPoseEstimator(
             FieldConstants.defaultAprilTagType.getLayout(),
             PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
-            config.cameraToRobot());
+            config.robotToCamera());
   }
 
   @Override

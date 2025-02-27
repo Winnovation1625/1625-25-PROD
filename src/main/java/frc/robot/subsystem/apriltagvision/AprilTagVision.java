@@ -13,6 +13,12 @@
 
 package frc.robot.subsystem.apriltagvision;
 
+import static frc.robot.subsystem.apriltagvision.AprilTagVisionConstants.ANGULAR_STD_DEV_BASELINE;
+import static frc.robot.subsystem.apriltagvision.AprilTagVisionConstants.CAMERA_CONFIGS;
+import static frc.robot.subsystem.apriltagvision.AprilTagVisionConstants.LINEAR_STD_DEV_BASELINE;
+import static frc.robot.subsystem.apriltagvision.AprilTagVisionConstants.MAX_AMBIGUITY;
+import static frc.robot.subsystem.apriltagvision.AprilTagVisionConstants.MAX_Z_ERROR;
+
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -23,13 +29,6 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import frc.robot.FieldConstants;
 import frc.robot.util.VirtualSubsystem;
-
-import static frc.robot.subsystem.apriltagvision.AprilTagVisionConstants.ANGULAR_STD_DEV_BASELINE;
-import static frc.robot.subsystem.apriltagvision.AprilTagVisionConstants.CAMERA_CONFIGS;
-import static frc.robot.subsystem.apriltagvision.AprilTagVisionConstants.LINEAR_STD_DEV_BASELINE;
-import static frc.robot.subsystem.apriltagvision.AprilTagVisionConstants.MAX_AMBIGUITY;
-import static frc.robot.subsystem.apriltagvision.AprilTagVisionConstants.MAX_Z_ERROR;
-
 import java.util.LinkedList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
@@ -112,9 +111,11 @@ public class AprilTagVision extends VirtualSubsystem {
 
                 // Must be within the field boundaries
                 || observation.pose().getX() < 0.0
-                || observation.pose().getX() > FieldConstants.defaultAprilTagType.getLayout().getFieldLength()
+                || observation.pose().getX()
+                    > FieldConstants.defaultAprilTagType.getLayout().getFieldLength()
                 || observation.pose().getY() < 0.0
-                || observation.pose().getY() > FieldConstants.defaultAprilTagType.getLayout().getFieldWidth();
+                || observation.pose().getY()
+                    > FieldConstants.defaultAprilTagType.getLayout().getFieldWidth();
 
         // Add pose to log
         robotPoses.add(observation.pose());
