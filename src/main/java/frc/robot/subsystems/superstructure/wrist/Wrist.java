@@ -56,10 +56,10 @@ public class Wrist {
   public enum WristState {
     STOP(() -> 0),
     STOW(new LoggedTunableNumber("Wrist/Stow", Units.degreesToRadians(0))),
-    TROUGH(new LoggedTunableNumber("Wrist/Trough", Units.degreesToRadians(20))),
-    LEVEL_TWO(new LoggedTunableNumber("Wrist/LevelTwo", Units.degreesToRadians(30))),
-    LEVEL_THREE(new LoggedTunableNumber("Wrist/LevelThree", Units.degreesToRadians(35))),
-    LEVEL_FOUR(new LoggedTunableNumber("Wrist/LevelFour", Units.degreesToRadians(40)));
+    TROUGH(new LoggedTunableNumber("Wrist/Trough", Units.degreesToRadians(19.996227))),
+    LEVEL_TWO(new LoggedTunableNumber("Wrist/LevelTwo", Units.degreesToRadians(11.4592))),
+    LEVEL_THREE(new LoggedTunableNumber("Wrist/LevelThree", Units.degreesToRadians(5.72958))),
+    LEVEL_FOUR(new LoggedTunableNumber("Wrist/LevelFour", Units.degreesToRadians(0)));
 
     @Getter private final DoubleSupplier wristSetpointSupplier;
   }
@@ -71,8 +71,7 @@ public class Wrist {
     if (disableSupplier.getAsBoolean() || wristState == wristState.STOP) {
       io.stop();
     }
-    // LoggedTunableNumber.ifChanged(hashCode(), pid -> io.setPID(pid[0], pid[1], pid[2]), kP, kI,
-    // kD);
+    LoggedTunableNumber.ifChanged(hashCode(), pid -> io.setPID(pid[0], pid[1], pid[2]), kP, kI, kD);
     // LoggedTunableNumber.ifChanged(
     //     hashCode(), kSVA -> io.setFF(kSVA[0], kSVA[1], kSVA[2], kSVA[3]), kS, kV, kA, kG);
     // LoggedTunableNumber.ifChanged(

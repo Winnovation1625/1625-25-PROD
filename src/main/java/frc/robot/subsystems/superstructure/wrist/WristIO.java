@@ -21,4 +21,6 @@ public interface WristIO {
   public default void stop() {}
 
   public default void setBrakeMode(boolean isBrake) {}
+
+  public default void setPID(double p, double d, double i) {}
 }

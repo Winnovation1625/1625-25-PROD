@@ -107,4 +107,13 @@ public class WristIOKraken implements WristIO {
       wristMotor.getConfigurator().apply(config);
     }
   }
+
+  @Override
+  public void setPID(double p, double i, double d) {
+
+    config.Slot0.kP = p;
+    config.Slot0.kI = i;
+    config.Slot0.kD = d;
+    wristMotor.getConfigurator().apply(config);
+  }
 }
