@@ -46,7 +46,7 @@ public class Arm {
     CLVL2(new LoggedTunableNumber("Superstructure/Arm/CLVL2", .5)),
     CLVL3(new LoggedTunableNumber("Superstructure/Arm/CLVL3", .6)),
     CLVL4(new LoggedTunableNumber("Superstructure/Arm/CLVL4", .7)),
-    INTAKE(new LoggedTunableNumber("Superstructure/Arm/INTAKE", .8)),
+    INTAKE(new LoggedTunableNumber("Superstructure/Arm/INTAKE", -.1)),
     PROCESS(new LoggedTunableNumber("Superstructure/Arm/PROCESS", .9)),
     BARGE(new LoggedTunableNumber("Superstructure/Arm/BARGE", 1)),
     STOP(() -> 0);

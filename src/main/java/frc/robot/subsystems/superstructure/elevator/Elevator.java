@@ -48,7 +48,8 @@ public class Elevator {
     CLVL2(new LoggedTunableNumber("Superstructure/Elevator/CLVL2", Units.inchesToMeters(39.3701))),
     CLVL3(new LoggedTunableNumber("Superstructure/Elevator/CLVL3", Units.inchesToMeters(55.1181))),
     CLVL4(new LoggedTunableNumber("Superstructure/Elevator/CLVL4", Units.inchesToMeters(84.80315))),
-    INTAKE(new LoggedTunableNumber("Superstructure/Elevator/INTAKE", Units.inchesToMeters(15))),
+    INTAKE(
+        new LoggedTunableNumber("Superstructure/Elevator/INTAKE", Units.inchesToMeters(25.21014))),
     PROCESS(new LoggedTunableNumber("Superstructure/Elevator/PROCESS", Units.inchesToMeters(13))),
     BARGE(new LoggedTunableNumber("Superstructure/Elevator/BARGE", Units.inchesToMeters(80))),
     STOP(() -> 0);
