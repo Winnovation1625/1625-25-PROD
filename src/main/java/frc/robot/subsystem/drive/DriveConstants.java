@@ -1,6 +1,10 @@
 package frc.robot.subsystem.drive;
 
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.Kilograms;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.CANBus;
 import com.pathplanner.lib.config.ModuleConfig;
@@ -8,6 +12,9 @@ import com.pathplanner.lib.config.RobotConfig;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import frc.robot.generated.TunerConstants;
+import org.ironmaple.simulation.drivesims.COTS;
+import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
+import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 
 public class DriveConstants extends TunerConstants {
 
@@ -50,4 +57,21 @@ public class DriveConstants extends TunerConstants {
       new Translation2d(DriveConstants.BackRight.LocationX, DriveConstants.BackRight.LocationY)
     };
   }
+
+  public static final DriveTrainSimulationConfig mapleSimConfig =
+      DriveTrainSimulationConfig.Default()
+          .withRobotMass(Kilograms.of(ROBOT_MASS_KG))
+          .withCustomModuleTranslations(getModuleTranslations())
+          .withGyro(COTS.ofPigeon2())
+          .withSwerveModule(
+              new SwerveModuleSimulationConfig(
+                  DCMotor.getKrakenX60Foc(1),
+                  DCMotor.getKrakenX60Foc(1),
+                  FrontLeft.DriveMotorGearRatio,
+                  FrontLeft.SteerMotorGearRatio,
+                  Volts.of(FrontLeft.DriveFrictionVoltage),
+                  Volts.of(FrontLeft.SteerFrictionVoltage),
+                  Meters.of(FrontLeft.WheelRadius),
+                  KilogramSquareMeters.of(FrontLeft.SteerInertia),
+                  WHEEL_COF));
 }

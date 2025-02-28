@@ -28,14 +28,15 @@ import frc.robot.subsystem.apriltagvision.AprilTagVision;
 import frc.robot.subsystem.apriltagvision.AprilTagVisionConstants;
 import frc.robot.subsystem.apriltagvision.AprilTagVisionIO;
 import frc.robot.subsystem.apriltagvision.AprilTagVisionIOPhoton;
-import frc.robot.subsystem.apriltagvision.AprilTagVisionIOPhotonSim;
 import frc.robot.subsystem.coralmanipulator.*;
 import frc.robot.subsystem.drive.Drive;
+import frc.robot.subsystem.drive.DriveConstants;
 import frc.robot.subsystem.drive.GyroIO;
 import frc.robot.subsystem.drive.GyroIOPigeon2;
+import frc.robot.subsystem.drive.GyroIOSim;
 import frc.robot.subsystem.drive.ModuleIO;
-import frc.robot.subsystem.drive.ModuleIOSim;
-import frc.robot.subsystem.drive.ModuleIOTalonFX;
+import frc.robot.subsystem.drive.ModuleIOTalonFXReal;
+import frc.robot.subsystem.drive.ModuleIOTalonFXSim;
 import frc.robot.subsystem.superstructure.arm.Arm;
 import frc.robot.subsystem.superstructure.arm.Arm.ArmState;
 import frc.robot.subsystem.superstructure.arm.ArmIO;
@@ -45,6 +46,9 @@ import frc.robot.subsystem.superstructure.elevator.Elevator;
 import frc.robot.subsystem.superstructure.elevator.ElevatorIO;
 import frc.robot.subsystem.superstructure.elevator.ElevatorIOKraken;
 import frc.robot.subsystem.superstructure.elevator.ElevatorIOSim;
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -59,6 +63,8 @@ public class RobotContainer {
   private final Arm arm;
   private final Elevator elevator;
   private final AprilTagVision aprilTagVision;
+
+  private SwerveDriveSimulation driveSimulation = null;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -75,15 +81,16 @@ public class RobotContainer {
         drive =
             new Drive(
                 new GyroIOPigeon2(),
-                new ModuleIOTalonFX(TunerConstants.FrontLeft),
-                new ModuleIOTalonFX(TunerConstants.FrontRight),
-                new ModuleIOTalonFX(TunerConstants.BackLeft),
-                new ModuleIOTalonFX(TunerConstants.BackRight));
+                new ModuleIOTalonFXReal(TunerConstants.FrontLeft),
+                new ModuleIOTalonFXReal(TunerConstants.FrontRight),
+                new ModuleIOTalonFXReal(TunerConstants.BackLeft),
+                new ModuleIOTalonFXReal(TunerConstants.BackRight),
+                (pose) -> {});
         arm = new Arm(new ArmIOKrakenx60());
         elevator = new Elevator(new ElevatorIOKraken());
         aprilTagVision =
             new AprilTagVision(
-                drive::addVisionMeasurement,
+                drive::accept,
                 new AprilTagVisionIOPhoton(
                     AprilTagVisionConstants.CAMERA_CONFIGS.get(0),
                     drive::getRotation,
@@ -100,32 +107,43 @@ public class RobotContainer {
 
       case SIM:
         // Sim robot, instantiate physics sim IO implementations
+        driveSimulation =
+            new SwerveDriveSimulation(
+                DriveConstants.mapleSimConfig, new Pose2d(3, 3, new Rotation2d()));
+        SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
         drive =
             new Drive(
-                new GyroIO() {},
-                new ModuleIOSim(TunerConstants.FrontLeft),
-                new ModuleIOSim(TunerConstants.FrontRight),
-                new ModuleIOSim(TunerConstants.BackLeft),
-                new ModuleIOSim(TunerConstants.BackRight));
+                new GyroIOSim(driveSimulation.getGyroSimulation()),
+                new ModuleIOTalonFXSim(TunerConstants.FrontLeft, driveSimulation.getModules()[0]),
+                new ModuleIOTalonFXSim(TunerConstants.FrontRight, driveSimulation.getModules()[1]),
+                new ModuleIOTalonFXSim(TunerConstants.BackLeft, driveSimulation.getModules()[2]),
+                new ModuleIOTalonFXSim(TunerConstants.BackRight, driveSimulation.getModules()[3]),
+                driveSimulation::setSimulationWorldPose);
 
         arm = new Arm(new ArmIOSim());
 
         elevator = new Elevator(new ElevatorIOSim());
+        // aprilTagVision =
+        //     new AprilTagVision(
+        //         drive::accept,
+        //         new AprilTagVisionIOPhotonSim(
+        //             AprilTagVisionConstants.CAMERA_CONFIGS.get(0),
+        //             drive::getRotation,
+        //             driveSimulation::getSimulatedDriveTrainPose),
+        //         new AprilTagVisionIOPhotonSim(
+        //             AprilTagVisionConstants.CAMERA_CONFIGS.get(1),
+        //             drive::getRotation,
+        //             driveSimulation::getSimulatedDriveTrainPose),
+        //         new AprilTagVisionIOPhotonSim(
+        //             AprilTagVisionConstants.CAMERA_CONFIGS.get(2),
+        //             drive::getRotation,
+        //             driveSimulation::getSimulatedDriveTrainPose));
         aprilTagVision =
             new AprilTagVision(
-                drive::addVisionMeasurement,
-                new AprilTagVisionIOPhotonSim(
-                    AprilTagVisionConstants.CAMERA_CONFIGS.get(0),
-                    drive::getRotation,
-                    drive::getPose),
-                new AprilTagVisionIOPhotonSim(
-                    AprilTagVisionConstants.CAMERA_CONFIGS.get(1),
-                    drive::getRotation,
-                    drive::getPose),
-                new AprilTagVisionIOPhotonSim(
-                    AprilTagVisionConstants.CAMERA_CONFIGS.get(2),
-                    drive::getRotation,
-                    drive::getPose));
+                drive::accept,
+                new AprilTagVisionIO() {},
+                new AprilTagVisionIO() {},
+                new AprilTagVisionIO() {});
         break;
 
       default:
@@ -136,12 +154,13 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {},
-                new ModuleIO() {});
+                new ModuleIO() {},
+                (pose) -> {});
         arm = new Arm(new ArmIO() {});
         elevator = new Elevator(new ElevatorIO() {});
         aprilTagVision =
             new AprilTagVision(
-                drive::addVisionMeasurement,
+                drive::accept,
                 new AprilTagVisionIO() {},
                 new AprilTagVisionIO() {},
                 new AprilTagVisionIO() {});
@@ -200,6 +219,19 @@ public class RobotContainer {
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
+    // Reset gyro / odometry
+    final Runnable resetGyro =
+        Constants.CURRENT_MODE == Constants.Mode.SIM
+            ? () ->
+                drive.setPose(
+                    driveSimulation
+                        .getSimulatedDriveTrainPose()) // reset odometry to actual robot pose during
+            // simulation
+            : () ->
+                drive.setPose(
+                    new Pose2d(drive.getPose().getTranslation(), new Rotation2d())); // zero gyro
+    controller.start().onTrue(Commands.runOnce(resetGyro, drive).ignoringDisable(true));
+
     // Reset gyro to 0° when B button is pressed
     controller
         .b()
@@ -234,5 +266,24 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return autoChooser.get();
+  }
+
+  public void resetSimulationField() {
+    if (Constants.CURRENT_MODE != Constants.Mode.SIM) return;
+
+    driveSimulation.setSimulationWorldPose(new Pose2d(3, 3, new Rotation2d()));
+    SimulatedArena.getInstance().resetFieldForAuto();
+  }
+
+  public void updateSimulation() {
+    if (Constants.CURRENT_MODE != Constants.Mode.SIM) return;
+
+    SimulatedArena.getInstance().simulationPeriodic();
+    Logger.recordOutput(
+        "FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
+    Logger.recordOutput(
+        "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
+    Logger.recordOutput(
+        "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
   }
 }

@@ -54,16 +54,7 @@ public class AprilTagVisionIOPhoton implements AprilTagVisionIO {
     Set<Short> tagIds = new HashSet<>();
     List<PoseObservation> poseObservations = new LinkedList<>();
     for (var result : camera.getAllUnreadResults()) {
-      // Update latest target observation
-      // if (result.hasTargets()) {
-      //   inputs.latestTargetObservation =
-      //       new TargetObservation(
-      //           Rotation2d.fromDegrees(result.getBestTarget().getYaw()),
-      //           Rotation2d.fromDegrees(result.getBestTarget().getPitch()));
-      // } else {
-      //   inputs.latestTargetObservation = new TargetObservation(new Rotation2d(), new
-      // Rotation2d());
-      // }
+      // TODO: Add txty results into the mix
       multiTagPnp.setReferencePose(currentPoseSupplier.get());
       var tag = multiTagPnp.update(result);
       if (tag.isPresent()) {
