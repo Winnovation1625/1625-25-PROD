@@ -94,11 +94,11 @@ public class TunerConstants {
   protected static final int kPigeonId = 1;
 
   // These are only used for simulation
-  protected static final MomentOfInertia kSteerInertia = KilogramSquareMeters.of(0.004);
+  protected static final MomentOfInertia kSteerInertia = KilogramSquareMeters.of(0.06);
   protected static final MomentOfInertia kDriveInertia = KilogramSquareMeters.of(0.025);
   // Simulated voltage necessary to overcome friction
-  protected static final Voltage kSteerFrictionVoltage = Volts.of(0.2);
-  protected static final Voltage kDriveFrictionVoltage = Volts.of(0.2);
+  protected static final Voltage kSteerFrictionVoltage = Volts.of(0.01);
+  protected static final Voltage kDriveFrictionVoltage = Volts.of(0.01);
 
   public static final SwerveDrivetrainConstants DrivetrainConstants =
       new SwerveDrivetrainConstants()

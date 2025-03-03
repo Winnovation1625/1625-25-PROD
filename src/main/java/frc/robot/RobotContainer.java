@@ -28,6 +28,7 @@ import frc.robot.subsystem.apriltagvision.AprilTagVision;
 import frc.robot.subsystem.apriltagvision.AprilTagVisionConstants;
 import frc.robot.subsystem.apriltagvision.AprilTagVisionIO;
 import frc.robot.subsystem.apriltagvision.AprilTagVisionIOPhoton;
+import frc.robot.subsystem.apriltagvision.AprilTagVisionIOPhotonSim;
 import frc.robot.subsystem.coralmanipulator.*;
 import frc.robot.subsystem.drive.Drive;
 import frc.robot.subsystem.drive.DriveConstants;
@@ -123,27 +124,21 @@ public class RobotContainer {
         arm = new Arm(new ArmIOSim());
 
         elevator = new Elevator(new ElevatorIOSim());
-        // aprilTagVision =
-        //     new AprilTagVision(
-        //         drive::accept,
-        //         new AprilTagVisionIOPhotonSim(
-        //             AprilTagVisionConstants.CAMERA_CONFIGS.get(0),
-        //             drive::getRotation,
-        //             driveSimulation::getSimulatedDriveTrainPose),
-        //         new AprilTagVisionIOPhotonSim(
-        //             AprilTagVisionConstants.CAMERA_CONFIGS.get(1),
-        //             drive::getRotation,
-        //             driveSimulation::getSimulatedDriveTrainPose),
-        //         new AprilTagVisionIOPhotonSim(
-        //             AprilTagVisionConstants.CAMERA_CONFIGS.get(2),
-        //             drive::getRotation,
-        //             driveSimulation::getSimulatedDriveTrainPose));
         aprilTagVision =
             new AprilTagVision(
                 drive::accept,
-                new AprilTagVisionIO() {},
-                new AprilTagVisionIO() {},
-                new AprilTagVisionIO() {});
+                new AprilTagVisionIOPhotonSim(
+                    AprilTagVisionConstants.CAMERA_CONFIGS.get(0),
+                    drive::getRotation,
+                    driveSimulation::getSimulatedDriveTrainPose),
+                new AprilTagVisionIOPhotonSim(
+                    AprilTagVisionConstants.CAMERA_CONFIGS.get(1),
+                    drive::getRotation,
+                    driveSimulation::getSimulatedDriveTrainPose),
+                new AprilTagVisionIOPhotonSim(
+                    AprilTagVisionConstants.CAMERA_CONFIGS.get(2),
+                    drive::getRotation,
+                    driveSimulation::getSimulatedDriveTrainPose));
         break;
 
       default:
