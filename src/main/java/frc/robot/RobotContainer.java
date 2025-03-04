@@ -42,7 +42,6 @@ import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIO;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOKraken;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
-import frc.robot.subsystems.superstructure.wrist.*;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -56,7 +55,6 @@ public class RobotContainer {
   private final Drive drive;
   private final Arm arm;
   private final Elevator elevator;
-  private final Wrist wrist;
   private final Superstructure superstructure;
   private final CoralManipulator coralManipulator;
 
@@ -81,8 +79,7 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.BackRight));
         arm = new Arm(new ArmIOKraken());
         elevator = new Elevator(new ElevatorIOKraken());
-        wrist = new Wrist(new WristIOKraken());
-        superstructure = new Superstructure(arm, elevator, wrist);
+        superstructure = new Superstructure(arm, elevator);
         coralManipulator =
             new CoralManipulator(
                 new CoralManipulatorIOKraken(), new CoralManipulatorSensorsIOCANrange());
@@ -99,8 +96,7 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.BackRight));
         arm = new Arm(new ArmIOSim());
         elevator = new Elevator(new ElevatorIOSim());
-        wrist = new Wrist(new WristIOSim());
-        superstructure = new Superstructure(arm, elevator, wrist);
+        superstructure = new Superstructure(arm, elevator);
         coralManipulator =
             new CoralManipulator(new CoralManipulatorIOSim(), new CoralManipulatorSensorIOSim());
 
@@ -117,8 +113,7 @@ public class RobotContainer {
                 new ModuleIO() {});
         arm = new Arm(new ArmIO() {});
         elevator = new Elevator(new ElevatorIO() {});
-        wrist = new Wrist(new WristIO() {});
-        superstructure = new Superstructure(arm, elevator, wrist);
+        superstructure = new Superstructure(arm, elevator);
         coralManipulator =
             new CoralManipulator(new CoralManipulatoIO() {}, new CoralManipulatorSensorIO() {});
         break;

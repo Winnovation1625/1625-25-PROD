@@ -4,7 +4,6 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.util.Units;
 import frc.robot.subsystems.superstructure.elevator.ElevatorConstants;
 import frc.robot.util.GeomUtil;
 import lombok.experimental.ExtensionMethod;
@@ -66,22 +65,20 @@ public class SuperstructureVisualizer {
     Logger.recordOutput("SuperstructureVisualizer/" + name + "/arm", armPose);
   }
 
-  public void updateWristPose(double wristAngleRad) {
-    Pose3d wristTemp =
-        armPose.rotateAround(
-            armPose
-                .getTranslation()
-                .plus(
-                    new Translation3d(0, Units.inchesToMeters(-12.5), Units.inchesToMeters(12))
-                        .rotateBy(armPose.getRotation())),
-            new Rotation3d(wristAngleRad, 0, 0));
-    Logger.recordOutput("SuperstructureVisualizer/" + name + "/wrist", wristTemp);
-  }
+  //   public void updateWristPose(double wristAngleRad) {
+  //     Pose3d wristTemp =
+  //         armPose.rotateAround(
+  //             armPose
+  //                 .getTranslation()
+  //                 .plus(
+  //                     new Translation3d(0, Units.inchesToMeters(-12.5), Units.inchesToMeters(12))
+  //                         .rotateBy(armPose.getRotation())),
+  //             new Rotation3d(wristAngleRad, 0, 0));
+  //     Logger.recordOutput("SuperstructureVisualizer/" + name + "/wrist", wristTemp);
+  //   }
 
-  public void updateSuperstructurePose(
-      double distanceFromGround, double armAngleRad, double wristAngleRad) {
+  public void updateSuperstructurePose(double distanceFromGround, double armAngleRad) {
     updateElevatorPose(distanceFromGround);
     updateArmPose(armAngleRad);
-    updateWristPose(wristAngleRad);
   }
 }
