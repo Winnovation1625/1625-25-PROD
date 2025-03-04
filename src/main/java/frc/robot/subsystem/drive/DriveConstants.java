@@ -65,7 +65,7 @@ public class DriveConstants extends TunerConstants {
           .withGyro(COTS.ofPigeon2())
           .withSwerveModule(
               new SwerveModuleSimulationConfig(
-                  DCMotor.getKrakenX60(1),
+                  DCMotor.getKrakenX60Foc(1),
                   DCMotor.getFalcon500(1),
                   FrontLeft.DriveMotorGearRatio,
                   FrontLeft.SteerMotorGearRatio,
