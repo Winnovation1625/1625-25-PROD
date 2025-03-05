@@ -76,6 +76,7 @@ public class Elevator {
   private boolean brakeModeEnabled;
   private BooleanSupplier disableSupplier = DriverStation::isDisabled;
   private BooleanSupplier coastSupplier = () -> false;
+  private double positionSetpoint;
 
   public void periodic() {
     io.updateInputs(inputs);
@@ -145,5 +146,9 @@ public class Elevator {
 
   public double getElevatorHeight() {
     return convertRadiansToDistanceMeters(inputs.positionRad);
+  }
+
+  public void setPosition(double positionSetpoint) {
+    this.positionSetpoint = positionSetpoint;
   }
 }

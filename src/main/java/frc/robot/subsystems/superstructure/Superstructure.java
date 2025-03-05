@@ -1,12 +1,16 @@
 package frc.robot.subsystems.superstructure;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.superstructure.arm.Arm;
 import frc.robot.subsystems.superstructure.arm.Arm.ArmState;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.superstructure.elevator.Elevator.ElevatorState;
+import frc.robot.util.LoggedTunableNumber;
+import java.util.function.DoubleSupplier;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.AutoLogOutput;
 
 public class Superstructure extends SubsystemBase {
@@ -23,18 +27,41 @@ public class Superstructure extends SubsystemBase {
 
   // TODO: Make these hold the elevator and arm positions in this state, eliminate it in the arm and
   // elevator classes
+  @RequiredArgsConstructor
   public enum SuperstructureStates {
-    INTAKING,
-    STOW,
-    CLIMB,
-    BARGE,
-    CLVL1,
-    CLVL2,
-    CLVL3,
-    CLVL4,
-    ALVL2,
-    ALVL3,
-    PROCESS;
+    INTAKING(
+        new LoggedTunableNumber("Superstructure/Elevator/INTAKING", Units.inchesToMeters(27.5591)),
+        new LoggedTunableNumber("Superstructure/Arm/INTAKING", Math.PI / 2)),
+    STOW(
+        new LoggedTunableNumber("Superstructure/Elevator/STOW", Units.inchesToMeters(27.5591)),
+        new LoggedTunableNumber("Superstructure/Arm/STOW", Math.PI / 2)),
+    CLIMB(
+        new LoggedTunableNumber("Superstructure/Elevator/CLIMB", Units.inchesToMeters(27.5591)),
+        new LoggedTunableNumber("Superstructure/Arm/CLIMB", Math.PI / 2)),
+    BARGE(
+        new LoggedTunableNumber("Superstructure/Elevator/BARGE", Units.inchesToMeters(27.5591)),
+        new LoggedTunableNumber("Superstructure/Arm/BARGE", Math.PI / 2)),
+    CLVL2(
+        new LoggedTunableNumber("Superstructure/Elevator/CLVL1", Units.inchesToMeters(27.5591)),
+        new LoggedTunableNumber("Superstructure/Arm/CLVL1", Math.PI / 2)),
+    TROUGH(
+        new LoggedTunableNumber("Superstructure/Elevator/TROUGH", Units.inchesToMeters(27.5591)),
+        new LoggedTunableNumber("Superstructure/Arm/TROUGH", Math.PI / 2)),
+    CLVL3(
+        new LoggedTunableNumber("Superstructure/Elevator/CLVL3", Units.inchesToMeters(27.5591)),
+        new LoggedTunableNumber("Superstructure/Arm/CLVL3", Math.PI / 2)),
+    CLVL4(
+        new LoggedTunableNumber("Superstructure/Elevator/CLVL4", Units.inchesToMeters(27.5591)),
+        new LoggedTunableNumber("Superstructure/Arm/CLVL4", Math.PI / 2)),
+    ALVL2(
+        new LoggedTunableNumber("Superstructure/Elevator/ALVL2", Units.inchesToMeters(27.5591)),
+        new LoggedTunableNumber("Superstructure/Arm/ALVL2", Math.PI / 2)),
+    ALVL3(
+        new LoggedTunableNumber("Superstructure/Elevator/ALVL3", Units.inchesToMeters(27.5591)),
+        new LoggedTunableNumber("Superstructure/Arm/ALVL3", Math.PI / 2)),
+    PROCESS(
+        new LoggedTunableNumber("Superstructure/Elevator/PROCESS", Units.inchesToMeters(27.5591)),
+        new LoggedTunableNumber("Superstructure/Arm/PROCESS", Math.PI / 2));
   }
 
   public Superstructure(Arm arm, Elevator elevator) {
@@ -191,5 +218,9 @@ public class Superstructure extends SubsystemBase {
 
   public boolean atArmGoal() {
     return arm.atGoal() && elevator.atGoal();
+  }
+
+  public void setElevatorPosition(DoubleSupplier positionSetpoint) {
+    elevator.setPosition(positionSetpoint.getAsDouble());
   }
 }

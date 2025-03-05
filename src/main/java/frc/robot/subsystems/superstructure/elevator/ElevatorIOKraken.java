@@ -9,6 +9,7 @@ import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.mechanisms.DifferentialMechanism;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
@@ -20,6 +21,8 @@ import edu.wpi.first.units.measure.Voltage;
 public class ElevatorIOKraken implements ElevatorIO {
 
   private final TalonFX elevatorTalon;
+  private final TalonFX elevatorFollower;
+  private final DifferentialMechanism elevator;
 
   private final StatusSignal<Angle> positionRotations;
   private final StatusSignal<AngularVelocity> velocityRps;
@@ -37,6 +40,7 @@ public class ElevatorIOKraken implements ElevatorIO {
 
   public ElevatorIOKraken() {
     elevatorTalon = new TalonFX(0); // will use device Id's when created.
+    elevatorFollower = new TalonFX(1);
 
     // numbers from Elevator Constant that will be implemented later.
     config.Slot0.kP = gains.kP();
@@ -64,6 +68,9 @@ public class ElevatorIOKraken implements ElevatorIO {
     // config.MotionMagic.MotionMagicCruiseVelocity = cruiseVelocity;
     // config.MotionMagic.MotionMagicJerk = cruiseJerk;
     elevatorTalon.getConfigurator().apply(config, 1.0);
+    elevatorFollower.getConfigurator().apply(config, 1.0);
+
+    elevator = new DifferentialMechanism(elevatorTalon, elevatorFollower, false);
 
     positionRotations = elevatorTalon.getPosition();
     // setPointError = elevatorTalon.getClosedLoopError();
