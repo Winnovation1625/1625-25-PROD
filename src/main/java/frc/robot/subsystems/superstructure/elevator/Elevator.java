@@ -2,8 +2,6 @@ package frc.robot.subsystems.superstructure.elevator;
 
 import static frc.robot.subsystems.superstructure.elevator.ElevatorConstants.*;
 
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.util.EqualsUtil;
@@ -22,7 +20,6 @@ public class Elevator {
   private static final LoggedTunableNumber kP = new LoggedTunableNumber("Elevator/kP", gains.kP());
   private static final LoggedTunableNumber kI = new LoggedTunableNumber("Elevator/kI", gains.kI());
   private static final LoggedTunableNumber kD = new LoggedTunableNumber("Elevator/kD", gains.kD());
-  private TrapezoidProfile profile;
   // private static final LoggedTunableNumber kS =
   //   new LoggedTunableNumber("Elevator/kS", gains.ffkS());
   // private static final LoggedTunableNumber kV =
@@ -40,9 +37,6 @@ public class Elevator {
 
   public Elevator(ElevatorIO io) {
     this.io = io;
-    profile =
-        new TrapezoidProfile(new Constraints(ELEVATOR_MAX_VELOCITY, ELEVATOR_MAX_ACCELERATION));
-    profile.calculate(ELEVATOR_CARRIAGE_TRAVEL_DISTANCE, null, null);
   }
 
   private boolean characterizing;
