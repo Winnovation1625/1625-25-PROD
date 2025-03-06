@@ -4,12 +4,9 @@ import static frc.robot.subsystems.superstructure.arm.ArmConstants.*;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.util.EqualsUtil;
-import frc.robot.util.LoggedTunableNumber;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -37,27 +34,6 @@ public class Arm {
   //     new LoggedTunableNumber("Arm/cruiseA", cruiseAcceleration);
   // private static final LoggedTunableNumber cruiseJ =
   //     new LoggedTunableNumber("Arm/cruiseJ", cruiseJerk);
-  @RequiredArgsConstructor
-  public enum ArmState {
-    STOW(new LoggedTunableNumber("Superstructure/Arm/STOW", Math.PI / 2)),
-    ALVL2(new LoggedTunableNumber("Superstructure/Arm/ALGL", .2)),
-    ALVL3(new LoggedTunableNumber("Superstructure/Arm/ALVL3", .3)),
-    CLVL1(new LoggedTunableNumber("Superstructure/Arm/CLVL1", .3)),
-    CLVL2(new LoggedTunableNumber("Superstructure/Arm/CLVL2", .5)),
-    CLVL3(new LoggedTunableNumber("Superstructure/Arm/CLVL3", .6)),
-    CLVL4(new LoggedTunableNumber("Superstructure/Arm/CLVL4", .7)),
-    INTAKE(new LoggedTunableNumber("Superstructure/Arm/INTAKE", -.1)),
-    PROCESS(new LoggedTunableNumber("Superstructure/Arm/PROCESS", .9)),
-    BARGE(new LoggedTunableNumber("Superstructure/Arm/BARGE", 1)),
-    STOP(() -> 0);
-
-    @Getter private final DoubleSupplier armSetpointSupplier;
-  }
-
-  @AutoLogOutput(key = "Superstructure/Arm/ArmState")
-  @Getter
-  @Setter
-  private ArmState armState = ArmState.STOW;
 
   public Arm(ArmIO io) {
     this.io = io;
@@ -67,12 +43,13 @@ public class Arm {
   private boolean brakeModeEnabled;
   private BooleanSupplier disableSupplier = DriverStation::isDisabled;
   private BooleanSupplier coastSupplier = () -> false;
+  private DoubleSupplier positionSetpoint;
 
   public void periodic() {
     io.updateInputs(inputs);
 
     Logger.processInputs("Superstructre/Arm", inputs);
-    if (disableSupplier.getAsBoolean() || armState == ArmState.STOP) {
+    if (disableSupplier.getAsBoolean()) {
       io.stop();
     }
 
@@ -81,15 +58,15 @@ public class Arm {
 
     // io.setBrakeMode(!coastSupplier.getAsBoolean() || armState == ArmState.STOW);
 
-    if (!disableSupplier.getAsBoolean() && armState != ArmState.STOP) {
-      io.setArmPosition(armState.armSetpointSupplier);
+    if (!disableSupplier.getAsBoolean()) {
+      io.setArmPosition(positionSetpoint);
     }
   }
 
   @AutoLogOutput(key = "Superstructre/Arm/AtGoal")
   public boolean atGoal() {
     return EqualsUtil.epsilonEquals(
-        inputs.positionRad, armState.armSetpointSupplier.getAsDouble(), ARM_TOLERANCE);
+        inputs.positionRad, positionSetpoint.getAsDouble(), ARM_TOLERANCE);
   }
 
   public void setBreakMode(boolean enabled) {
@@ -114,4 +91,9 @@ public class Arm {
   public double getArmPos() {
     return inputs.positionRad;
   }
+  
+  public void setPosition(DoubleSupplier positionSetpoint) {
+    this.positionSetpoint = positionSetpoint;
+  }
+
 }

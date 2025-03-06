@@ -42,29 +42,6 @@ public class Elevator {
   // private static final LoggedTunableNumber cruiseJ =
   //   new LoggedTunableNumber("Elevator/cruiseJ", cruiseJerk);
 
-  @RequiredArgsConstructor
-  public enum ElevatorState {
-    STOW(new LoggedTunableNumber("Superstructure/Elevator/STOW", Units.inchesToMeters(27.5591))),
-    ALVL2(new LoggedTunableNumber("Superstructure/Elevator/ALGL", Units.inchesToMeters(30))),
-    ALVL3(new LoggedTunableNumber("Superstructure/Elevator/ALVL3", Units.inchesToMeters(35))),
-    CLVL1(new LoggedTunableNumber("Superstructure/Elevator/CLVL1", Units.inchesToMeters(40.107))),
-    CLVL2(new LoggedTunableNumber("Superstructure/Elevator/CLVL2", Units.inchesToMeters(39.3701))),
-    CLVL3(new LoggedTunableNumber("Superstructure/Elevator/CLVL3", Units.inchesToMeters(55.1181))),
-    CLVL4(new LoggedTunableNumber("Superstructure/Elevator/CLVL4", Units.inchesToMeters(84.80315))),
-    INTAKE(
-        new LoggedTunableNumber("Superstructure/Elevator/INTAKE", Units.inchesToMeters(25.21014))),
-    PROCESS(new LoggedTunableNumber("Superstructure/Elevator/PROCESS", Units.inchesToMeters(13))),
-    BARGE(new LoggedTunableNumber("Superstructure/Elevator/BARGE", Units.inchesToMeters(80))),
-    STOP(() -> 0);
-
-    @Getter private final DoubleSupplier elevatorSetpointFromGround;
-  }
-
-  @AutoLogOutput(key = "Superstructure/Elevator/ElevatorState")
-  @Getter
-  @Setter
-  private ElevatorState elevatorState = ElevatorState.STOW;
-
   public Elevator(ElevatorIO io) {
     this.io = io;
     profile =
@@ -76,14 +53,14 @@ public class Elevator {
   private boolean brakeModeEnabled;
   private BooleanSupplier disableSupplier = DriverStation::isDisabled;
   private BooleanSupplier coastSupplier = () -> false;
-  private double positionSetpoint;
+  private double positionSetpoint = Units.inchesToMeters(27.5591);
 
   public void periodic() {
     io.updateInputs(inputs);
 
     Logger.processInputs("Superstructure/Elevator", inputs);
 
-    if (disableSupplier.getAsBoolean() || elevatorState == ElevatorState.STOP) {
+    if (disableSupplier.getAsBoolean()) {
       io.stop();
     }
 
@@ -95,17 +72,16 @@ public class Elevator {
 
     if (!characterizing
         && brakeModeEnabled
-        && !disableSupplier.getAsBoolean()
-        && elevatorState != ElevatorState.STOP) {
+        && !disableSupplier.getAsBoolean()){
       io.setPosition(
-          convertDistanceMetersToRadians(elevatorState.elevatorSetpointFromGround.getAsDouble()));
+          convertDistanceMetersToRadians(positionSetpoint));
       Logger.recordOutput(
           "Superstructure/Elevator/ElevatorSetpointInches",
-          Units.metersToInches(elevatorState.getElevatorSetpointFromGround().getAsDouble()));
+          Units.metersToInches(positionSetpoint));
       Logger.recordOutput(
           "Superstructure/Elevator/ElevatorSetpointRads",
           convertDistanceMetersToRadians(
-              elevatorState.getElevatorSetpointFromGround().getAsDouble()));
+              positionSetpoint));
     }
   }
 
@@ -113,7 +89,7 @@ public class Elevator {
   public boolean atGoal() {
     return EqualsUtil.epsilonEquals(
         convertRadiansToDistanceMeters(inputs.positionRad),
-        elevatorState.getElevatorSetpointFromGround().getAsDouble(),
+        positionSetpoint,
         ELEVATOR_TOLERANCE_METERS);
   }
 
