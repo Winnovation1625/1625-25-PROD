@@ -4,9 +4,9 @@ import static frc.robot.subsystems.superstructure.arm.ArmConstants.*;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.util.EqualsUtil;
+import frc.robot.util.LoggedTunableNumber;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
-
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -14,12 +14,9 @@ public class Arm {
   private final ArmIO io;
   private final ArmIOInputsAutoLogged inputs = new ArmIOInputsAutoLogged();
   // private final ArmVisualizer visualizer = new ArmVisualizer();
-  // private static final LoggedTunableNumber kP =
-  //     new LoggedTunableNumber("Arm/kP", gains.kP());
-  // private static final LoggedTunableNumber kI =
-  //     new LoggedTunableNumber("Arm/kI", gains.kI());
-  // private static final LoggedTunableNumber kD =
-  //     new LoggedTunableNumber("Arm/kD", gains.kD());
+  private static final LoggedTunableNumber kP = new LoggedTunableNumber("Arm/kP", gains.kP());
+  private static final LoggedTunableNumber kI = new LoggedTunableNumber("Arm/kI", gains.kI());
+  private static final LoggedTunableNumber kD = new LoggedTunableNumber("Arm/kD", gains.kD());
   // private static final LoggedTunableNumber kS =
   //     new LoggedTunableNumber("Arm/kS", gains.ffkS());
   // private static final LoggedTunableNumber kV =
@@ -53,8 +50,7 @@ public class Arm {
       io.stop();
     }
 
-    // LoggedTunableNumber.ifChanged(hashCode(), pid -> io.setPID(pid[0], pid[1], pid[2]), kP, kI,
-    // kD);
+    LoggedTunableNumber.ifChanged(hashCode(), pid -> io.setPID(pid[0], pid[1], pid[2]), kP, kI, kD);
 
     // io.setBrakeMode(!coastSupplier.getAsBoolean() || armState == ArmState.STOW);
 
@@ -91,9 +87,8 @@ public class Arm {
   public double getArmPos() {
     return inputs.positionRad;
   }
-  
+
   public void setPosition(DoubleSupplier positionSetpoint) {
     this.positionSetpoint = positionSetpoint;
   }
-
 }

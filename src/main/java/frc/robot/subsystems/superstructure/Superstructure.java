@@ -61,10 +61,8 @@ public class Superstructure extends SubsystemBase {
         new LoggedTunableNumber("Superstructure/Elevator/PROCESS", Units.inchesToMeters(13)),
         new LoggedTunableNumber("Superstructure/Arm/PROCESS", .9)),
     STOP(() -> 0, () -> 0);
-
-        @Getter private final DoubleSupplier elevatorHeight, 
-        armAngle;
-    }
+    @Getter private final DoubleSupplier elevatorHeight, armAngle;
+  }
 
   public Superstructure(Arm arm, Elevator elevator) {
     this.arm = arm;
@@ -78,63 +76,62 @@ public class Superstructure extends SubsystemBase {
     elevator.periodic();
     switch (superstructureGoal) {
       case INTAKING -> {
-        arm.setArmState(ArmState.INTAKE);
-        elevator.setElevatorState(ElevatorState.INTAKE);
+        arm.setPosition(superstructureGoal.armAngle);
+        elevator.setPosition(superstructureGoal.elevatorHeight.getAsDouble());
       }
 
       case STOW -> {
-        arm.setArmState(ArmState.STOW);
-        elevator.setElevatorState(ElevatorState.STOW);
+        arm.setPosition(superstructureGoal.armAngle);
+        elevator.setPosition(superstructureGoal.elevatorHeight.getAsDouble());
       }
 
       case CLIMB -> {
-        arm.setArmState(ArmState.STOW);
-        elevator.setElevatorState(ElevatorState.STOW);
+        arm.setPosition(superstructureGoal.armAngle);
+        elevator.setPosition(superstructureGoal.elevatorHeight.getAsDouble());
       }
 
       case BARGE -> {
-        arm.setArmState(ArmState.BARGE);
-        elevator.setElevatorState(ElevatorState.BARGE);
+        arm.setPosition(superstructureGoal.armAngle);
+        elevator.setPosition(superstructureGoal.elevatorHeight.getAsDouble());
       }
 
-      case CLVL1 -> {
-        arm.setArmState(ArmState.CLVL1);
-        elevator.setElevatorState(ElevatorState.CLVL1);
+      case TROUGH -> {
+        arm.setPosition(superstructureGoal.armAngle);
+        elevator.setPosition(superstructureGoal.elevatorHeight.getAsDouble());
       }
 
       case CLVL2 -> {
-        arm.setArmState(ArmState.CLVL2);
-        elevator.setElevatorState(ElevatorState.CLVL2);
+        arm.setPosition(superstructureGoal.armAngle);
+        elevator.setPosition(superstructureGoal.elevatorHeight.getAsDouble());
       }
 
       case CLVL3 -> {
-        arm.setArmState(ArmState.CLVL3);
-        elevator.setElevatorState(ElevatorState.CLVL3);
+        arm.setPosition(superstructureGoal.armAngle);
+        elevator.setPosition(superstructureGoal.elevatorHeight.getAsDouble());
       }
 
       case CLVL4 -> {
-        arm.setArmState(ArmState.CLVL4);
-        elevator.setElevatorState(ElevatorState.CLVL4);
+        arm.setPosition(superstructureGoal.armAngle);
+        elevator.setPosition(superstructureGoal.elevatorHeight.getAsDouble());
       }
 
       case ALVL2 -> {
-        arm.setArmState(ArmState.ALVL2);
-        elevator.setElevatorState(ElevatorState.ALVL2);
+        arm.setPosition(superstructureGoal.armAngle);
+        elevator.setPosition(superstructureGoal.elevatorHeight.getAsDouble());
       }
 
       case ALVL3 -> {
-        arm.setArmState(ArmState.ALVL3);
-        elevator.setElevatorState(ElevatorState.ALVL3);
+        arm.setPosition(superstructureGoal.armAngle);
+        elevator.setPosition(superstructureGoal.elevatorHeight.getAsDouble());
       }
 
       case PROCESS -> {
-        arm.setArmState(ArmState.PROCESS);
-        elevator.setElevatorState(ElevatorState.PROCESS);
+        arm.setPosition(superstructureGoal.armAngle);
+        elevator.setPosition(superstructureGoal.elevatorHeight.getAsDouble());
       }
     }
     setpointVisualizer.updateSuperstructurePose(
-        elevator.getElevatorState().getElevatorSetpointFromGround().getAsDouble(),
-        arm.getArmState().getArmSetpointSupplier().getAsDouble());
+        superstructureGoal.elevatorHeight.getAsDouble(), superstructureGoal.armAngle.getAsDouble());
     measuredVisualizer.updateSuperstructurePose(elevator.getElevatorHeight(), arm.getArmPos());
   }
 
@@ -225,7 +222,8 @@ public class Superstructure extends SubsystemBase {
   public void setElevatorPosition(DoubleSupplier positionSetpoint) {
     elevator.setPosition(positionSetpoint.getAsDouble());
   }
-  public void setArmPosition(DoubleSupplier positionSetpoint){
+
+  public void setArmPosition(DoubleSupplier positionSetpoint) {
     arm.setPosition(positionSetpoint);
   }
 }

@@ -9,10 +9,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.util.EqualsUtil;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.BooleanSupplier;
-import java.util.function.DoubleSupplier;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -70,18 +66,13 @@ public class Elevator {
 
     // visualizer.updateVisualizer(inputs.positionRads);
 
-    if (!characterizing
-        && brakeModeEnabled
-        && !disableSupplier.getAsBoolean()){
-      io.setPosition(
-          convertDistanceMetersToRadians(positionSetpoint));
+    if (!characterizing && brakeModeEnabled && !disableSupplier.getAsBoolean()) {
+      io.setPosition(convertDistanceMetersToRadians(positionSetpoint));
       Logger.recordOutput(
-          "Superstructure/Elevator/ElevatorSetpointInches",
-          Units.metersToInches(positionSetpoint));
+          "Superstructure/Elevator/ElevatorSetpointInches", Units.metersToInches(positionSetpoint));
       Logger.recordOutput(
           "Superstructure/Elevator/ElevatorSetpointRads",
-          convertDistanceMetersToRadians(
-              positionSetpoint));
+          convertDistanceMetersToRadians(positionSetpoint));
     }
   }
 
