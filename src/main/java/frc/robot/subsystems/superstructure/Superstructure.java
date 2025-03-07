@@ -45,7 +45,7 @@ public class Superstructure extends SubsystemBase {
         new LoggedTunableNumber("Superstructure/Elevator/CLVL2", Units.inchesToMeters(39.3701)),
         new LoggedTunableNumber("Superstructure/Arm/CLVL2", .5)),
     TROUGH(
-        new LoggedTunableNumber("Superstructure/Elevator/TROUGH", Units.inchesToMeters(40.107)),
+        new LoggedTunableNumber("Superstructure/Elevator/TROUGH", Units.inchesToMeters(27.107)),
         new LoggedTunableNumber("Superstructure/Arm/TROUGH", .3)),
     CLVL3(
         new LoggedTunableNumber("Superstructure/Elevator/CLVL3", Units.inchesToMeters(55.1181)),
@@ -135,6 +135,10 @@ public class Superstructure extends SubsystemBase {
       }
 
       case PROCESS -> {
+        arm.setPosition(superstructureGoal.armAngle);
+        elevator.setPosition(superstructureGoal.elevatorHeight.getAsDouble());
+      }
+      case STOP -> {
         arm.setPosition(superstructureGoal.armAngle);
         elevator.setPosition(superstructureGoal.elevatorHeight.getAsDouble());
       }
