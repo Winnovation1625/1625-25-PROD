@@ -19,6 +19,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -153,6 +155,37 @@ public class FieldConstants {
         new Pose2d(Units.inchesToMeters(48), middleIceCream.getY() - separation, new Rotation2d());
   }
 
+  @RequiredArgsConstructor
+  public enum ReefPosition {
+      A(1),
+      B(0),
+      C(11),
+      D(10),
+      E(9),
+      F(8),
+      G(7),
+      H(6),
+      I(5),
+      J(4),
+      K(3),
+      L(2);
+      @Getter
+      private final int fieldConstantsIndex;
+
+    // Reverse-lookup map for getting a reef position from the index of the list
+    private static final Map<Integer, ReefPosition> lookup = new HashMap<Integer, ReefPosition>();
+
+    static {
+        for (ReefPosition index : ReefPosition.values()) {
+            lookup.put(index.getFieldConstantsIndex(), index);
+        }
+    }
+
+    public static ReefPosition fromIndex(int index) {
+        return lookup.get(index);
+    }
+  }
+
   public enum ReefLevel {
     L1(Units.inchesToMeters(25.0), 0),
     L2(Units.inchesToMeters(31.875 - Math.cos(Math.toRadians(35.0)) * 0.625), -35),
@@ -219,7 +252,8 @@ public class FieldConstants {
     private final String layoutString;
   }
 
-  public record CoralObjective(int branchId, ReefLevel reefLevel) {}
+  @Builder
+  public record CoralObjective(ReefPosition position, ReefLevel reefLevel) {}
 
   public record AlgaeObjective(int id) {}
 

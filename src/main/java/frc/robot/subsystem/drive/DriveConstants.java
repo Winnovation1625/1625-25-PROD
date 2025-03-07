@@ -1,5 +1,6 @@
 package frc.robot.subsystem.drive;
 
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
@@ -58,9 +59,10 @@ public class DriveConstants extends TunerConstants {
     };
   }
 
-  public static final DriveTrainSimulationConfig mapleSimConfig =
+  public static final DriveTrainSimulationConfig MAPLE_SIM_CONFIG =
       DriveTrainSimulationConfig.Default()
           .withRobotMass(Kilograms.of(ROBOT_MASS_KG))
+          .withBumperSize(Inches.of(35.437500), Inches.of(31.937500))
           .withCustomModuleTranslations(getModuleTranslations())
           .withGyro(COTS.ofPigeon2())
           .withSwerveModule(

@@ -63,6 +63,8 @@ public class RobotContainer {
   private final Drive drive;
   private final Arm arm;
   private final Elevator elevator;
+
+  @SuppressWarnings("unused")
   private final AprilTagVision aprilTagVision;
 
   private SwerveDriveSimulation driveSimulation = null;
@@ -72,7 +74,6 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
-  private final LoggedDashboardChooser<String> modeChooser;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -92,6 +93,7 @@ public class RobotContainer {
         aprilTagVision =
             new AprilTagVision(
                 drive::accept,
+                drive::getPose,
                 new AprilTagVisionIOPhoton(
                     AprilTagVisionConstants.CAMERA_CONFIGS.get(0),
                     drive::getRotation,
@@ -103,6 +105,10 @@ public class RobotContainer {
                 new AprilTagVisionIOPhoton(
                     AprilTagVisionConstants.CAMERA_CONFIGS.get(2),
                     drive::getRotation,
+                    drive::getPose),
+                new AprilTagVisionIOPhoton(
+                    AprilTagVisionConstants.CAMERA_CONFIGS.get(3),
+                    drive::getRotation,
                     drive::getPose));
         break;
 
@@ -110,7 +116,7 @@ public class RobotContainer {
         // Sim robot, instantiate physics sim IO implementations
         driveSimulation =
             new SwerveDriveSimulation(
-                DriveConstants.mapleSimConfig, new Pose2d(3, 3, new Rotation2d()));
+                DriveConstants.MAPLE_SIM_CONFIG, new Pose2d(3, 3, new Rotation2d()));
         SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
         drive =
             new Drive(
@@ -127,6 +133,7 @@ public class RobotContainer {
         aprilTagVision =
             new AprilTagVision(
                 drive::accept,
+                drive::getPose,
                 new AprilTagVisionIOPhotonSim(
                     AprilTagVisionConstants.CAMERA_CONFIGS.get(0),
                     drive::getRotation,
@@ -137,6 +144,10 @@ public class RobotContainer {
                     driveSimulation::getSimulatedDriveTrainPose),
                 new AprilTagVisionIOPhotonSim(
                     AprilTagVisionConstants.CAMERA_CONFIGS.get(2),
+                    drive::getRotation,
+                    driveSimulation::getSimulatedDriveTrainPose),
+                new AprilTagVisionIOPhotonSim(
+                    AprilTagVisionConstants.CAMERA_CONFIGS.get(3),
                     drive::getRotation,
                     driveSimulation::getSimulatedDriveTrainPose));
         break;
@@ -156,6 +167,8 @@ public class RobotContainer {
         aprilTagVision =
             new AprilTagVision(
                 drive::accept,
+                drive::getPose,
+                new AprilTagVisionIO() {},
                 new AprilTagVisionIO() {},
                 new AprilTagVisionIO() {},
                 new AprilTagVisionIO() {});
@@ -164,8 +177,6 @@ public class RobotContainer {
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
-    modeChooser = new LoggedDashboardChooser<>("modeChooser");
-    modeChooser.addOption("Show This", "Do This");
     // Set up SysId routines
     autoChooser.addOption(
         "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
