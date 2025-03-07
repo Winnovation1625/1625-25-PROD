@@ -1,4 +1,4 @@
-package frc.robot.subsystems.coralmanipulator;
+package frc.robot.subsystems.manipulator;
 
 import static frc.robot.Constants.*;
 
@@ -12,7 +12,7 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Time;
 import frc.robot.Constants;
 
-public class CoralManipulatorConstants {
+public class ManipulatorConstants {
 
   public static final Distance REQUIRED_CORAL_DISTANCE = Units.Meters.of(0.1);
   public static final double ROLLERS_REDUCTION = 12.0;
