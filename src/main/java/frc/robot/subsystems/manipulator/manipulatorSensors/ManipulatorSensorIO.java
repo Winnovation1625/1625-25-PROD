@@ -10,8 +10,8 @@ public interface ManipulatorSensorIO {
     public double frontSensorMeasurment = 0.0;
     public double backSensorMeasurment = 0.0;
     public double algaeSensorMeasurment = 0.0;
-    public boolean isBackDetected = false;
-    public boolean isFrontDetected = false;
+    public boolean isBackCoralDetected = false;
+    public boolean isFrontCoralDetected = false;
     public boolean isAlgaeDetected = false;
   }
 

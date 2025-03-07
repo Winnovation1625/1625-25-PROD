@@ -18,14 +18,14 @@ public class Manipulator extends SubsystemBase {
   private final ManipulatorIOInputsAutoLogged inputs = new ManipulatorIOInputsAutoLogged();
   private final ManipulatorSensorIOInputsAutoLogged sensorInputs =
       new ManipulatorSensorIOInputsAutoLogged();
-  private boolean onlyBackSensor = false;
 
   @RequiredArgsConstructor
   public enum ManipulatorState {
     INTAKING_CORAL(new LoggedTunableNumber("Manipulator/CoralIntakeVoltage", 12)),
-    INTAKING_ALGAE(new LoggedTunableNumber("Manipulator/AlgaeIntakeVoltage", 12)),
-    SHOOTING_CORAL(new LoggedTunableNumber("Manipulator/CoralShootingVoltage", -12)),
-    SHOOTING_ALGAE(new LoggedTunableNumber("Manipulator/AlgaeShootingVoltage", -10)),
+    INTAKING_ALGAE(new LoggedTunableNumber("Manipulator/AlgaeIntakeVoltage", -12)),
+    STAGING_CORAL(new LoggedTunableNumber("Manipulator/CoralStagingVoltage", 12)),
+    SHOOTING_CORAL(new LoggedTunableNumber("Manipulator/CoralShootingVoltage", 12)),
+    SHOOTING_ALGAE(new LoggedTunableNumber("Manipulator/AlgaeShootingVoltage", 10)),
     IDLE(() -> 0);
 
     private final DoubleSupplier voltageSupplier;
@@ -33,9 +33,9 @@ public class Manipulator extends SubsystemBase {
 
   @RequiredArgsConstructor
   public enum GamepieceState {
-    ALGAE_IN_SHOOTER,
+    ALGAE_IN_CLAW,
     CORAL_STAGING,
-    CORAL_IN_SHOOTER,
+    CORAL_IN_MANIPULATOR,
     NONE;
   }
 
@@ -55,30 +55,26 @@ public class Manipulator extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
+    Logger.processInputs("Manipulator", inputs);
     sensorsIO.updateInputs(sensorInputs);
+    Logger.processInputs("Manipulator/Sensors", sensorInputs);
 
-    if (sensorInputs.isFrontDetected == false && sensorInputs.isBackDetected == true) {
-      onlyBackSensor = true;
-    }
-
-    if (onlyBackSensor == true) {
+    if (sensorInputs.isFrontCoralDetected == false && sensorInputs.isBackCoralDetected == true) {
       manipulatorState = ManipulatorState.INTAKING_CORAL;
       gamepieceState = GamepieceState.CORAL_STAGING;
     }
 
-    if (sensorInputs.isFrontDetected == true && sensorInputs.isBackDetected == true) {
-      gamepieceState = GamepieceState.CORAL_IN_SHOOTER;
+    if (sensorInputs.isFrontCoralDetected == true && sensorInputs.isBackCoralDetected == true) {
+      gamepieceState = GamepieceState.CORAL_IN_MANIPULATOR;
     }
 
-    if (sensorInputs.isFrontDetected == false && sensorInputs.isBackDetected == false) {
+    if (sensorInputs.isFrontCoralDetected == false && sensorInputs.isBackCoralDetected == false) {
       gamepieceState = GamepieceState.NONE;
     }
 
     if (sensorInputs.isAlgaeDetected == true) {
-      gamepieceState = GamepieceState.ALGAE_IN_SHOOTER;
+      gamepieceState = GamepieceState.ALGAE_IN_CLAW;
     }
-
-    Logger.processInputs("Manipulator", inputs);
 
     if (DriverStation.isDisabled()) {
       manipulatorState = ManipulatorState.IDLE;

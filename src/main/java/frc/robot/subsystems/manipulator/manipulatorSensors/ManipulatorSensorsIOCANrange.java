@@ -34,7 +34,7 @@ public class ManipulatorSensorsIOCANrange implements ManipulatorSensorIO {
 
     backSensor.getConfigurator().apply(CORAL_SENSOR_CONFIG);
     frontSensor.getConfigurator().apply(CORAL_SENSOR_CONFIG);
-    algaeSensor.getConfigurator().apply(CORAL_SENSOR_CONFIG);
+    algaeSensor.getConfigurator().apply(ALGAE_SENSOR_CONFIG);
 
     isFrontDetected = frontSensor.getIsDetected();
     isBackDetected = backSensor.getIsDetected();
@@ -47,8 +47,8 @@ public class ManipulatorSensorsIOCANrange implements ManipulatorSensorIO {
     inputs.frontSensorMeasurment = frontSensor.getDistance().getValueAsDouble();
     inputs.backSensorMeasurment = backSensor.getDistance().getValueAsDouble();
     inputs.algaeSensorMeasurment = algaeSensor.getDistance().getValueAsDouble();
-    inputs.isBackDetected = backSensor.getIsDetected().getValue();
-    inputs.isFrontDetected = frontSensor.getIsDetected().getValue();
+    inputs.isBackCoralDetected = backSensor.getIsDetected().getValue();
+    inputs.isFrontCoralDetected = frontSensor.getIsDetected().getValue();
     inputs.isAlgaeDetected = algaeSensor.getIsDetected().getValue();
   }
 }
