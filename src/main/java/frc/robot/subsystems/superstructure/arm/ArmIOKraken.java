@@ -1,5 +1,7 @@
 package frc.robot.subsystems.superstructure.arm;
 
+import static frc.robot.subsystems.superstructure.arm.ArmConstants.*;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -17,7 +19,7 @@ import edu.wpi.first.units.measure.Voltage;
 import frc.robot.subsystems.superstructure.arm.ArmIO.ArmIOInputs;
 import java.util.function.DoubleSupplier;
 
-public class ArmIOKrakenx60 implements ArmIO {
+public class ArmIOKraken implements ArmIO {
   private final StatusSignal<Angle> positionRotations;
   private final StatusSignal<Voltage> appliedVolts;
   private final StatusSignal<AngularVelocity> velocityRadPerSec;
@@ -29,13 +31,13 @@ public class ArmIOKrakenx60 implements ArmIO {
   private final TalonFXConfiguration armConfig;
   private final NeutralOut neutralOut = new NeutralOut();
 
-  public ArmIOKrakenx60() {
+  public ArmIOKraken() {
     armTalon = new TalonFX(0);
     armConfig = new TalonFXConfiguration();
 
-    // armConfig.Slot0.kP = gains.kP();
-    // armConfig.Slot0.kI = gains.kI();
-    // armConfig.Slot0.kD = gains.kD();
+    armConfig.Slot0.kP = gains.kP();
+    armConfig.Slot0.kI = gains.kI();
+    armConfig.Slot0.kD = gains.kD();
     // armConfig.Slot0.kS = gains.ffkS();
     // armConfig.Slot0.kV = gains.ffkV();
     // armConfig.Slot0.kG = gains.ffkG();

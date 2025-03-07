@@ -17,12 +17,12 @@ public class ElevatorIOSim implements ElevatorIO {
   private DCMotor elevatorMotors = DCMotor.getKrakenX60Foc(2);
   private LinearSystem<N2, N1, N2> elevatorId =
       LinearSystemId.createElevatorSystem(
-          elevatorMotors, ELEVATOR_MASS_KG, ELEVATOR_TOLERANCE_METERS, ELEVATOR_GEARING);
+          elevatorMotors, ELEVATOR_MASS_KG, ELEVATOR_DRUM_RADIUS, ELEVATOR_GEARING);
   private final ProfiledPIDController pidController =
       new ProfiledPIDController(
-          ELEVATOR_PID_P,
-          ELEVATOR_PID_I,
-          ELEVATOR_PID_D,
+          gains.kP(),
+          gains.kI(),
+          gains.kD(),
           new TrapezoidProfile.Constraints(ELEVATOR_MAX_VELOCITY, ELEVATOR_MAX_ACCELERATION));
 
   private final ElevatorSim elevatorSim =
@@ -41,19 +41,30 @@ public class ElevatorIOSim implements ElevatorIO {
   @Override
   public void updateInputs(ElevatorIOInputs inputs) {
 
+    elevatorSim.update(0.02);
+    if (DriverStation
+        .isDisabled()) { // TODO: This is probably not the only time you want to make sure it
+      // doesn't move
+      stop();
+      inputs.appliedVolts = 0;
+      pidController.reset(inputs.positionRad);
+    } else {
+      var output =
+          MathUtil.clamp(
+              pidController.calculate(elevatorSim.getPositionMeters() / ELEVATOR_DRUM_RADIUS),
+              -12,
+              12);
+      inputs.appliedVolts = output;
+      setInputVoltage(inputs.appliedVolts);
+    }
+
     inputs.positionRad = elevatorSim.getPositionMeters() / ELEVATOR_DRUM_RADIUS;
     inputs.velocityRadPerSec = elevatorSim.getVelocityMetersPerSecond();
     inputs.supplyCurrentAmps = Math.abs(elevatorSim.getCurrentDrawAmps());
+  }
 
-    elevatorSim.update(0.02);
-    if (DriverStation.isDisabled()) {
-      stop();
-      inputs.appliedVolts = 0;
-    } else {
-      var output = MathUtil.clamp(pidController.calculate(inputs.positionRad), -12, 12);
-      elevatorSim.setInputVoltage(output);
-      inputs.appliedVolts = output;
-    }
+  public void setInputVoltage(double volts) {
+    elevatorSim.setInputVoltage(volts);
   }
 
   @Override
@@ -62,7 +73,15 @@ public class ElevatorIOSim implements ElevatorIO {
   }
 
   @Override
-  public void setPosition(double positionSetpoint) {
-    pidController.setGoal(positionSetpoint / ELEVATOR_DRUM_RADIUS);
+  public void setPosition(double positionSetpointRads) {
+    pidController.setGoal(positionSetpointRads);
+  }
+
+  @Override
+  public void setPID(double p, double i, double d) {
+    pidController.setP(p);
+    pidController.setI(i);
+    pidController.setD(d);
+    pidController.reset(elevatorSim.getPositionMeters() / ELEVATOR_DRUM_RADIUS);
   }
 }

@@ -1,12 +1,16 @@
 package frc.robot.subsystems.superstructure.elevator;
 
+import static frc.robot.subsystems.superstructure.elevator.ElevatorConstants.*;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.mechanisms.DifferentialMechanism;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
@@ -18,6 +22,8 @@ import edu.wpi.first.units.measure.Voltage;
 public class ElevatorIOKraken implements ElevatorIO {
 
   private final TalonFX elevatorTalon;
+  private final TalonFX elevatorFollower;
+  private final DifferentialMechanism elevator;
 
   private final StatusSignal<Angle> positionRotations;
   private final StatusSignal<AngularVelocity> velocityRps;
@@ -29,17 +35,20 @@ public class ElevatorIOKraken implements ElevatorIO {
   private final TorqueCurrentFOC currentControl = new TorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
   private final MotionMagicTorqueCurrentFOC positionControl =
       new MotionMagicTorqueCurrentFOC(0).withUpdateFreqHz(null);
+  private final PositionTorqueCurrentFOC followerDifferentialCurrentFOC = 
+      new PositionTorqueCurrentFOC(0).withUpdateFreqHz(null);
 
   private final TalonFXConfiguration config = new TalonFXConfiguration();
   private final NeutralOut neutralout = new NeutralOut();
 
   public ElevatorIOKraken() {
     elevatorTalon = new TalonFX(0); // will use device Id's when created.
+    elevatorFollower = new TalonFX(1);
 
     // numbers from Elevator Constant that will be implemented later.
-    // config.Slot0.kP = gains.kP();
-    // config.Slot0.kI = gains.kI();
-    // config.Slot0.kD = gains.kD();
+    config.Slot0.kP = gains.kP();
+    config.Slot0.kI = gains.kI();
+    config.Slot0.kD = gains.kD();
     // config.Slot0.kS = gains.ffkS();
     // config.Slot0.kV = gains.ffkV();
     // config.Slot0.kG = gains.ffkG();
@@ -61,7 +70,10 @@ public class ElevatorIOKraken implements ElevatorIO {
     // config.MotionMagic.MotionMagicAcceleration = cruiseAcceleration;
     // config.MotionMagic.MotionMagicCruiseVelocity = cruiseVelocity;
     // config.MotionMagic.MotionMagicJerk = cruiseJerk;
-    // armTalon.getConfigurator().apply(config, 1.0);
+    elevatorTalon.getConfigurator().apply(config, 1.0);
+    elevatorFollower.getConfigurator().apply(config, 1.0);
+
+    elevator = new DifferentialMechanism(elevatorTalon, elevatorFollower, false);
 
     positionRotations = elevatorTalon.getPosition();
     // setPointError = elevatorTalon.getClosedLoopError();
@@ -117,10 +129,8 @@ public class ElevatorIOKraken implements ElevatorIO {
   }
 
   @Override
-  public void setPosition(double positionSetpoint) {
-    elevatorTalon.setControl(
-        positionControl
-            .withPosition(Units.radiansToRotations(positionSetpoint))
-            .withUpdateFreqHz(50));
+  public void setPosition(double positionSetpointRads) {
+    elevator.setControl(positionControl.withPosition(Units.radiansToRotations(positionSetpointRads)),
+    followerDifferentialCurrentFOC);
   }
 }

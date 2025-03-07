@@ -4,30 +4,22 @@ import static frc.robot.subsystems.superstructure.elevator.ElevatorConstants.*;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.EqualsUtil;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.BooleanSupplier;
-import java.util.function.DoubleSupplier;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-public class Elevator extends SubsystemBase {
+public class Elevator {
 
   private final ElevatorIO io;
   private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
   //  private final ElevatorVisualizer visualizer =
   //   new ElevatorVisualizer(ElevatorConstants.elevatorPose);
 
-  // private static final LoggedTunableNumber kP =
-  //   new LoggedTunableNumber("Elevator/kP", gains.kP());
-  // private static final LoggedTunableNumber kI =
-  //   new LoggedTunableNumber("Elevator/kI", gains.kI());
-  // private static final LoggedTunableNumber kD =
-  //   new LoggedTunableNumber("Elevator/kD", gains.kD());
+  private static final LoggedTunableNumber kP = new LoggedTunableNumber("Elevator/kP", gains.kP());
+  private static final LoggedTunableNumber kI = new LoggedTunableNumber("Elevator/kI", gains.kI());
+  private static final LoggedTunableNumber kD = new LoggedTunableNumber("Elevator/kD", gains.kD());
   // private static final LoggedTunableNumber kS =
   //   new LoggedTunableNumber("Elevator/kS", gains.ffkS());
   // private static final LoggedTunableNumber kV =
@@ -43,24 +35,6 @@ public class Elevator extends SubsystemBase {
   // private static final LoggedTunableNumber cruiseJ =
   //   new LoggedTunableNumber("Elevator/cruiseJ", cruiseJerk);
 
-  @RequiredArgsConstructor
-  public enum ElevatorState {
-    STOP(() -> 0),
-    STOW(new LoggedTunableNumber("Superstructure/Elevator/Stow", 0)),
-    LEVEL_0NE(new LoggedTunableNumber("Superstructure/Elevator/L1", 12)),
-    LEVEL_TWO(new LoggedTunableNumber("Superstructure/Elevator/L2", 22)),
-    LEVEL_THREE(new LoggedTunableNumber("Superstructure/Elevator/L3", 33)),
-    LEVEL_FOUR(new LoggedTunableNumber("Superstructure/Elevator/L4", 44)),
-    BARGE(new LoggedTunableNumber("Superstructure/Elevator/Barge", 55));
-
-    @Getter private final DoubleSupplier elevatorSetpointFromGround;
-  }
-
-  @AutoLogOutput(key = "Superstructure/Elevator/ElevatorState")
-  // @Getter
-  // @Setter
-  private ElevatorState elevatorState = ElevatorState.STOW;
-
   public Elevator(ElevatorIO io) {
     this.io = io;
   }
@@ -69,36 +43,38 @@ public class Elevator extends SubsystemBase {
   private boolean brakeModeEnabled;
   private BooleanSupplier disableSupplier = DriverStation::isDisabled;
   private BooleanSupplier coastSupplier = () -> false;
+  private double positionSetpoint = Units.inchesToMeters(27.5591);
 
   public void periodic() {
     io.updateInputs(inputs);
 
     Logger.processInputs("Superstructure/Elevator", inputs);
 
-    if (disableSupplier.getAsBoolean() || elevatorState == ElevatorState.STOP) {
+    if (disableSupplier.getAsBoolean()) {
       io.stop();
     }
+
+    LoggedTunableNumber.ifChanged(hashCode(), pid -> io.setPID(pid[0], pid[1], pid[2]), kP, kI, kD);
 
     setBrakeMode(!coastSupplier.getAsBoolean() || DriverStation.isEnabled());
 
     // visualizer.updateVisualizer(inputs.positionRads);
 
-    if (!characterizing
-        && brakeModeEnabled
-        && !disableSupplier.getAsBoolean()
-        && elevatorState != ElevatorState.STOP) {
-
+    if (!characterizing && brakeModeEnabled && !disableSupplier.getAsBoolean()) {
+      io.setPosition(convertDistanceMetersToRadians(positionSetpoint));
       Logger.recordOutput(
-          "Superstructure/Elevator/ElevatorSetpoint",
-          Units.radiansToDegrees(elevatorState.getElevatorSetpointFromGround().getAsDouble()));
+          "Superstructure/Elevator/ElevatorSetpointInches", Units.metersToInches(positionSetpoint));
+      Logger.recordOutput(
+          "Superstructure/Elevator/ElevatorSetpointRads",
+          convertDistanceMetersToRadians(positionSetpoint));
     }
   }
 
   @AutoLogOutput(key = "Superstructure/Elevator/AtGoal")
   public boolean atGoal() {
     return EqualsUtil.epsilonEquals(
-        inputs.positionRad,
-        elevatorState.getElevatorSetpointFromGround().getAsDouble(),
+        convertRadiansToDistanceMeters(inputs.positionRad),
+        positionSetpoint,
         ELEVATOR_TOLERANCE_METERS);
   }
 
@@ -121,16 +97,19 @@ public class Elevator extends SubsystemBase {
     characterizing = false;
   }
 
-  public void changeLevel() {
-    elevatorState = ElevatorState.LEVEL_0NE;
-    io.setPosition(ElevatorState.LEVEL_0NE.getElevatorSetpointFromGround().getAsDouble());
+  public static double convertDistanceMetersToRadians(double distanceMeters) {
+    return distanceMeters / ELEVATOR_DRUM_RADIUS;
   }
 
-  public void tempStop() {
-    io.stop();
+  public static double convertRadiansToDistanceMeters(double posRads) {
+    return posRads * ELEVATOR_DRUM_RADIUS;
   }
 
-  public Command tempCommand() {
-    return startEnd(() -> changeLevel(), () -> tempStop());
+  public double getElevatorHeight() {
+    return convertRadiansToDistanceMeters(inputs.positionRad);
+  }
+
+  public void setPosition(double positionSetpoint) {
+    this.positionSetpoint = positionSetpoint;
   }
 }
