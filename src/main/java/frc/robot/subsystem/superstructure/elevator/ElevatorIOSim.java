@@ -1,6 +1,6 @@
-package frc.robot.subsystems.superstructure.elevator;
+package frc.robot.subsystem.superstructure.elevator;
 
-import static frc.robot.subsystems.superstructure.elevator.ElevatorConstants.*;
+import static frc.robot.subsystem.superstructure.elevator.ElevatorConstants.*;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;

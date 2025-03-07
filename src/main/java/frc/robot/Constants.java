@@ -27,12 +27,21 @@ public final class Constants {
   public static final Mode SIM_MODE = Mode.SIM;
   public static final Mode CURRENT_MODE = RobotBase.isReal() ? Mode.REAL : SIM_MODE;
   public static final String CANIVORE_NAME = "canivore";
-  public static final DriveCANIds DRIVE_CAN_IDS = DriveCANIds.builder()
-  .driveFrontLeft(0).steerFrontLeft(1).steerEncoderFrontLeft(2)
-  .driveFrontRight(3).steerFrontRight(4).steerEncoderFrontRight(5)
-  .driveBackLeft(6).steerBackLeft(7).steerEncoderBackLeft(8)
-  .driveBackRight(9).steerBackRight(10).steerEncoderBackRight(11)
-  .build();
+  public static final DriveCANIds DRIVE_CAN_IDS =
+      DriveCANIds.builder()
+          .driveFrontLeft(0)
+          .steerFrontLeft(1)
+          .steerEncoderFrontLeft(2)
+          .driveFrontRight(3)
+          .steerFrontRight(4)
+          .steerEncoderFrontRight(5)
+          .driveBackLeft(6)
+          .steerBackLeft(7)
+          .steerEncoderBackLeft(8)
+          .driveBackRight(9)
+          .steerBackRight(10)
+          .steerEncoderBackRight(11)
+          .build();
 
   public static enum Mode {
     /** Running on a real robot. */
@@ -65,21 +74,15 @@ public final class Constants {
       Integer driveBackRight,
       Integer steerBackRight,
       Integer steerEncoderBackRight) {}
-  
 
   @Builder
   public static final record SuperstructureCANIds(
-      Integer elevatorLeft,
-      Integer elevatorRight,
-      Integer armMotor,
-      Integer armEncoder) {}
+      Integer elevatorLeft, Integer elevatorRight, Integer armMotor, Integer armEncoder) {}
 
   @Builder
   public static final record ManipulatorCANIds(
-    Integer manipulatorMotor,
-    Integer algaeCANRange,
-    Integer coralBackCANRange,
-    Integer coralFrontCANRange
-  ) {}
-  
+      Integer manipulatorMotor,
+      Integer algaeCANRange,
+      Integer coralBackCANRange,
+      Integer coralFrontCANRange) {}
 }

@@ -1,6 +1,6 @@
-package frc.robot.subsystems.manipulator;
+package frc.robot.subsystem.manipulator;
 
-import static frc.robot.subsystems.manipulator.ManipulatorConstants.*;
+import static frc.robot.subsystem.manipulator.ManipulatorConstants.*;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;

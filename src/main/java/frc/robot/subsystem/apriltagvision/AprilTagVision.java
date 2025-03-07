@@ -91,12 +91,10 @@ public class AprilTagVision extends VirtualSubsystem {
       Logger.processInputs("Vision/" + CAMERA_CONFIGS.get(i).cameraName(), inputs[i]);
     }
 
-
     // Loop over cameras
     for (int cameraIndex = 0; cameraIndex < io.length; cameraIndex++) {
       // Update disconnected alert
       disconnectedAlerts[cameraIndex].set(!inputs[cameraIndex].connected);
-
 
       // Add tag poses
       for (int tagId : inputs[cameraIndex].tagIds) {

@@ -44,7 +44,7 @@ public class AprilTagVisionConstants {
               1,
               "Back Right",
               new Transform3d(
-                Units.inchesToMeters(-10.340901),
+                  Units.inchesToMeters(-10.340901),
                   Units.inchesToMeters(-12.659099),
                   Units.inchesToMeters(8),
                   new Rotation3d(0, Units.degreesToRadians(-25), Units.degreesToRadians(-95))),
@@ -58,15 +58,15 @@ public class AprilTagVisionConstants {
                   Units.inchesToMeters(8),
                   new Rotation3d(0, Units.degreesToRadians(-32), Units.degreesToRadians(85))),
               0.6),
-              new CameraConfig(
-                0,
-                "Back Center",
-                new Transform3d(
-                    Units.inchesToMeters(0),
-                    Units.inchesToMeters(-0.375),
-                    Units.inchesToMeters(30.25),
-                    new Rotation3d(0, Units.degreesToRadians(-15), Units.degreesToRadians(180))),
-                0.6));
+          new CameraConfig(
+              0,
+              "Back Center",
+              new Transform3d(
+                  Units.inchesToMeters(0),
+                  Units.inchesToMeters(-0.375),
+                  Units.inchesToMeters(30.25),
+                  new Rotation3d(0, Units.degreesToRadians(-15), Units.degreesToRadians(180))),
+              0.6));
   // new CameraConfig(0, "front left", new Transform3d(Units.inchesToMeters(10.319),
   // Units.inchesToMeters(-12.686), Units.inchesToMeters(8), new Rotation3d(0, 0, 0)), 1.0));
 }

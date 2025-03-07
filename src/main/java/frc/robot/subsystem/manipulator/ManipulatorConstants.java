@@ -1,4 +1,4 @@
-package frc.robot.subsystems.manipulator;
+package frc.robot.subsystem.manipulator;
 
 import static frc.robot.Constants.*;
 
@@ -47,7 +47,7 @@ public class ManipulatorConstants {
   }
 
   public static final Gains gains =
-      switch (Constants.currentMode) {
+      switch (Constants.CURRENT_MODE) {
         case REAL, REPLAY -> new Gains(0.3, 0, 0.0016, 0.17523, 0.084, 0);
         case SIM -> new Gains(0.05, 0.0, 0.0, 0.01, 0.00103, 0.0);
       };

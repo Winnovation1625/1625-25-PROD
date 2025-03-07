@@ -3,14 +3,13 @@ package frc.robot.subsystem.superstructure;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.superstructure.arm.Arm;
-import frc.robot.subsystems.superstructure.elevator.Elevator;
+import frc.robot.subsystem.superstructure.arm.Arm;
+import frc.robot.subsystem.superstructure.elevator.Elevator;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.DoubleSupplier;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-
 import org.littletonrobotics.junction.AutoLogOutput;
 
 public class Superstructure extends SubsystemBase {
@@ -20,7 +19,7 @@ public class Superstructure extends SubsystemBase {
   private final SuperstructureVisualizer setpointVisualizer =
       new SuperstructureVisualizer("setpoint");
   private final SuperstructureVisualizer measuredVisualizer =
-      new SuperstructureVisualizer("measured"); 
+      new SuperstructureVisualizer("measured");
 
   @AutoLogOutput @Getter
   private SuperstructureStates superstructureGoal = SuperstructureStates.STOW;
@@ -73,11 +72,14 @@ public class Superstructure extends SubsystemBase {
   }
 
   @Getter @Setter private boolean hasAlgae = false;
-  private LoggedTunableNumber stowPos = new LoggedTunableNumber("Superstructure/StowPos",27.5591);
-  private LoggedTunableNumber algaeStowPos = new LoggedTunableNumber("Superstructure/algaeStowPos",34);
-  private LoggedTunableNumber normalStowPos = new LoggedTunableNumber("Superstrcture/NormalStowPos",27.5591);
+  private LoggedTunableNumber stowPos = new LoggedTunableNumber("Superstructure/StowPos", 27.5591);
+  private LoggedTunableNumber algaeStowPos =
+      new LoggedTunableNumber("Superstructure/algaeStowPos", 34);
+  private LoggedTunableNumber normalStowPos =
+      new LoggedTunableNumber("Superstrcture/NormalStowPos", 27.5591);
   private double elevatorThreshold = Units.inchesToMeters(40);
-  private LoggedTunableNumber armTolerance = new LoggedTunableNumber("Superstructure/ArmThreshold", .6 );
+  private LoggedTunableNumber armTolerance =
+      new LoggedTunableNumber("Superstructure/ArmThreshold", .6);
 
   @Override
   public void periodic() {
@@ -156,9 +158,6 @@ public class Superstructure extends SubsystemBase {
 
   public Command buildSuperStructureCommand(SuperstructureStates from, SuperstructureStates to) {
     return null;
-
-
-
 
     /* https://v6.docs.ctr-electronics.com/en/stable/docs/api-reference/device-specific/talonfx/basic-pid-control.html#motion-profiling
     * https://github.com/Mechanical-Advantage/RobotCode2025Public/blob/main/src/main/java/org/littletonrobotics/frc2025/subsystems/superstructure/Superstructure.java#L536
@@ -244,46 +243,45 @@ public class Superstructure extends SubsystemBase {
     arm.setPosition(positionSetpoint);
   }
 
-  public void moveArmAndElevator(double elevatorSetpoint, DoubleSupplier armSetpoint, boolean hasAlgae){
+  public void moveArmAndElevator(
+      double elevatorSetpoint, DoubleSupplier armSetpoint, boolean hasAlgae) {
     stowPos = hasAlgae ? algaeStowPos : normalStowPos;
 
-    if(elevator.getElevatorHeight() > elevatorThreshold && superstructureGoal.getElevatorHeight().getAsDouble() < elevatorThreshold){
+    if (elevator.getElevatorHeight() > elevatorThreshold
+        && superstructureGoal.getElevatorHeight().getAsDouble() < elevatorThreshold) {
       elevator.setPosition(stowPos.getAsDouble());
       arm.setPosition(armSetpoint);
 
-      if(armWithinTolerance()){
+      if (armWithinTolerance()) {
         elevator.setPosition(elevatorSetpoint);
       }
-    }
-    else if(elevator.getElevatorHeight() < elevatorThreshold && superstructureGoal.getElevatorHeight().getAsDouble() > elevatorThreshold){
+    } else if (elevator.getElevatorHeight() < elevatorThreshold
+        && superstructureGoal.getElevatorHeight().getAsDouble() > elevatorThreshold) {
       elevator.setPosition(stowPos.getAsDouble());
 
-      if(elevatorClearofBumpers()){
+      if (elevatorClearofBumpers()) {
         arm.setPosition(armSetpoint);
         elevator.setPosition(elevatorSetpoint);
       }
 
-    }
-    else if(elevator.getElevatorHeight() < elevatorThreshold && superstructureGoal.getElevatorHeight().getAsDouble() > elevatorThreshold){
+    } else if (elevator.getElevatorHeight() < elevatorThreshold
+        && superstructureGoal.getElevatorHeight().getAsDouble() > elevatorThreshold) {
       elevator.setPosition(stowPos.getAsDouble());
 
-      if(elevatorClearofBumpers()){
+      if (elevatorClearofBumpers()) {
         arm.setPosition(armSetpoint);
       }
-      if(armWithinTolerance()){
+      if (armWithinTolerance()) {
         elevator.setPosition(elevatorSetpoint);
       }
     }
-    
-
   }
 
-  public boolean armWithinTolerance(){
+  public boolean armWithinTolerance() {
     return arm.atGoal() && elevator.atGoal();
   }
 
-  public boolean elevatorClearofBumpers(){
-    return elevator.getElevatorHeight() > elevatorThreshold; 
+  public boolean elevatorClearofBumpers() {
+    return elevator.getElevatorHeight() > elevatorThreshold;
   }
-
 }

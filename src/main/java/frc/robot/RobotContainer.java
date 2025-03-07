@@ -29,7 +29,6 @@ import frc.robot.subsystem.apriltagvision.AprilTagVisionConstants;
 import frc.robot.subsystem.apriltagvision.AprilTagVisionIO;
 import frc.robot.subsystem.apriltagvision.AprilTagVisionIOPhoton;
 import frc.robot.subsystem.apriltagvision.AprilTagVisionIOPhotonSim;
-import frc.robot.subsystem.coralmanipulator.*;
 import frc.robot.subsystem.drive.Drive;
 import frc.robot.subsystem.drive.DriveConstants;
 import frc.robot.subsystem.drive.GyroIO;
@@ -39,9 +38,8 @@ import frc.robot.subsystem.drive.ModuleIO;
 import frc.robot.subsystem.drive.ModuleIOTalonFXReal;
 import frc.robot.subsystem.drive.ModuleIOTalonFXSim;
 import frc.robot.subsystem.superstructure.arm.Arm;
-import frc.robot.subsystem.superstructure.arm.Arm.ArmState;
 import frc.robot.subsystem.superstructure.arm.ArmIO;
-import frc.robot.subsystem.superstructure.arm.ArmIOKrakenx60;
+import frc.robot.subsystem.superstructure.arm.ArmIOKraken;
 import frc.robot.subsystem.superstructure.arm.ArmIOSim;
 import frc.robot.subsystem.superstructure.elevator.Elevator;
 import frc.robot.subsystem.superstructure.elevator.ElevatorIO;
@@ -88,7 +86,7 @@ public class RobotContainer {
                 new ModuleIOTalonFXReal(TunerConstants.BackLeft),
                 new ModuleIOTalonFXReal(TunerConstants.BackRight),
                 (pose) -> {});
-        arm = new Arm(new ArmIOKrakenx60());
+        arm = new Arm(new ArmIOKraken());
         elevator = new Elevator(new ElevatorIOKraken());
         aprilTagVision =
             new AprilTagVision(
@@ -248,21 +246,6 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
-
-    controller
-        .leftTrigger()
-        .and(() -> arm.getArmState() == ArmState.STOW)
-        .onTrue(arm.setDesiredStateCommand(ArmState.CLVL1));
-    controller
-        .rightBumper()
-        .and(() -> arm.getArmState() == ArmState.CLVL1)
-        .onTrue(arm.setDesiredStateCommand(ArmState.CLVL2));
-    controller
-        .leftBumper()
-        .and(() -> arm.getArmState() != ArmState.STOW)
-        .onTrue(arm.setDesiredStateCommand(ArmState.STOW));
-
-    controller.leftTrigger().whileTrue(elevator.tempCommand());
   }
 
   /**

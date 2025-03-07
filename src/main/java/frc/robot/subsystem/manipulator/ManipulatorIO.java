@@ -1,4 +1,4 @@
-package frc.robot.subsystems.manipulator;
+package frc.robot.subsystem.manipulator;
 
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLog;

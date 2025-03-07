@@ -1,6 +1,6 @@
-package frc.robot.subsystems.manipulator.manipulatorSensors;
+package frc.robot.subsystem.manipulator.manipulatorSensors;
 
-import static frc.robot.subsystems.manipulator.ManipulatorConstants.*;
+import static frc.robot.subsystem.manipulator.ManipulatorConstants.*;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANrangeConfiguration;

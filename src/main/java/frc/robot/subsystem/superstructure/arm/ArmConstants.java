@@ -17,7 +17,7 @@ public class ArmConstants {
   public static final double ARM_MAX_ACCELERATION = 50.0;
 
   public static Gains gains =
-      switch (Constants.currentMode) {
+      switch (Constants.CURRENT_MODE) {
         case SIM -> new Gains(4.0, 0.125, 0.125, 0.0, 0.0, 0.0, 0.0);
         case REAL, REPLAY -> new Gains(600.0, 0.0, 40.0, 3.0, 0.0, 0.0, 4.0);
       };

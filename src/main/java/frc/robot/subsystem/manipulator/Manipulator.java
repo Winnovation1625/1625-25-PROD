@@ -1,9 +1,9 @@
-package frc.robot.subsystems.manipulator;
+package frc.robot.subsystem.manipulator;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.manipulator.manipulatorSensors.ManipulatorSensorIO;
-import frc.robot.subsystems.manipulator.manipulatorSensors.ManipulatorSensorIOInputsAutoLogged;
+import frc.robot.subsystem.manipulator.manipulatorSensors.ManipulatorSensorIO;
+import frc.robot.subsystem.manipulator.manipulatorSensors.ManipulatorSensorIOInputsAutoLogged;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.DoubleSupplier;
 import lombok.Getter;

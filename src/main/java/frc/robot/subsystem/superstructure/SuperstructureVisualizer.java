@@ -1,10 +1,10 @@
-package frc.robot.subsystems.superstructure;
+package frc.robot.subsystem.superstructure;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import frc.robot.subsystems.superstructure.elevator.ElevatorConstants;
+import frc.robot.subsystem.superstructure.elevator.ElevatorConstants;
 import frc.robot.util.GeomUtil;
 import lombok.experimental.ExtensionMethod;
 import org.littletonrobotics.junction.Logger;

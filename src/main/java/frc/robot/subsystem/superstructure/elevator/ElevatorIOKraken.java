@@ -1,6 +1,6 @@
 package frc.robot.subsystem.superstructure.elevator;
 
-import static frc.robot.subsystems.superstructure.elevator.ElevatorConstants.*;
+import static frc.robot.subsystem.superstructure.elevator.ElevatorConstants.*;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
@@ -35,7 +35,7 @@ public class ElevatorIOKraken implements ElevatorIO {
   private final TorqueCurrentFOC currentControl = new TorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
   private final MotionMagicTorqueCurrentFOC positionControl =
       new MotionMagicTorqueCurrentFOC(0).withUpdateFreqHz(null);
-  private final PositionTorqueCurrentFOC followerDifferentialCurrentFOC = 
+  private final PositionTorqueCurrentFOC followerDifferentialCurrentFOC =
       new PositionTorqueCurrentFOC(0).withUpdateFreqHz(null);
 
   private final TalonFXConfiguration config = new TalonFXConfiguration();
@@ -130,7 +130,8 @@ public class ElevatorIOKraken implements ElevatorIO {
 
   @Override
   public void setPosition(double positionSetpointRads) {
-    elevator.setControl(positionControl.withPosition(Units.radiansToRotations(positionSetpointRads)),
-    followerDifferentialCurrentFOC);
+    elevator.setControl(
+        positionControl.withPosition(Units.radiansToRotations(positionSetpointRads)),
+        followerDifferentialCurrentFOC);
   }
 }
