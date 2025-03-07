@@ -7,6 +7,7 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.mechanisms.DifferentialMechanism;
@@ -34,6 +35,8 @@ public class ElevatorIOKraken implements ElevatorIO {
   private final TorqueCurrentFOC currentControl = new TorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
   private final MotionMagicTorqueCurrentFOC positionControl =
       new MotionMagicTorqueCurrentFOC(0).withUpdateFreqHz(null);
+  private final PositionTorqueCurrentFOC followerDifferentialCurrentFOC = 
+      new PositionTorqueCurrentFOC(0).withUpdateFreqHz(null);
 
   private final TalonFXConfiguration config = new TalonFXConfiguration();
   private final NeutralOut neutralout = new NeutralOut();
@@ -127,9 +130,7 @@ public class ElevatorIOKraken implements ElevatorIO {
 
   @Override
   public void setPosition(double positionSetpointRads) {
-    elevatorTalon.setControl(
-        positionControl
-            .withPosition(Units.radiansToRotations(positionSetpointRads))
-            .withUpdateFreqHz(50));
+    elevator.setControl(positionControl.withPosition(Units.radiansToRotations(positionSetpointRads)),
+    followerDifferentialCurrentFOC);
   }
 }
