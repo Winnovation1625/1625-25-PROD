@@ -14,6 +14,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.RobotBase;
+import lombok.Builder;
 
 /**
  * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
@@ -21,10 +22,17 @@ import edu.wpi.first.wpilibj.RobotBase;
  * (log replay from a file).
  */
 public final class Constants {
-  public static final double loopPeriodSecs = 0.02;
-  public static final Mode simMode = Mode.SIM;
-  public static final boolean tuningMode = true;
-  public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
+  public static final double LOOP_PERIOD_SECS = 0.02;
+  public static final boolean TUNING_MODE = false;
+  public static final Mode SIM_MODE = Mode.SIM;
+  public static final Mode CURRENT_MODE = RobotBase.isReal() ? Mode.REAL : SIM_MODE;
+  public static final String CANIVORE_NAME = "canivore";
+  public static final DriveCANIds DRIVE_CAN_IDS = DriveCANIds.builder()
+  .driveFrontLeft(0).steerFrontLeft(1).steerEncoderFrontLeft(2)
+  .driveFrontRight(3).steerFrontRight(4).steerEncoderFrontRight(5)
+  .driveBackLeft(6).steerBackLeft(7).steerEncoderBackLeft(8)
+  .driveBackRight(9).steerBackRight(10).steerEncoderBackRight(11)
+  .build();
 
   public static enum Mode {
     /** Running on a real robot. */
@@ -36,4 +44,42 @@ public final class Constants {
     /** Replaying from a log file. */
     REPLAY
   }
+
+  public static boolean disableHAL = false;
+
+  public static void disableHAL() {
+    disableHAL = true;
+  }
+
+  @Builder
+  public static final record DriveCANIds(
+      Integer driveFrontLeft,
+      Integer steerFrontLeft,
+      Integer steerEncoderFrontLeft,
+      Integer driveFrontRight,
+      Integer steerFrontRight,
+      Integer steerEncoderFrontRight,
+      Integer driveBackLeft,
+      Integer steerBackLeft,
+      Integer steerEncoderBackLeft,
+      Integer driveBackRight,
+      Integer steerBackRight,
+      Integer steerEncoderBackRight) {}
+  
+
+  @Builder
+  public static final record SuperstructureCANIds(
+      Integer elevatorLeft,
+      Integer elevatorRight,
+      Integer armMotor,
+      Integer armEncoder) {}
+
+  @Builder
+  public static final record ManipulatorCANIds(
+    Integer manipulatorMotor,
+    Integer algaeCANRange,
+    Integer coralBackCANRange,
+    Integer coralFrontCANRange
+  ) {}
+  
 }

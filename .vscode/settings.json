@@ -31,6 +31,9 @@
   "java.test.defaultConfig": "WPIlibUnitTests",
   "spotlessGradle.format.enable": true,
   "spotlessGradle.diagnostics.enable": false,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.spotlessGradle": "explicit"
+  },
   "java.import.gradle.annotationProcessing.enabled": false,
   "java.completion.favoriteStaticMembers": [
     "org.junit.Assert.*",
@@ -68,5 +71,7 @@
   },
   "[java]": {
     "editor.defaultFormatter": "richardwillis.vscode-spotless-gradle"
-  }
+  },
+  "wpilib.selectDefaultSimulateExtension": true,
+  "wpilib.skipSelectSimulateExtension": true
 }
