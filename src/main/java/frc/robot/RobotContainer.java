@@ -38,6 +38,7 @@ import frc.robot.subsystem.drive.ModuleIO;
 import frc.robot.subsystem.drive.ModuleIOTalonFXReal;
 import frc.robot.subsystem.drive.ModuleIOTalonFXSim;
 import frc.robot.subsystem.superstructure.Superstructure;
+import frc.robot.subsystem.superstructure.Superstructure.SuperstructureStates;
 import frc.robot.subsystem.superstructure.arm.Arm;
 import frc.robot.subsystem.superstructure.arm.ArmIO;
 import frc.robot.subsystem.superstructure.arm.ArmIOKraken;
@@ -247,6 +248,17 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
+
+    controller
+        .x()
+        .whileTrue(
+            superstructure.buildSuperStructureCommand(
+                superstructure.getPreviousState(), SuperstructureStates.INTAKING));
+    controller
+        .leftTrigger()
+        .whileTrue(
+            superstructure.buildSuperStructureCommand(
+                superstructure.getPreviousState(), SuperstructureStates.CLVL2));
   }
 
   /**

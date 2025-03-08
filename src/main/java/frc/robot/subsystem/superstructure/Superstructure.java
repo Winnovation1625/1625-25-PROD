@@ -80,7 +80,7 @@ public class Superstructure extends SubsystemBase {
   private double elevatorThreshold = Units.inchesToMeters(40);
   private LoggedTunableNumber armTolerance =
       new LoggedTunableNumber("Superstructure/ArmThreshold", .6);
-  private SuperstructureStates previousState = SuperstructureStates.STOW;
+  @Getter private SuperstructureStates previousState = SuperstructureStates.STOW;
 
   @Override
   public void periodic() {

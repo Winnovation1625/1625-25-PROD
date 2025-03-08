@@ -40,7 +40,7 @@ public class Arm {
   private boolean brakeModeEnabled;
   private BooleanSupplier disableSupplier = DriverStation::isDisabled;
   private BooleanSupplier coastSupplier = () -> false;
-  private DoubleSupplier positionSetpoint;
+  private DoubleSupplier positionSetpoint = () -> Math.PI / 2;
 
   public void periodic() {
     io.updateInputs(inputs);
