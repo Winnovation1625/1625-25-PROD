@@ -249,16 +249,8 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    controller
-        .x()
-        .whileTrue(
-            superstructure.buildSuperStructureCommand(
-                superstructure.getPreviousState(), SuperstructureStates.INTAKING));
-    controller
-        .leftTrigger()
-        .whileTrue(
-            superstructure.buildSuperStructureCommand(
-                superstructure.getPreviousState(), SuperstructureStates.CLVL2));
+    controller.x().whileTrue(superstructure.setGoalCommand(SuperstructureStates.INTAKING));
+    controller.leftTrigger().whileTrue(superstructure.setGoalCommand(SuperstructureStates.CLVL2));
   }
 
   /**

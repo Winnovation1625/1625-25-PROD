@@ -71,16 +71,22 @@ public class Superstructure extends SubsystemBase {
     setDefaultCommand(setGoalCommand(SuperstructureStates.STOW));
   }
 
-  @Getter @Setter private boolean hasAlgae = false;
+  @AutoLogOutput @Getter @Setter private boolean hasAlgae = false;
+
+  @AutoLogOutput
   private LoggedTunableNumber stowPos = new LoggedTunableNumber("Superstructure/StowPos", 27.5591);
+
   private LoggedTunableNumber algaeStowPos =
       new LoggedTunableNumber("Superstructure/algaeStowPos", 34);
   private LoggedTunableNumber normalStowPos =
       new LoggedTunableNumber("Superstrcture/NormalStowPos", 27.5591);
-  private double elevatorThreshold = Units.inchesToMeters(40);
+  private double elevatorThreshold = Units.inchesToMeters(80);
   private LoggedTunableNumber armTolerance =
-      new LoggedTunableNumber("Superstructure/ArmThreshold", .6);
+      new LoggedTunableNumber("Superstructure/ArmThreshold", .20);
   @Getter private SuperstructureStates previousState = SuperstructureStates.STOW;
+  @AutoLogOutput private boolean case1 = false;
+  @AutoLogOutput private boolean case2 = false;
+  @AutoLogOutput private boolean case3 = false;
 
   @Override
   public void periodic() {
@@ -92,7 +98,7 @@ public class Superstructure extends SubsystemBase {
       }
 
       case STOW -> {
-        buildSuperStructureCommand(previousState, superstructureGoal);
+        buildSuperStructureCommand(superstructureGoal, previousState);
       }
 
       case CLIMB -> {
@@ -109,6 +115,7 @@ public class Superstructure extends SubsystemBase {
 
       case CLVL2 -> {
         buildSuperStructureCommand(previousState, superstructureGoal);
+        setHasAlgae(true);
       }
 
       case CLVL3 -> {
@@ -121,7 +128,6 @@ public class Superstructure extends SubsystemBase {
 
       case ALVL2 -> {
         buildSuperStructureCommand(previousState, superstructureGoal);
-        ;
       }
 
       case ALVL3 -> {
@@ -148,7 +154,7 @@ public class Superstructure extends SubsystemBase {
 
   public Command buildSuperStructureCommand(SuperstructureStates from, SuperstructureStates to) {
 
-    moveArmAndElevator(to.elevatorHeight.getAsDouble(), to.armAngle, hasAlgae);
+    moveArmAndElevator(to.elevatorHeight.getAsDouble(), to.armAngle, hasAlgae, from);
     previousState = to;
 
     /* https://v6.docs.ctr-electronics.com/en/stable/docs/api-reference/device-specific/talonfx/basic-pid-control.html#motion-profiling
@@ -242,6 +248,7 @@ public class Superstructure extends SubsystemBase {
 
     if (elevator.getElevatorHeight() > elevatorThreshold
         && superstructureGoal.getElevatorHeight().getAsDouble() < elevatorThreshold) {
+      case1 = true;
       elevator.setPosition(stowPos.getAsDouble());
       arm.setPosition(armSetpoint);
 
@@ -250,6 +257,7 @@ public class Superstructure extends SubsystemBase {
       }
     } else if (elevator.getElevatorHeight() < elevatorThreshold
         && superstructureGoal.getElevatorHeight().getAsDouble() > elevatorThreshold) {
+      case2 = true;
       elevator.setPosition(stowPos.getAsDouble());
 
       if (elevatorClearofBumpers()) {
@@ -259,6 +267,7 @@ public class Superstructure extends SubsystemBase {
 
     } else if (elevator.getElevatorHeight() < elevatorThreshold
         && superstructureGoal.getElevatorHeight().getAsDouble() > elevatorThreshold) {
+      case3 = true;
       elevator.setPosition(stowPos.getAsDouble());
 
       if (elevatorClearofBumpers()) {
@@ -267,6 +276,9 @@ public class Superstructure extends SubsystemBase {
       if (armWithinTolerance()) {
         elevator.setPosition(elevatorSetpoint);
       }
+    } else {
+      arm.setPosition(armSetpoint);
+      elevator.setPosition(elevatorSetpoint);
     }
   }
 
