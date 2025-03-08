@@ -1,6 +1,7 @@
 package frc.robot.subsystem.superstructure.elevator;
 
 import static frc.robot.subsystem.superstructure.elevator.ElevatorConstants.*;
+import static frc.robot.util.PhoenixUtil.tryUntilOk;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
@@ -125,7 +126,7 @@ public class ElevatorIOKraken implements ElevatorIO {
     config.Slot0.kP = p;
     config.Slot0.kI = i;
     config.Slot0.kD = d;
-    elevatorTalon.getConfigurator().apply(config);
+    tryUntilOk(5, () -> elevatorTalon.getConfigurator().apply(config));
   }
 
   @Override

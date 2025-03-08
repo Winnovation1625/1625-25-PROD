@@ -37,6 +37,7 @@ import frc.robot.subsystem.drive.GyroIOSim;
 import frc.robot.subsystem.drive.ModuleIO;
 import frc.robot.subsystem.drive.ModuleIOTalonFXReal;
 import frc.robot.subsystem.drive.ModuleIOTalonFXSim;
+import frc.robot.subsystem.superstructure.Superstructure;
 import frc.robot.subsystem.superstructure.arm.Arm;
 import frc.robot.subsystem.superstructure.arm.ArmIO;
 import frc.robot.subsystem.superstructure.arm.ArmIOKraken;
@@ -61,6 +62,7 @@ public class RobotContainer {
   private final Drive drive;
   private final Arm arm;
   private final Elevator elevator;
+  private final Superstructure superstructure;
 
   @SuppressWarnings("unused")
   private final AprilTagVision aprilTagVision;
@@ -126,7 +128,6 @@ public class RobotContainer {
                 driveSimulation::setSimulationWorldPose);
 
         arm = new Arm(new ArmIOSim());
-
         elevator = new Elevator(new ElevatorIOSim());
         aprilTagVision =
             new AprilTagVision(
@@ -172,7 +173,7 @@ public class RobotContainer {
                 new AprilTagVisionIO() {});
         break;
     }
-
+    superstructure = new Superstructure(arm, elevator);
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
     // Set up SysId routines
