@@ -28,6 +28,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import frc.robot.FieldConstants;
+import frc.robot.subsystem.apriltagvision.AprilTagVisionIO.PoseObservationType;
 import frc.robot.util.GeomUtil;
 import frc.robot.util.VirtualSubsystem;
 import java.util.LinkedList;
@@ -134,25 +135,39 @@ public class AprilTagVision extends VirtualSubsystem {
         if (rejectPose) {
           continue;
         }
+        if (observation.type() == PoseObservationType.PHOTONVISION_MULTI_TAG
+            || observation.type() == PoseObservationType.PHOTONVISION_SINGLE_TAG) {
+          // Calculate standard deviations
+          double stdDevFactor =
+              Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount();
+          double linearStdDev = LINEAR_STD_DEV_BASELINE * stdDevFactor;
+          double angularStdDev = ANGULAR_STD_DEV_BASELINE * stdDevFactor;
+          if (cameraIndex < CAMERA_CONFIGS.size()) {
+            linearStdDev *= CAMERA_CONFIGS.get(cameraIndex).stdDevFactor();
+            angularStdDev *= CAMERA_CONFIGS.get(cameraIndex).stdDevFactor();
+          }
 
-        // Calculate standard deviations
-        double stdDevFactor =
-            Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount();
-        double linearStdDev = LINEAR_STD_DEV_BASELINE * stdDevFactor;
-        double angularStdDev = ANGULAR_STD_DEV_BASELINE * stdDevFactor;
-        if (cameraIndex < CAMERA_CONFIGS.size()) {
-          linearStdDev *= CAMERA_CONFIGS.get(cameraIndex).stdDevFactor();
-          angularStdDev *= CAMERA_CONFIGS.get(cameraIndex).stdDevFactor();
+          // Send vision observation
+          consumer.accept(
+              observation.pose().toPose2d(),
+              observation.timestamp(),
+              VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev),
+              null,
+              null);
         }
-
-        // Send vision observation
-        consumer.accept(
-            observation.pose().toPose2d(),
-            observation.timestamp(),
-            VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev));
+        if (observation.type() == PoseObservationType.PHOTONVISION_TX_TY) {
+          consumer.accept(
+              observation.pose().toPose2d(),
+              observation.timestamp(),
+              null,
+              observation.averageTagDistance(),
+              observation.tagCount());
+        }
       }
 
       // Log camera datadata
+      // TODO: Remvove Rejected and Robot Poses from any logging since it includes bad poses, only
+      // pass accepted poses to drive, less load on NT
       Logger.recordOutput(
           "Vision/" + CAMERA_CONFIGS.get(cameraIndex).cameraName() + "/TagPoses",
           tagPoses.toArray(new Pose3d[tagPoses.size()]));
@@ -196,11 +211,12 @@ public class AprilTagVision extends VirtualSubsystem {
     allRobotPosesRejected.clear();
   }
 
-  @FunctionalInterface
   public static interface VisionConsumer {
     public void accept(
         Pose2d visionRobotPoseMeters,
         double timestampSeconds,
-        Matrix<N3, N1> visionMeasurementStdDevs);
+        Matrix<N3, N1> visionMeasurementStdDevs,
+        Double distance,
+        Integer tagId);
   }
 }

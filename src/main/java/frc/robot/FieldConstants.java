@@ -156,19 +156,20 @@ public class FieldConstants {
 
   @RequiredArgsConstructor
   public enum ReefPosition {
-    A(1),
-    B(0),
-    C(11),
-    D(10),
-    E(9),
-    F(8),
-    G(7),
-    H(6),
-    I(5),
-    J(4),
-    K(3),
-    L(2);
+    A(1, 0),
+    B(0, 0),
+    C(11, 5),
+    D(10, 5),
+    E(9, 4),
+    F(8, 4),
+    G(7, 3),
+    H(6, 3),
+    I(5, 2),
+    J(4, 2),
+    K(3, 1),
+    L(2, 1);
     @Getter private final int fieldConstantsIndex;
+    @Getter private final int face;
 
     // Reverse-lookup map for getting a reef position from the index of the list
     private static final Map<Integer, ReefPosition> lookup = new HashMap<Integer, ReefPosition>();

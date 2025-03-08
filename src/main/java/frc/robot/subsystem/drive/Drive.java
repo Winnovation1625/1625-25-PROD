@@ -30,7 +30,9 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -42,17 +44,25 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
+import frc.robot.FieldConstants;
+import frc.robot.RobotState.OdometryObservation;
+import frc.robot.RobotState.TxTyPoseRecord;
 import frc.robot.subsystem.apriltagvision.AprilTagVision;
 import frc.robot.util.LocalADStarAK;
+import frc.robot.util.LoggedTunableNumber;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
+import lombok.Getter;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -65,20 +75,26 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
   private final SysIdRoutine sysId;
   private final Alert gyroDisconnectedAlert =
       new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
+  private static final LoggedTunableNumber txTyObservationStaleSecs =
+      new LoggedTunableNumber("Drive/TxTyObservationStaleSeconds", 0.5);
 
-  private SwerveDriveKinematics kinematics =
+  private static SwerveDriveKinematics kinematics =
       new SwerveDriveKinematics(DriveConstants.getModuleTranslations());
-  private Rotation2d rawGyroRotation = new Rotation2d();
-  private SwerveModulePosition[] lastModulePositions = // For delta tracking
+  private static Rotation2d rawGyroRotation = new Rotation2d();
+  private static SwerveModulePosition[] lastModulePositions = // For delta tracking
       new SwerveModulePosition[] {
         new SwerveModulePosition(),
         new SwerveModulePosition(),
         new SwerveModulePosition(),
         new SwerveModulePosition()
       };
-  private SwerveDrivePoseEstimator poseEstimator =
+  private static SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
-
+  private static final double poseBufferSizeSec = 2.0;
+  private final Map<Integer, TxTyPoseRecord> txTyPoses = new HashMap<>();
+  private final TimeInterpolatableBuffer<Pose2d> poseBuffer =
+      TimeInterpolatableBuffer.createBuffer(poseBufferSizeSec);
+  @Getter private Pose2d odometryPose = new Pose2d();
   private final SwerveSetpointGenerator setpointGenerator;
   private SwerveSetpoint previousSetpoint;
 
@@ -142,6 +158,10 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
         new SwerveSetpointGenerator(DriveConstants.PP_CONFIG, Units.rotationsToRadians(10));
     previousSetpoint =
         new SwerveSetpoint(getChassisSpeeds(), getModuleStates(), DriveFeedforwards.zeros(4));
+
+    for (int i = 1; i <= FieldConstants.aprilTagCount; i++) {
+      txTyPoses.put(i, new TxTyPoseRecord(new Pose2d(), Double.POSITIVE_INFINITY, -1.0));
+    }
   }
 
   @Override
@@ -194,13 +214,21 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
         Twist2d twist = kinematics.toTwist2d(moduleDeltas);
         rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
       }
-
+      addOdometryObservation(
+          new OdometryObservation(modulePositions, rawGyroRotation, sampleTimestamps[i]));
       // Apply update
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
     }
 
     // Update gyro alert
     gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.CURRENT_MODE != Mode.SIM);
+
+    for (var tag : FieldConstants.defaultAprilTagType.getLayout().getTags()) {
+      var pose = getTxTyPose(tag.ID);
+      Logger.recordOutput(
+          "Drive/TxTyPoses/" + Integer.toString(tag.ID),
+          pose.isPresent() ? new Pose2d[] {pose.get()} : new Pose2d[] {});
+    }
   }
 
   /**
@@ -287,7 +315,7 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
 
   /** Returns the measured chassis speeds of the robot. */
   @AutoLogOutput(key = "SwerveChassisSpeeds/Measured")
-  private ChassisSpeeds getChassisSpeeds() {
+  public ChassisSpeeds getChassisSpeeds() {
     return kinematics.toChassisSpeeds(getModuleStates());
   }
 
@@ -340,12 +368,49 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
     return poseEstimator.sampleAt(timestamp);
   }
 
+  /** Get 2d pose estimate of robot if not stale. */
+  public Optional<Pose2d> getTxTyPose(int tagId) {
+    if (!txTyPoses.containsKey(tagId)) {
+      DriverStation.reportError("No tag with id: " + tagId, true);
+      return Optional.empty();
+    }
+    var data = txTyPoses.get(tagId);
+    // Check if stale
+    if (Timer.getTimestamp() - data.timestamp() >= txTyObservationStaleSecs.get()) {
+      return Optional.empty();
+    }
+    // Get odometry based pose at timestamp
+    var sample = poseBuffer.getSample(data.timestamp());
+    // Latency compensate
+    return sample.map(pose2d -> data.pose().plus(new Transform2d(pose2d, odometryPose)));
+  }
+
+  public void addOdometryObservation(OdometryObservation observation) {
+    Twist2d twist = kinematics.toTwist2d(lastModulePositions, observation.wheelPositions());
+    lastModulePositions = observation.wheelPositions();
+    Pose2d lastOdometryPose = odometryPose;
+    odometryPose = odometryPose.exp(twist);
+    // Use gyro if connected
+
+    Rotation2d angle = observation.gyroAngle();
+    odometryPose = new Pose2d(odometryPose.getTranslation(), angle);
+
+    // Add pose to buffer at timestamp
+    poseBuffer.addSample(observation.timestamp(), odometryPose);
+  }
+
   @Override
   public void accept(
       Pose2d visionRobotPoseMeters,
       double timestampSeconds,
-      Matrix<N3, N1> visionMeasurementStdDevs) {
-    poseEstimator.addVisionMeasurement(
-        visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
+      Matrix<N3, N1> visionMeasurementStdDevs,
+      Double distance,
+      Integer tagId) {
+    if (visionMeasurementStdDevs != null) {
+      poseEstimator.addVisionMeasurement(
+          visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
+    } else {
+      txTyPoses.put(tagId, new TxTyPoseRecord(visionRobotPoseMeters, distance, timestampSeconds));
+    }
   }
 }
