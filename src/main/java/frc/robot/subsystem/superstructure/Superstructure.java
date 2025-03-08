@@ -80,6 +80,7 @@ public class Superstructure extends SubsystemBase {
   private double elevatorThreshold = Units.inchesToMeters(40);
   private LoggedTunableNumber armTolerance =
       new LoggedTunableNumber("Superstructure/ArmThreshold", .6);
+  private SuperstructureStates previousState = SuperstructureStates.STOW;
 
   @Override
   public void periodic() {
@@ -87,62 +88,51 @@ public class Superstructure extends SubsystemBase {
     elevator.periodic();
     switch (superstructureGoal) {
       case INTAKING -> {
-        arm.setPosition(superstructureGoal.armAngle);
-        elevator.setPosition(superstructureGoal.elevatorHeight.getAsDouble());
+        buildSuperStructureCommand(previousState, superstructureGoal);
       }
 
       case STOW -> {
-        arm.setPosition(superstructureGoal.armAngle);
-        elevator.setPosition(superstructureGoal.elevatorHeight.getAsDouble());
+        buildSuperStructureCommand(previousState, superstructureGoal);
       }
 
       case CLIMB -> {
-        arm.setPosition(superstructureGoal.armAngle);
-        elevator.setPosition(superstructureGoal.elevatorHeight.getAsDouble());
+        buildSuperStructureCommand(previousState, superstructureGoal);
       }
 
       case BARGE -> {
-        arm.setPosition(superstructureGoal.armAngle);
-        elevator.setPosition(superstructureGoal.elevatorHeight.getAsDouble());
+        buildSuperStructureCommand(previousState, superstructureGoal);
       }
 
       case TROUGH -> {
-        arm.setPosition(superstructureGoal.armAngle);
-        elevator.setPosition(superstructureGoal.elevatorHeight.getAsDouble());
+        buildSuperStructureCommand(previousState, superstructureGoal);
       }
 
       case CLVL2 -> {
-        arm.setPosition(superstructureGoal.armAngle);
-        elevator.setPosition(superstructureGoal.elevatorHeight.getAsDouble());
+        buildSuperStructureCommand(previousState, superstructureGoal);
       }
 
       case CLVL3 -> {
-        arm.setPosition(superstructureGoal.armAngle);
-        elevator.setPosition(superstructureGoal.elevatorHeight.getAsDouble());
+        buildSuperStructureCommand(previousState, superstructureGoal);
       }
 
       case CLVL4 -> {
-        arm.setPosition(superstructureGoal.armAngle);
-        elevator.setPosition(superstructureGoal.elevatorHeight.getAsDouble());
+        buildSuperStructureCommand(previousState, superstructureGoal);
       }
 
       case ALVL2 -> {
-        arm.setPosition(superstructureGoal.armAngle);
-        elevator.setPosition(superstructureGoal.elevatorHeight.getAsDouble());
+        buildSuperStructureCommand(previousState, superstructureGoal);
+        ;
       }
 
       case ALVL3 -> {
-        arm.setPosition(superstructureGoal.armAngle);
-        elevator.setPosition(superstructureGoal.elevatorHeight.getAsDouble());
+        buildSuperStructureCommand(previousState, superstructureGoal);
       }
 
       case PROCESS -> {
-        arm.setPosition(superstructureGoal.armAngle);
-        elevator.setPosition(superstructureGoal.elevatorHeight.getAsDouble());
+        buildSuperStructureCommand(previousState, superstructureGoal);
       }
       case STOP -> {
-        arm.setPosition(superstructureGoal.armAngle);
-        elevator.setPosition(superstructureGoal.elevatorHeight.getAsDouble());
+        buildSuperStructureCommand(previousState, superstructureGoal);
       }
     }
     setpointVisualizer.updateSuperstructurePose(
@@ -157,7 +147,9 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command buildSuperStructureCommand(SuperstructureStates from, SuperstructureStates to) {
-    return null;
+
+    moveArmAndElevator(to.elevatorHeight.getAsDouble(), to.armAngle, hasAlgae);
+    previousState = to;
 
     /* https://v6.docs.ctr-electronics.com/en/stable/docs/api-reference/device-specific/talonfx/basic-pid-control.html#motion-profiling
     * https://github.com/Mechanical-Advantage/RobotCode2025Public/blob/main/src/main/java/org/littletonrobotics/frc2025/subsystems/superstructure/Superstructure.java#L536
@@ -224,6 +216,7 @@ public class Superstructure extends SubsystemBase {
     * second check will be for when we have an algae and need to worry about it colliding with the elevator and knocking the algae out, or worse...
     */
     //
+    return null;
   }
 
   public Command setGoalCommand(SuperstructureStates goal) {
