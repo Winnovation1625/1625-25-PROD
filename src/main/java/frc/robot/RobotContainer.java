@@ -313,7 +313,7 @@ public class RobotContainer {
                     Commands.waitUntil(
                         () ->
                             manipulator.getGamepieceState()
-                                == Manipulator.GamepieceState.ALGAE_IN_CLAW))44444444444444444444444444444
+                                == Manipulator.GamepieceState.ALGAE_IN_CLAW))
                 .andThen(
                     superstructure.setSuperstructureCommand(
                         () -> SuperstructureStates.ALGAE_STOW)));
