@@ -235,7 +235,7 @@ public class RobotContainer {
                 () -> new Rotation2d()));
 
     // Switch to X pattern when X button is pressed
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    // controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
     // Reset gyro / odometry
     final Runnable resetGyro =
@@ -261,10 +261,18 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    controller.x().onTrue(superstructure.setSuperstructureCommand(SuperstructureStates.INTAKING));
+    controller
+        .x()
+        .onTrue(superstructure.setSuperstructureCommand(() -> SuperstructureStates.INTAKING));
     controller
         .leftTrigger()
-        .onTrue(superstructure.setSuperstructureCommand(SuperstructureStates.CLVL2));
+        .onTrue(superstructure.setSuperstructureCommand(() -> SuperstructureStates.CLVL2));
+    controller
+        .leftBumper()
+        .onTrue(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW));
+    controller
+        .rightBumper()
+        .onTrue(superstructure.setSuperstructureCommand(() -> SuperstructureStates.CLVL4));
   }
 
   /**

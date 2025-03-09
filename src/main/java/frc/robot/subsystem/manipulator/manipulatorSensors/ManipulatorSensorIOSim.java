@@ -10,11 +10,16 @@ public class ManipulatorSensorIOSim implements ManipulatorSensorIO {
       new LoggedTunableNumber("ManipulatorSensorIOSim/Backsensor", 290);
   private LoggedTunableNumber algaeSensor =
       new LoggedTunableNumber("ManipulatorSensorIOSim/Algaesensor", 290);
+  private LoggedTunableNumber algaeSensorThreshold =
+      new LoggedTunableNumber("Manipulator/AlgaeSensorThreshold", 200);
 
   @Override
   public void updateInputs(ManipulatorSensorIOInputs inputs) {
     inputs.frontSensorMeasurment = frontSensor.get();
     inputs.backSensorMeasurment = backSensor.get();
     inputs.algaeSensorMeasurment = algaeSensor.get();
+    inputs.isAlgaeDetected = algaeSensor.get() < algaeSensorThreshold.get();
+    inputs.isFrontCoralDetected = false;
+    inputs.isBackCoralDetected = false;
   }
 }

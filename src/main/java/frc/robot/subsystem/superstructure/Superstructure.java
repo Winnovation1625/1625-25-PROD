@@ -9,6 +9,7 @@ import frc.robot.subsystem.superstructure.arm.Arm.ArmState;
 import frc.robot.subsystem.superstructure.elevator.Elevator;
 import frc.robot.subsystem.superstructure.elevator.Elevator.ElevatorState;
 import frc.robot.util.LoggedTunableNumber;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -61,10 +62,7 @@ public class Superstructure extends SubsystemBase {
     this.arm = arm;
     this.elevator = elevator;
     this.hasAlgaeSupplier = hasAlgaeSupplier;
-    setSuperstructureCommand(SuperstructureStates.STOW).schedule();
   }
-
-  @Getter private SuperstructureStates previousState = SuperstructureStates.STOW;
 
   @Override
   public void periodic() {
@@ -130,52 +128,99 @@ public class Superstructure extends SubsystemBase {
   //   }
   // }
 
-  public Command setSuperstructureCommand(SuperstructureStates to) {
+  public Command setSuperstructureCommand(Supplier<SuperstructureStates> to) {
+    Supplier<ElevatorState> toElevatorState =
+        () ->
+            to.get() == SuperstructureStates.STOW && hasAlgaeSupplier.get()
+                ? ElevatorState.ALGAE_STOW
+                : to.get().getElevatorState();
+    BooleanSupplier currentlyBelowThreshold =
+        () ->
+            elevatorState.getElevatorHeight().getAsDouble()
+                < (hasAlgaeSupplier.get() ? elevatorAlgaeThreshold.get() : elevatorThreshold.get());
+    BooleanSupplier goingBelowThreshold =
+        () ->
+            toElevatorState.get().getElevatorHeight().getAsDouble()
+                < (hasAlgaeSupplier.get() ? elevatorAlgaeThreshold.get() : elevatorThreshold.get());
+    Supplier<ElevatorState> intermediateState =
+        () -> hasAlgaeSupplier.get() ? ElevatorState.ALGAE_CLEARANCE : ElevatorState.STOW;
+    return Commands.either(
+        Commands.either( // true, true worst case
+            runElevatorToState(intermediateState)
+                .andThen(Commands.waitUntil(() -> atGoal()))
+                .andThen(runArmToState(() -> to.get().getArmState()))
+                .andThen(Commands.waitUntil(() -> atGoal()))
+                .andThen(runElevatorToState(toElevatorState))
+                .andThen(() -> superstructureGoal = to.get(), this)
+                .withName("Worst Case Superstructure Run"),
+            // true, false starting below thresh, but going above
+            runElevatorToState(intermediateState)
+                .andThen(Commands.waitUntil(() -> atGoal()))
+                .andThen(runArmToState(() -> to.get().getArmState()))
+                .alongWith(runElevatorToState(toElevatorState))
+                .andThen(() -> superstructureGoal = to.get(), this)
+                .withName("From Under Superstructure Run"),
+            goingBelowThreshold),
+        Commands.either(
+            // false, true above thresh going below
+            runElevatorToState(intermediateState)
+                .alongWith(runArmToState(() -> to.get().getArmState()))
+                .andThen(Commands.waitUntil(() -> atGoal()))
+                .andThen(runElevatorToState(toElevatorState))
+                .andThen(() -> superstructureGoal = to.get(), this)
+                .withName("From Above Case Superstructure Run"),
+            // false false no issues with threshold
+            runElevatorToState(toElevatorState)
+                .alongWith(runArmToState(() -> to.get().armState))
+                .andThen(() -> superstructureGoal = to.get(), this)
+                .withName("Best Case Superstructure Run"),
+            goingBelowThreshold),
+        currentlyBelowThreshold);
 
-    SuperstructureStates intermediateState =
-        hasAlgaeSupplier.get() ? SuperstructureStates.ALGAE_CLEARANCE : SuperstructureStates.STOW;
-    double threshold =
-        hasAlgaeSupplier.get() ? elevatorThreshold.get() : elevatorAlgaeThreshold.get();
-    if (superstructureGoal == to) {
-      return Commands.none();
-    }
-
-    if (elevatorState.getElevatorHeight().getAsDouble() < threshold
-        && to.elevatorState.getElevatorHeight().getAsDouble() < threshold) {
-      return runElevatorToState(intermediateState.getElevatorState())
-          .andThen(Commands.waitUntil(() -> atGoal()))
-          .andThen(runArmToState(to.getArmState()))
-          .andThen(Commands.waitUntil(() -> atGoal()))
-          .andThen(runElevatorToState(to.getElevatorState()))
-          .andThen(() -> superstructureGoal = to, this);
-      // add intermediate state
-    } else if (elevatorState.getElevatorHeight().getAsDouble() < threshold
-        && to.elevatorState.getElevatorHeight().getAsDouble() > threshold) {
-      return runElevatorToState(intermediateState.getElevatorState())
-          .andThen(Commands.waitUntil(() -> atGoal()))
-          .andThen(runArmToState(to.getArmState()))
-          .alongWith(runElevatorToState(to.getElevatorState()))
-          .andThen(() -> superstructureGoal = to, this);
-      // add intermediate state
-    } else if (elevatorState.getElevatorHeight().getAsDouble() > threshold
-        && to.elevatorState.getElevatorHeight().getAsDouble() < threshold) {
-      return runElevatorToState(intermediateState.getElevatorState())
-          .alongWith(runArmToState(to.getArmState()))
-          .andThen(Commands.waitUntil(() -> atGoal()))
-          .andThen(runElevatorToState(to.getElevatorState()))
-          .andThen(() -> superstructureGoal = to, this);
-      // add intermediate state
-    } else {
-      return runElevatorToState(to.elevatorState)
-          .alongWith(runArmToState(to.armState))
-          .andThen(() -> superstructureGoal = to, this); // ends immediately,
-      // no intermediate state continue as nomal
-    }
+    // if (elevatorState.getElevatorHeight().getAsDouble() < threshold
+    //     && to.elevatorState.getElevatorHeight().getAsDouble() < threshold) {
+    //   System.out.println("Worst Case Scenario");
+    //   return runElevatorToState(intermediateState.getElevatorState())
+    //       .andThen(Commands.waitUntil(() -> atGoal()))
+    //       .andThen(runArmToState(to.getArmState()))
+    //       .andThen(Commands.waitUntil(() -> atGoal()))
+    //       .andThen(runElevatorToState(to.getElevatorState()))
+    //       .andThen(() -> superstructureGoal = to, this)
+    //       .withName("Worst Case Superstructure Run");
+    //   // add intermediate state
+    // } else if (elevatorState.getElevatorHeight().getAsDouble() < threshold
+    //     && to.elevatorState.getElevatorHeight().getAsDouble() > threshold) {
+    //   System.out.println("from below Case Scenario");
+    //   return runElevatorToState(intermediateState.getElevatorState())
+    //       .andThen(Commands.waitUntil(() -> atGoal()))
+    //       .andThen(runArmToState(to.getArmState()))
+    //       .alongWith(runElevatorToState(to.getElevatorState()))
+    //       .andThen(() -> superstructureGoal = to, this)
+    //       .withName("From Under Superstructure Run");
+    //   // add intermediate state
+    // } else if (elevatorState.getElevatorHeight().getAsDouble() > threshold
+    //     && to.elevatorState.getElevatorHeight().getAsDouble() < threshold) {
+    //   System.out.println("from above Case Scenario");
+    //   return runElevatorToState(intermediateState.getElevatorState())
+    //       .alongWith(runArmToState(to.getArmState()))
+    //       .andThen(Commands.waitUntil(() -> atGoal()))
+    //       .andThen(runElevatorToState(to.getElevatorState()))
+    //       .andThen(() -> superstructureGoal = to, this)
+    //       .withName("From Above Case Superstructure Run");
+    //   // add intermediate state
+    // } else {
+    //   System.out.println("Best Case Scenario");
+    //   return runElevatorToState(to.elevatorState)
+    //       .alongWith(runArmToState(to.armState))
+    //       .andThen(() -> superstructureGoal = to, this)
+    //       .withName("Best Case Superstructure Run"); // ends immediately,
+    //   // no intermediate state continue as nomal
+    // }
   }
 
-  private Command runArmToState(ArmState armState) {
-    this.armState = armState;
-    return Commands.runOnce(() -> arm.setPosition(armState.getArmAngle()), this);
+  private Command runArmToState(Supplier<ArmState> armState) {
+    return Commands.runOnce(() -> arm.setPosition(armState.get().getArmAngle()))
+        .alongWith(Commands.runOnce(() -> this.armState = armState.get()));
   }
 
   // public Command setGoalCommand(SuperstructureStates goal) {
@@ -183,9 +228,10 @@ public class Superstructure extends SubsystemBase {
   //       .withName("Superstructure " + goal);
   // }
 
-  private Command runElevatorToState(ElevatorState state) {
-    this.elevatorState = state;
-    return Commands.runOnce(() -> elevator.setPosition(state.getElevatorHeight()), this);
+  private Command runElevatorToState(Supplier<ElevatorState> state) {
+    this.elevatorState = state.get();
+    return Commands.runOnce(() -> elevator.setPosition(state.get().getElevatorHeight()))
+        .alongWith(Commands.runOnce(() -> elevatorState = state.get()));
   }
 
   public boolean atGoal() {
@@ -195,7 +241,9 @@ public class Superstructure extends SubsystemBase {
   public boolean atSuperStructureGoal() {
     return atGoal()
         && superstructureGoal.getArmState() == armState
-        && superstructureGoal.getElevatorState() == elevatorState;
+        && (superstructureGoal.getElevatorState() == elevatorState
+            || (superstructureGoal.getElevatorState() == ElevatorState.STOW
+                && elevatorState == ElevatorState.ALGAE_STOW));
   }
 
   public boolean elevatorClearofBumpers() {

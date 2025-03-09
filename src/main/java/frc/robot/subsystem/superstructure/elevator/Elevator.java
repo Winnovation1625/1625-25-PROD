@@ -24,6 +24,8 @@ public class Elevator {
   private static final LoggedTunableNumber kP = new LoggedTunableNumber("Elevator/kP", gains.kP());
   private static final LoggedTunableNumber kI = new LoggedTunableNumber("Elevator/kI", gains.kI());
   private static final LoggedTunableNumber kD = new LoggedTunableNumber("Elevator/kD", gains.kD());
+  private static final LoggedTunableNumber elevatorTolerance =
+      new LoggedTunableNumber("Elevator/ToleranceMeters", ELEVATOR_TOLERANCE_METERS);
   private boolean characterizing;
   private boolean brakeModeEnabled;
   private BooleanSupplier disableSupplier = DriverStation::isDisabled;
@@ -37,9 +39,11 @@ public class Elevator {
         new LoggedTunableNumber(
             "Superstructure/Elevator/INTAKING", Units.inchesToMeters(25.21014))),
     STOW(new LoggedTunableNumber("Superstructure/Elevator/STOW", Units.inchesToMeters(27.5591))),
-    ALGAE_STOW(new LoggedTunableNumber("Superstructure/Elevator/STOW", Units.inchesToMeters(40))),
+    ALGAE_STOW(
+        new LoggedTunableNumber("Superstructure/Elevator/ALGAE STOW", Units.inchesToMeters(34))),
     ALGAE_CLEARANCE(
-        new LoggedTunableNumber("Superstructure/Elevator/STOW", Units.inchesToMeters(47))),
+        new LoggedTunableNumber(
+            "Superstructure/Elevator/ALGAE CLEARANCE", Units.inchesToMeters(47))),
     CLIMB(new LoggedTunableNumber("Superstructure/Elevator/CLIMB", Units.inchesToMeters(27.5591))),
     BARGE(new LoggedTunableNumber("Superstructure/Elevator/BARGE", Units.inchesToMeters(80))),
     CLVL2(new LoggedTunableNumber("Superstructure/Elevator/CLVL2", Units.inchesToMeters(39.3701))),
@@ -90,7 +94,7 @@ public class Elevator {
       // io.setPosition(convertDistanceMetersToRadians(positionSetpoint));
       Logger.recordOutput(
           "Superstructure/Elevator/ElevatorSetpointInches",
-      Units.metersToInches(setpoint.getAsDouble()));
+          Units.metersToInches(setpoint.getAsDouble()));
       Logger.recordOutput(
           "Superstructure/Elevator/ElevatorSetpointRads",
           convertDistanceMetersToRadians(setpoint.getAsDouble()));
@@ -103,11 +107,12 @@ public class Elevator {
         EqualsUtil.epsilonEquals(
             convertRadiansToDistanceMeters(inputs.positionRad),
             setpoint.getAsDouble(),
-            ELEVATOR_TOLERANCE_METERS));
+            elevatorTolerance.get()));
   }
 
   public void setPosition(DoubleSupplier positionSetpointMeters) {
-    if (setpoint != positionSetpointMeters) {
+    System.out.println("Set Command For Elevator Ran to " + positionSetpointMeters.getAsDouble());
+    if (setpoint.getAsDouble() != positionSetpointMeters.getAsDouble()) {
       this.setpoint = positionSetpointMeters;
       io.setPosition(convertDistanceMetersToRadians(positionSetpointMeters.getAsDouble()));
     }
@@ -143,6 +148,4 @@ public class Elevator {
   public double getElevatorHeight() {
     return convertRadiansToDistanceMeters(inputs.positionRad);
   }
-
-
 }

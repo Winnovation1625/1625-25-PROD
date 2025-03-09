@@ -21,11 +21,16 @@ public class Arm {
   private static final LoggedTunableNumber kP = new LoggedTunableNumber("Arm/kP", gains.kP());
   private static final LoggedTunableNumber kI = new LoggedTunableNumber("Arm/kI", gains.kI());
   private static final LoggedTunableNumber kD = new LoggedTunableNumber("Arm/kD", gains.kD());
+  private static final LoggedTunableNumber armTolerance =
+      new LoggedTunableNumber("Arm/Tolerance", ARM_TOLERANCE);
   // private boolean characterizing;
   private boolean brakeModeEnabled;
   private BooleanSupplier disableSupplier = DriverStation::isDisabled;
   private BooleanSupplier coastSupplier = () -> false;
-  @AutoLogOutput(key = "Superstructure/Arm/Position") private DoubleSupplier positionSetpoint = ArmState.STOW.getArmAngle();
+
+  @AutoLogOutput(key = "Superstructure/Arm/Position")
+  private DoubleSupplier positionSetpoint = ArmState.STOP.getArmAngle();
+
   private Debouncer atGoalDebouncer = new Debouncer(0.1, DebounceType.kRising);
   // private static final LoggedTunableNumber kS =
   //     new LoggedTunableNumber("Arm/kS", gains.ffkS());
@@ -84,7 +89,7 @@ public class Arm {
 
     return atGoalDebouncer.calculate(
         EqualsUtil.epsilonEquals(
-            inputs.positionRad, positionSetpoint.getAsDouble(), ARM_TOLERANCE));
+            inputs.positionRad, positionSetpoint.getAsDouble(), armTolerance.get()));
   }
 
   public void setBreakMode(boolean enabled) {
@@ -111,7 +116,8 @@ public class Arm {
   }
 
   public void setPosition(DoubleSupplier positionSetpoint) {
-    if (this.positionSetpoint != positionSetpoint) {
+    System.out.println("Set Command For Arm Ran to " + positionSetpoint.getAsDouble());
+    if (this.positionSetpoint.getAsDouble() != positionSetpoint.getAsDouble()) {
       this.positionSetpoint = positionSetpoint;
       io.setArmPosition(positionSetpoint.getAsDouble());
     }
