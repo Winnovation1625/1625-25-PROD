@@ -52,6 +52,10 @@ public class Manipulator extends SubsystemBase {
   @Getter
   private ManipulatorState manipulatorState = ManipulatorState.IDLE;
 
+  public boolean hasAlgae() {
+    return gamepieceState == GamepieceState.ALGAE_IN_CLAW;
+  }
+
   @Override
   public void periodic() {
     io.updateInputs(inputs);

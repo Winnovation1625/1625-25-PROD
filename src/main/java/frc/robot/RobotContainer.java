@@ -37,6 +37,13 @@ import frc.robot.subsystem.drive.GyroIOSim;
 import frc.robot.subsystem.drive.ModuleIO;
 import frc.robot.subsystem.drive.ModuleIOTalonFXReal;
 import frc.robot.subsystem.drive.ModuleIOTalonFXSim;
+import frc.robot.subsystem.manipulator.Manipulator;
+import frc.robot.subsystem.manipulator.ManipulatorIO;
+import frc.robot.subsystem.manipulator.ManipulatorIOKraken;
+import frc.robot.subsystem.manipulator.ManipulatorIOSim;
+import frc.robot.subsystem.manipulator.manipulatorSensors.ManipulatorSensorIO;
+import frc.robot.subsystem.manipulator.manipulatorSensors.ManipulatorSensorIOSim;
+import frc.robot.subsystem.manipulator.manipulatorSensors.ManipulatorSensorsIOCANrange;
 import frc.robot.subsystem.superstructure.Superstructure;
 import frc.robot.subsystem.superstructure.Superstructure.SuperstructureStates;
 import frc.robot.subsystem.superstructure.arm.Arm;
@@ -64,6 +71,7 @@ public class RobotContainer {
   private final Arm arm;
   private final Elevator elevator;
   private final Superstructure superstructure;
+  private final Manipulator manipulator;
 
   @SuppressWarnings("unused")
   private final AprilTagVision aprilTagVision;
@@ -111,6 +119,8 @@ public class RobotContainer {
                     AprilTagVisionConstants.CAMERA_CONFIGS.get(3),
                     drive::getRotation,
                     drive::getPose));
+        manipulator =
+            new Manipulator(new ManipulatorIOKraken(), new ManipulatorSensorsIOCANrange());
         break;
 
       case SIM:
@@ -150,6 +160,7 @@ public class RobotContainer {
                     AprilTagVisionConstants.CAMERA_CONFIGS.get(3),
                     drive::getRotation,
                     driveSimulation::getSimulatedDriveTrainPose));
+        manipulator = new Manipulator(new ManipulatorIOSim(), new ManipulatorSensorIOSim());
         break;
 
       default:
@@ -172,9 +183,10 @@ public class RobotContainer {
                 new AprilTagVisionIO() {},
                 new AprilTagVisionIO() {},
                 new AprilTagVisionIO() {});
+        manipulator = new Manipulator(new ManipulatorIO() {}, new ManipulatorSensorIO() {});
         break;
     }
-    superstructure = new Superstructure(arm, elevator);
+    superstructure = new Superstructure(arm, elevator, manipulator::hasAlgae);
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
     // Set up SysId routines
@@ -249,8 +261,10 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    controller.x().whileTrue(superstructure.setGoalCommand(SuperstructureStates.INTAKING));
-    controller.leftTrigger().whileTrue(superstructure.setGoalCommand(SuperstructureStates.CLVL2));
+    controller.x().onTrue(superstructure.setSuperstructureCommand(SuperstructureStates.INTAKING));
+    controller
+        .leftTrigger()
+        .onTrue(superstructure.setSuperstructureCommand(SuperstructureStates.CLVL2));
   }
 
   /**

@@ -12,7 +12,6 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
-import java.util.function.DoubleSupplier;
 
 public class ArmIOSim implements ArmIO {
   private DCMotor armMotorSim = DCMotor.getKrakenX60Foc(1);
@@ -64,7 +63,7 @@ public class ArmIOSim implements ArmIO {
   }
 
   @Override
-  public void setArmPosition(DoubleSupplier positionSetpoint) {
-    pidController.setGoal(positionSetpoint.getAsDouble());
+  public void setArmPosition(double positionSetpoint) {
+    pidController.setGoal(positionSetpoint);
   }
 }
