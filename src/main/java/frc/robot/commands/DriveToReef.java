@@ -22,7 +22,9 @@ public class DriveToReef extends DriveToPose {
         drive,
         // goal supplier
         () ->
-            FieldConstants.Reef.branchPositions2d.get(reefPosition.getFieldConstantsIndex()).get(ReefLevel.L4),
+            FieldConstants.Reef.branchPositions2d
+                .get(reefPosition.getFieldConstantsIndex())
+                .get(ReefLevel.L4),
         // robot position supplier
         () -> {
           Optional<Pose2d> txPose =

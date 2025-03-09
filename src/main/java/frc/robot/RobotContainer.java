@@ -315,24 +315,26 @@ public class RobotContainer {
                     Commands.waitUntil(
                         () ->
                             manipulator.getGamepieceState()
-                                == Manipulator.GamepieceState.ALGAE_IN_CLAW))44444444444444444444444444444
+                                == Manipulator.GamepieceState.ALGAE_IN_CLAW))
                 .andThen(
                     superstructure.setSuperstructureCommand(
                         () -> SuperstructureStates.ALGAE_STOW)));
-    controller
-        .rightBumper()
-        .onTrue(
-            superstructure
-                .setSuperstructureCommand(() -> SuperstructureStates.CORAL_INTAKING)
-                .andThen(
-                    Commands.waitUntil(() -> superstructure.atSuperStructureGoal())
-                        .andThen(manipulator.setManipulatorState(ManipulatorState.INTAKING_CORAL)))
-                .andThen(
-                    Commands.waitUntil(
-                        () ->
-                            manipulator.getGamepieceState()
-                                == Manipulator.GamepieceState.CORAL_IN_MANIPULATOR))
-                .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
+    // controller
+    //     .rightBumper()
+    //     .onTrue(
+    //         superstructure
+    //             .setSuperstructureCommand(() -> SuperstructureStates.CORAL_INTAKING)
+    //             .andThen(
+    //                 Commands.waitUntil(() -> superstructure.atSuperStructureGoal())
+    //
+    // .andThen(manipulator.setManipulatorState(ManipulatorState.INTAKING_CORAL)))
+    //             .andThen(
+    //                 Commands.waitUntil(
+    //                     () ->
+    //                         manipulator.getGamepieceState()
+    //                             == Manipulator.GamepieceState.CORAL_IN_MANIPULATOR))
+    //             .andThen(superstructure.setSuperstructureCommand(() ->
+    // SuperstructureStates.STOW)));
     controller.rightBumper().whileTrue(new DriveToReef(drive, ReefPosition.A));
   }
 
