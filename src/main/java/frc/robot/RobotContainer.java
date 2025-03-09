@@ -17,6 +17,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -39,7 +40,16 @@ import frc.robot.subsystem.drive.GyroIOSim;
 import frc.robot.subsystem.drive.ModuleIO;
 import frc.robot.subsystem.drive.ModuleIOTalonFXReal;
 import frc.robot.subsystem.drive.ModuleIOTalonFXSim;
+import frc.robot.subsystem.manipulator.Manipulator;
+import frc.robot.subsystem.manipulator.Manipulator.ManipulatorState;
+import frc.robot.subsystem.manipulator.ManipulatorIO;
+import frc.robot.subsystem.manipulator.ManipulatorIOKraken;
+import frc.robot.subsystem.manipulator.ManipulatorIOSim;
+import frc.robot.subsystem.manipulator.manipulatorSensors.ManipulatorSensorIO;
+import frc.robot.subsystem.manipulator.manipulatorSensors.ManipulatorSensorIOSim;
+import frc.robot.subsystem.manipulator.manipulatorSensors.ManipulatorSensorsIOCANrange;
 import frc.robot.subsystem.superstructure.Superstructure;
+import frc.robot.subsystem.superstructure.Superstructure.SuperstructureStates;
 import frc.robot.subsystem.superstructure.arm.Arm;
 import frc.robot.subsystem.superstructure.arm.ArmIO;
 import frc.robot.subsystem.superstructure.arm.ArmIOKraken;
@@ -65,6 +75,7 @@ public class RobotContainer {
   private final Arm arm;
   private final Elevator elevator;
   private final Superstructure superstructure;
+  private final Manipulator manipulator;
 
   @SuppressWarnings("unused")
   private final AprilTagVision aprilTagVision;
@@ -112,6 +123,8 @@ public class RobotContainer {
                     AprilTagVisionConstants.CAMERA_CONFIGS.get(3),
                     drive::getRotation,
                     drive::getPose));
+        manipulator =
+            new Manipulator(new ManipulatorIOKraken(), new ManipulatorSensorsIOCANrange());
         break;
 
       case SIM:
@@ -151,6 +164,7 @@ public class RobotContainer {
                     AprilTagVisionConstants.CAMERA_CONFIGS.get(3),
                     drive::getRotation,
                     driveSimulation::getSimulatedDriveTrainPose));
+        manipulator = new Manipulator(new ManipulatorIOSim(), new ManipulatorSensorIOSim());
         break;
 
       default:
@@ -173,9 +187,10 @@ public class RobotContainer {
                 new AprilTagVisionIO() {},
                 new AprilTagVisionIO() {},
                 new AprilTagVisionIO() {});
+        manipulator = new Manipulator(new ManipulatorIO() {}, new ManipulatorSensorIO() {});
         break;
     }
-    superstructure = new Superstructure(arm, elevator);
+    superstructure = new Superstructure(arm, elevator, manipulator::hasAlgae);
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
     // Set up SysId routines
@@ -224,7 +239,7 @@ public class RobotContainer {
                 () -> new Rotation2d()));
 
     // Switch to X pattern when X button is pressed
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    // controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
     // Reset gyro / odometry
     final Runnable resetGyro =
@@ -249,6 +264,75 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
+
+    // controller
+    //     .x()
+    //     .onTrue(superstructure.setSuperstructureCommand(() -> SuperstructureStates.INTAKING));
+    // controller
+    //     .leftTrigger()
+    //     .onTrue(superstructure.setSuperstructureCommand(() -> SuperstructureStates.CLVL2));
+    // controller
+    //     .leftBumper()
+    //     .onTrue(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW));
+    // controller
+    //     .rightBumper()
+    //     .onTrue(superstructure.setSuperstructureCommand(() -> SuperstructureStates.CLVL4));
+
+    controller
+        .leftTrigger()
+        .and(
+            () ->
+                manipulator.getGamepieceState() == Manipulator.GamepieceState.CORAL_IN_MANIPULATOR)
+        .onTrue(
+            superstructure
+                .setSuperstructureCommand(() -> SuperstructureStates.CLVL2)
+                .andThen(
+                    Commands.waitUntil(() -> superstructure.atSuperStructureGoal())
+                        .andThen(manipulator.setManipulatorState(ManipulatorState.SHOOTING_CORAL)))
+                .andThen(
+                    Commands.waitUntil(
+                        () ->
+                            manipulator.getGamepieceState()
+                                != Manipulator.GamepieceState.CORAL_IN_MANIPULATOR))
+                .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
+
+    controller
+        .leftBumper()
+        .onTrue(
+            superstructure
+                .setSuperstructureCommand(() -> SuperstructureStates.STOW)
+                .alongWith(manipulator.setManipulatorState(ManipulatorState.IDLE)));
+
+    controller
+        .leftTrigger()
+        .onTrue(
+            superstructure
+                .setSuperstructureCommand(() -> SuperstructureStates.ALGAE_INTAKING)
+                .andThen(
+                    Commands.waitUntil(() -> superstructure.atSuperStructureGoal())
+                        .andThen(manipulator.setManipulatorState(ManipulatorState.INTAKING_ALGAE)))
+                .andThen(
+                    Commands.waitUntil(
+                        () ->
+                            manipulator.getGamepieceState()
+                                == Manipulator.GamepieceState.ALGAE_IN_CLAW))44444444444444444444444444444
+                .andThen(
+                    superstructure.setSuperstructureCommand(
+                        () -> SuperstructureStates.ALGAE_STOW)));
+    controller
+        .rightBumper()
+        .onTrue(
+            superstructure
+                .setSuperstructureCommand(() -> SuperstructureStates.CORAL_INTAKING)
+                .andThen(
+                    Commands.waitUntil(() -> superstructure.atSuperStructureGoal())
+                        .andThen(manipulator.setManipulatorState(ManipulatorState.INTAKING_CORAL)))
+                .andThen(
+                    Commands.waitUntil(
+                        () ->
+                            manipulator.getGamepieceState()
+                                == Manipulator.GamepieceState.CORAL_IN_MANIPULATOR))
+                .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
     controller.rightBumper().whileTrue(new DriveToReef(drive, ReefPosition.A));
   }
 
@@ -278,5 +362,15 @@ public class RobotContainer {
         "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
     Logger.recordOutput(
         "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
+  }
+
+  private Command controllerRumbleCommand() {
+    return Commands.startEnd(
+        () -> {
+          controller.getHID().setRumble(RumbleType.kBothRumble, 1.0);
+        },
+        () -> {
+          controller.getHID().setRumble(RumbleType.kBothRumble, 0.0);
+        });
   }
 }

@@ -4,7 +4,7 @@ import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
 
 public class ArmConstants {
-  public static final double ARM_TOLERANCE = Units.inchesToMeters(0.125);
+  public static final double ARM_TOLERANCE = Units.degreesToRadians(0.5);
   public static final double ARM_KV = 0.125;
   public static final double ARM_KA = 0.125;
   public static final double ARM_GEARING = 25.0;
@@ -18,7 +18,7 @@ public class ArmConstants {
 
   public static Gains gains =
       switch (Constants.CURRENT_MODE) {
-        case SIM -> new Gains(4.0, 0.125, 0.125, 0.0, 0.0, 0.0, 0.0);
+        case SIM -> new Gains(4.0, 0, 0.0, 0.0, 0.0, 0.0, 0.0);
         case REAL, REPLAY -> new Gains(600.0, 0.0, 40.0, 3.0, 0.0, 0.0, 4.0);
       };
 

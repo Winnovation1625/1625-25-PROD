@@ -1,6 +1,8 @@
 package frc.robot.subsystem.manipulator;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystem.manipulator.manipulatorSensors.ManipulatorSensorIO;
 import frc.robot.subsystem.manipulator.manipulatorSensors.ManipulatorSensorIOInputsAutoLogged;
@@ -52,6 +54,10 @@ public class Manipulator extends SubsystemBase {
   @Getter
   private ManipulatorState manipulatorState = ManipulatorState.IDLE;
 
+  public boolean hasAlgae() {
+    return gamepieceState == GamepieceState.ALGAE_IN_CLAW;
+  }
+
   @Override
   public void periodic() {
     io.updateInputs(inputs);
@@ -81,5 +87,14 @@ public class Manipulator extends SubsystemBase {
     }
 
     io.setVoltage(manipulatorState.voltageSupplier);
+  }
+
+  public Command setManipulatorState(ManipulatorState state) {
+    return Commands.runOnce(() -> runManipulator(state));
+  }
+
+  public Command runManipulator(ManipulatorState state) {
+    manipulatorState = state;
+    return Commands.runOnce(() -> io.setVoltage(state.voltageSupplier));
   }
 }
