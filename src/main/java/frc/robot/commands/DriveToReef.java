@@ -1,7 +1,11 @@
 package frc.robot.commands;
 
+import static edu.wpi.first.units.Units.Degrees;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.FieldConstants;
 import frc.robot.FieldConstants.ReefLevel;
@@ -16,6 +20,10 @@ public class DriveToReef extends DriveToPose {
       new LoggedTunableNumber("DriveToReef/MinDistanceTagPoseBlend", Units.inchesToMeters(24.0));
   private static final LoggedTunableNumber maxDistanceTagPoseBlend =
       new LoggedTunableNumber("DriveToReef/MaxDistanceTagPoseBlend", Units.inchesToMeters(36.0));
+  private static final LoggedTunableNumber reefPoseOffsetX =
+      new LoggedTunableNumber("DriveToReef/ReefCoralScoreXOffset", Units.inchesToMeters(17));
+  private static final LoggedTunableNumber reefPoseOffsetY =
+      new LoggedTunableNumber("DriveToReef/ReefCoralScoreYOffset", Units.inchesToMeters(-10.9));
 
   public DriveToReef(Drive drive, ReefPosition reefPosition) {
     super(
@@ -24,7 +32,12 @@ public class DriveToReef extends DriveToPose {
         () ->
             FieldConstants.Reef.branchPositions2d
                 .get(reefPosition.getFieldConstantsIndex())
-                .get(ReefLevel.L4),
+                .get(ReefLevel.L4)
+                .transformBy(
+                    new Transform2d(
+                        reefPoseOffsetX.get(),
+                        reefPoseOffsetY.get(),
+                        new Rotation2d(Degrees.of(-90)))),
         // robot position supplier
         () -> {
           Optional<Pose2d> txPose =
@@ -49,6 +62,11 @@ public class DriveToReef extends DriveToPose {
                                   FieldConstants.Reef.branchPositions2d
                                       .get(reefPosition.getFieldConstantsIndex())
                                       .get(ReefLevel.L4)
+                                      .transformBy(
+                                          new Transform2d(
+                                              reefPoseOffsetX.get(),
+                                              reefPoseOffsetY.get(),
+                                              new Rotation2d(Degrees.of(90))))
                                       .getTranslation())
                           - minDistanceTagPoseBlend.get())
                       / (maxDistanceTagPoseBlend.get() - minDistanceTagPoseBlend.get()),

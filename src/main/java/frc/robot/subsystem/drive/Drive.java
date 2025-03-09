@@ -94,7 +94,7 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
   private final Map<Integer, TxTyPoseRecord> txTyPoses = new HashMap<>();
   private final TimeInterpolatableBuffer<Pose2d> poseBuffer =
       TimeInterpolatableBuffer.createBuffer(poseBufferSizeSec);
-  @Getter private Pose2d odometryPose = new Pose2d();
+  @Getter @AutoLogOutput private Pose2d odometryPose = new Pose2d();
   private final SwerveSetpointGenerator setpointGenerator;
   private SwerveSetpoint previousSetpoint;
 
