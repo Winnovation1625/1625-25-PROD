@@ -388,7 +388,6 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
   public void addOdometryObservation(OdometryObservation observation) {
     Twist2d twist = kinematics.toTwist2d(lastModulePositions, observation.wheelPositions());
     lastModulePositions = observation.wheelPositions();
-    Pose2d lastOdometryPose = odometryPose;
     odometryPose = odometryPose.exp(twist);
     // Use gyro if connected
 
