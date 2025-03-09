@@ -17,6 +17,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -38,6 +39,7 @@ import frc.robot.subsystem.drive.ModuleIO;
 import frc.robot.subsystem.drive.ModuleIOTalonFXReal;
 import frc.robot.subsystem.drive.ModuleIOTalonFXSim;
 import frc.robot.subsystem.manipulator.Manipulator;
+import frc.robot.subsystem.manipulator.Manipulator.ManipulatorState;
 import frc.robot.subsystem.manipulator.ManipulatorIO;
 import frc.robot.subsystem.manipulator.ManipulatorIOKraken;
 import frc.robot.subsystem.manipulator.ManipulatorIOSim;
@@ -261,18 +263,74 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    controller
-        .x()
-        .onTrue(superstructure.setSuperstructureCommand(() -> SuperstructureStates.INTAKING));
+    // controller
+    //     .x()
+    //     .onTrue(superstructure.setSuperstructureCommand(() -> SuperstructureStates.INTAKING));
+    // controller
+    //     .leftTrigger()
+    //     .onTrue(superstructure.setSuperstructureCommand(() -> SuperstructureStates.CLVL2));
+    // controller
+    //     .leftBumper()
+    //     .onTrue(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW));
+    // controller
+    //     .rightBumper()
+    //     .onTrue(superstructure.setSuperstructureCommand(() -> SuperstructureStates.CLVL4));
+
     controller
         .leftTrigger()
-        .onTrue(superstructure.setSuperstructureCommand(() -> SuperstructureStates.CLVL2));
+        .and(
+            () ->
+                manipulator.getGamepieceState() == Manipulator.GamepieceState.CORAL_IN_MANIPULATOR)
+        .onTrue(
+            superstructure
+                .setSuperstructureCommand(() -> SuperstructureStates.CLVL2)
+                .andThen(
+                    Commands.waitUntil(() -> superstructure.atSuperStructureGoal())
+                        .andThen(manipulator.setManipulatorState(ManipulatorState.SHOOTING_CORAL)))
+                .andThen(
+                    Commands.waitUntil(
+                        () ->
+                            manipulator.getGamepieceState()
+                                != Manipulator.GamepieceState.CORAL_IN_MANIPULATOR))
+                .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
+
     controller
         .leftBumper()
-        .onTrue(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW));
+        .onTrue(
+            superstructure
+                .setSuperstructureCommand(() -> SuperstructureStates.STOW)
+                .alongWith(manipulator.setManipulatorState(ManipulatorState.IDLE)));
+
+    controller
+        .leftTrigger()
+        .onTrue(
+            superstructure
+                .setSuperstructureCommand(() -> SuperstructureStates.ALGAE_INTAKING)
+                .andThen(
+                    Commands.waitUntil(() -> superstructure.atSuperStructureGoal())
+                        .andThen(manipulator.setManipulatorState(ManipulatorState.INTAKING_ALGAE)))
+                .andThen(
+                    Commands.waitUntil(
+                        () ->
+                            manipulator.getGamepieceState()
+                                == Manipulator.GamepieceState.ALGAE_IN_CLAW))44444444444444444444444444444
+                .andThen(
+                    superstructure.setSuperstructureCommand(
+                        () -> SuperstructureStates.ALGAE_STOW)));
     controller
         .rightBumper()
-        .onTrue(superstructure.setSuperstructureCommand(() -> SuperstructureStates.CLVL4));
+        .onTrue(
+            superstructure
+                .setSuperstructureCommand(() -> SuperstructureStates.CORAL_INTAKING)
+                .andThen(
+                    Commands.waitUntil(() -> superstructure.atSuperStructureGoal())
+                        .andThen(manipulator.setManipulatorState(ManipulatorState.INTAKING_CORAL)))
+                .andThen(
+                    Commands.waitUntil(
+                        () ->
+                            manipulator.getGamepieceState()
+                                == Manipulator.GamepieceState.CORAL_IN_MANIPULATOR))
+                .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
   }
 
   /**
@@ -301,5 +359,15 @@ public class RobotContainer {
         "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
     Logger.recordOutput(
         "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
+  }
+
+  private Command controllerRumbleCommand() {
+    return Commands.startEnd(
+        () -> {
+          controller.getHID().setRumble(RumbleType.kBothRumble, 1.0);
+        },
+        () -> {
+          controller.getHID().setRumble(RumbleType.kBothRumble, 0.0);
+        });
   }
 }

@@ -40,7 +40,8 @@ public class Superstructure extends SubsystemBase {
   // elevator classes
   @RequiredArgsConstructor
   public enum SuperstructureStates {
-    INTAKING(ElevatorState.INTAKING, ArmState.INTAKING),
+    ALGAE_INTAKING(ElevatorState.ALGAE_INTAKING, ArmState.ALGAE_INTAKING),
+    CORAL_INTAKING(ElevatorState.CORAL_INTAKING, ArmState.CORAL_INTAKING),
     STOW(ElevatorState.STOW, ArmState.STOW),
     ALGAE_STOW(ElevatorState.ALGAE_STOW, ArmState.STOW),
     ALGAE_CLEARANCE(ElevatorState.ALGAE_CLEARANCE, ArmState.STOW),

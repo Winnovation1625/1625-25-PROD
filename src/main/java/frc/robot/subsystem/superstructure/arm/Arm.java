@@ -48,7 +48,8 @@ public class Arm {
   //     new LoggedTunableNumber("Arm/cruiseJ", cruiseJerk);
   @RequiredArgsConstructor
   public enum ArmState {
-    INTAKING(new LoggedTunableNumber("Superstructure/Arm/INTAKING", -.1)),
+    ALGAE_INTAKING(new LoggedTunableNumber("Superstructure/Arm/INTAKING", -.2)),
+    CORAL_INTAKING(new LoggedTunableNumber("Superstructure/Arm/CORAL_INTAKING", 0)),
     STOW(new LoggedTunableNumber("Superstructure/Arm/STOW", Math.PI / 2)),
     CLIMB(new LoggedTunableNumber("Superstructure/Arm/CLIMB", Math.PI / 2)),
     BARGE(new LoggedTunableNumber("Superstructure/Arm/BARGE", 1)),

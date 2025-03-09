@@ -35,9 +35,12 @@ public class Elevator {
 
   @RequiredArgsConstructor
   public enum ElevatorState {
-    INTAKING(
+    ALGAE_INTAKING(
         new LoggedTunableNumber(
-            "Superstructure/Elevator/INTAKING", Units.inchesToMeters(25.21014))),
+            "Superstructure/Elevator/ALGAE_INTAKING", Units.inchesToMeters(19.685))),
+    CORAL_INTAKING(
+        new LoggedTunableNumber(
+            "Superstructure/Elevator/CORAL_INTAKING", Units.inchesToMeters(27.5591))),
     STOW(new LoggedTunableNumber("Superstructure/Elevator/STOW", Units.inchesToMeters(27.5591))),
     ALGAE_STOW(
         new LoggedTunableNumber("Superstructure/Elevator/ALGAE STOW", Units.inchesToMeters(34))),
@@ -45,8 +48,8 @@ public class Elevator {
         new LoggedTunableNumber(
             "Superstructure/Elevator/ALGAE CLEARANCE", Units.inchesToMeters(47))),
     CLIMB(new LoggedTunableNumber("Superstructure/Elevator/CLIMB", Units.inchesToMeters(27.5591))),
-    BARGE(new LoggedTunableNumber("Superstructure/Elevator/BARGE", Units.inchesToMeters(80))),
-    CLVL2(new LoggedTunableNumber("Superstructure/Elevator/CLVL2", Units.inchesToMeters(39.3701))),
+    BARGE(new LoggedTunableNumber("Superstructure/Elevator/BARGE", Units.inchesToMeters(84.75))),
+    CLVL2(new LoggedTunableNumber("Superstructure/Elevator/CLVL2", Units.inchesToMeters(59.0551))),
     TROUGH(new LoggedTunableNumber("Superstructure/Elevator/TROUGH", Units.inchesToMeters(27.107))),
     CLVL3(new LoggedTunableNumber("Superstructure/Elevator/CLVL3", Units.inchesToMeters(55.1181))),
     CLVL4(new LoggedTunableNumber("Superstructure/Elevator/CLVL4", Units.inchesToMeters(84.80315))),
