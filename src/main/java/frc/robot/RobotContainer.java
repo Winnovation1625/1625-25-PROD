@@ -279,13 +279,13 @@ public class RobotContainer {
     //     .onTrue(superstructure.setSuperstructureCommand(() -> SuperstructureStates.CLVL4));
 
     controller
-        .leftTrigger()
+        .rightTrigger()
         .and(
             () ->
                 manipulator.getGamepieceState() == Manipulator.GamepieceState.CORAL_IN_MANIPULATOR)
         .onTrue(
             superstructure
-                .setSuperstructureCommand(() -> SuperstructureStates.CLVL2)
+                .setSuperstructureCommand(() -> SuperstructureStates.CLVL4)
                 .andThen(
                     Commands.waitUntil(() -> superstructure.atSuperStructureGoal())
                         .andThen(manipulator.setManipulatorState(ManipulatorState.SHOOTING_CORAL)))
@@ -316,6 +316,7 @@ public class RobotContainer {
                         () ->
                             manipulator.getGamepieceState()
                                 == Manipulator.GamepieceState.ALGAE_IN_CLAW))
+                .andThen(controllerRumbleCommand().withTimeout(0.5))
                 .andThen(
                     superstructure.setSuperstructureCommand(
                         () -> SuperstructureStates.ALGAE_STOW)));
@@ -335,7 +336,7 @@ public class RobotContainer {
     //                             == Manipulator.GamepieceState.CORAL_IN_MANIPULATOR))
     //             .andThen(superstructure.setSuperstructureCommand(() ->
     // SuperstructureStates.STOW)));
-    controller.rightBumper().whileTrue(new DriveToReef(drive, ReefPosition.A));
+    controller.rightBumper().whileTrue(new DriveToReef(drive, ReefPosition.D));
   }
 
   /**

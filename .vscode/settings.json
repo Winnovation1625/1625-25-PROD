@@ -73,6 +73,5 @@
     "editor.defaultFormatter": "richardwillis.vscode-spotless-gradle"
   },
   "wpilib.selectDefaultSimulateExtension": true,
-  "wpilib.skipSelectSimulateExtension": true,
-  "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx2G -Xms100m -Xlog:disable"
+  "wpilib.skipSelectSimulateExtension": false
 }

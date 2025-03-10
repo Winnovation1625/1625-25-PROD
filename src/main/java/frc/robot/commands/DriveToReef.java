@@ -66,7 +66,7 @@ public class DriveToReef extends DriveToPose {
                                           new Transform2d(
                                               reefPoseOffsetX.get(),
                                               reefPoseOffsetY.get(),
-                                              new Rotation2d(Degrees.of(90))))
+                                              new Rotation2d(Degrees.of(-90))))
                                       .getTranslation())
                           - minDistanceTagPoseBlend.get())
                       / (maxDistanceTagPoseBlend.get() - minDistanceTagPoseBlend.get()),
