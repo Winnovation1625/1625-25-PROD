@@ -23,7 +23,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.FieldConstants.ReefPosition;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.DriveToReef;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystem.apriltagvision.AprilTagVision;
 import frc.robot.subsystem.apriltagvision.AprilTagVisionConstants;
@@ -317,20 +319,23 @@ public class RobotContainer {
                 .andThen(
                     superstructure.setSuperstructureCommand(
                         () -> SuperstructureStates.ALGAE_STOW)));
-    controller
-        .rightBumper()
-        .onTrue(
-            superstructure
-                .setSuperstructureCommand(() -> SuperstructureStates.CORAL_INTAKING)
-                .andThen(
-                    Commands.waitUntil(() -> superstructure.atSuperStructureGoal())
-                        .andThen(manipulator.setManipulatorState(ManipulatorState.INTAKING_CORAL)))
-                .andThen(
-                    Commands.waitUntil(
-                        () ->
-                            manipulator.getGamepieceState()
-                                == Manipulator.GamepieceState.CORAL_IN_MANIPULATOR))
-                .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
+    // controller
+    //     .rightBumper()
+    //     .onTrue(
+    //         superstructure
+    //             .setSuperstructureCommand(() -> SuperstructureStates.CORAL_INTAKING)
+    //             .andThen(
+    //                 Commands.waitUntil(() -> superstructure.atSuperStructureGoal())
+    //
+    // .andThen(manipulator.setManipulatorState(ManipulatorState.INTAKING_CORAL)))
+    //             .andThen(
+    //                 Commands.waitUntil(
+    //                     () ->
+    //                         manipulator.getGamepieceState()
+    //                             == Manipulator.GamepieceState.CORAL_IN_MANIPULATOR))
+    //             .andThen(superstructure.setSuperstructureCommand(() ->
+    // SuperstructureStates.STOW)));
+    controller.rightBumper().whileTrue(new DriveToReef(drive, ReefPosition.A));
   }
 
   /**

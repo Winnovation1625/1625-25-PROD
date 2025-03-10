@@ -2,6 +2,7 @@ package frc.robot.subsystem.apriltagvision;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.util.WPIUtilJNI;
 import frc.robot.FieldConstants;
 import frc.robot.subsystem.apriltagvision.AprilTagVisionConstants.CameraConfig;
 import java.util.HashSet;
@@ -49,7 +50,7 @@ public class AprilTagVisionIOPhoton implements AprilTagVisionIO {
   @Override
   public void updateInputs(AprilTagVisionIOInputs inputs) {
     inputs.connected = camera.isConnected();
-
+    txtyPoseEstimator.addHeadingData(WPIUtilJNI.getSystemTime(), headingSupplier.get());
     // Read new camera observations
     Set<Short> tagIds = new HashSet<>();
     List<PoseObservation> poseObservations = new LinkedList<>();
@@ -57,9 +58,10 @@ public class AprilTagVisionIOPhoton implements AprilTagVisionIO {
       // TODO: Add txty results into the mix
       multiTagPnp.setReferencePose(currentPoseSupplier.get());
       var tag = multiTagPnp.update(result);
+      var txtyResult = txtyPoseEstimator.update(result);
       if (tag.isPresent()) {
         var tagResult = tag.get();
-
+        var bestTarget = result.targets.get(0);
         // Calculate average tag distance
 
         double totalTagDistance = 0.0;
@@ -71,6 +73,17 @@ public class AprilTagVisionIOPhoton implements AprilTagVisionIO {
         tagIds.addAll(
             tagResult.targetsUsed.stream().map(target -> (short) target.fiducialId).toList());
 
+        if (txtyResult.isPresent()) {
+          var txtyPose = txtyResult.get().estimatedPose;
+          poseObservations.add(
+              new PoseObservation(
+                  result.getTimestampSeconds(),
+                  txtyPose,
+                  bestTarget.poseAmbiguity,
+                  bestTarget.fiducialId,
+                  txtyPose.getTranslation().getNorm(),
+                  PoseObservationType.PHOTONVISION_TX_TY));
+        }
         // Add pose observation
         if (result.multitagResult.isPresent()) { // Multitag result
           var multitagResult = result.multitagResult.get();
@@ -86,16 +99,15 @@ public class AprilTagVisionIOPhoton implements AprilTagVisionIO {
                   PoseObservationType.PHOTONVISION_MULTI_TAG)); // Observation type
 
         } else if (!result.targets.isEmpty()) { // Single tag result
-          var target = result.targets.get(0);
 
           // Add observation
           poseObservations.add(
               new PoseObservation(
                   result.getTimestampSeconds(), // Timestamp
                   tagResult.estimatedPose, // 3D pose estimate
-                  target.poseAmbiguity, // Ambiguity
+                  bestTarget.poseAmbiguity, // Ambiguity
                   1, // Tag count
-                  target.bestCameraToTarget.getTranslation().getNorm(), // Average tag distance
+                  bestTarget.bestCameraToTarget.getTranslation().getNorm(), // Average tag distance
                   PoseObservationType.PHOTONVISION_SINGLE_TAG)); // Observation type
         }
       }
