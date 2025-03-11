@@ -29,7 +29,6 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystem.apriltagvision.AprilTagVision;
 import frc.robot.subsystem.apriltagvision.AprilTagVisionConstants;
 import frc.robot.subsystem.apriltagvision.AprilTagVisionIO;
-import frc.robot.subsystem.apriltagvision.AprilTagVisionIOPhoton;
 import frc.robot.subsystem.apriltagvision.AprilTagVisionIOPhotonSim;
 import frc.robot.subsystem.drive.Drive;
 import frc.robot.subsystem.drive.DriveConstants;
@@ -39,23 +38,20 @@ import frc.robot.subsystem.drive.GyroIOSim;
 import frc.robot.subsystem.drive.ModuleIO;
 import frc.robot.subsystem.drive.ModuleIOTalonFXReal;
 import frc.robot.subsystem.drive.ModuleIOTalonFXSim;
+import frc.robot.subsystem.leds.Leds;
 import frc.robot.subsystem.manipulator.Manipulator;
 import frc.robot.subsystem.manipulator.Manipulator.ManipulatorState;
 import frc.robot.subsystem.manipulator.ManipulatorIO;
-import frc.robot.subsystem.manipulator.ManipulatorIOKraken;
 import frc.robot.subsystem.manipulator.ManipulatorIOSim;
 import frc.robot.subsystem.manipulator.manipulatorSensors.ManipulatorSensorIO;
 import frc.robot.subsystem.manipulator.manipulatorSensors.ManipulatorSensorIOSim;
-import frc.robot.subsystem.manipulator.manipulatorSensors.ManipulatorSensorsIOCANrange;
 import frc.robot.subsystem.superstructure.Superstructure;
 import frc.robot.subsystem.superstructure.Superstructure.SuperstructureStates;
 import frc.robot.subsystem.superstructure.arm.Arm;
 import frc.robot.subsystem.superstructure.arm.ArmIO;
-import frc.robot.subsystem.superstructure.arm.ArmIOKraken;
 import frc.robot.subsystem.superstructure.arm.ArmIOSim;
 import frc.robot.subsystem.superstructure.elevator.Elevator;
 import frc.robot.subsystem.superstructure.elevator.ElevatorIO;
-import frc.robot.subsystem.superstructure.elevator.ElevatorIOKraken;
 import frc.robot.subsystem.superstructure.elevator.ElevatorIOSim;
 import frc.robot.util.AllianceFlipUtil;
 import org.ironmaple.simulation.SimulatedArena;
@@ -76,6 +72,7 @@ public class RobotContainer {
   private final Elevator elevator;
   private final Superstructure superstructure;
   private final Manipulator manipulator;
+  private Leds leds = Leds.getInstance();
 
   @SuppressWarnings("unused")
   private final AprilTagVision aprilTagVision;
@@ -101,30 +98,17 @@ public class RobotContainer {
                 new ModuleIOTalonFXReal(TunerConstants.BackLeft),
                 new ModuleIOTalonFXReal(TunerConstants.BackRight),
                 (pose) -> {});
-        arm = new Arm(new ArmIOKraken());
-        elevator = new Elevator(new ElevatorIOKraken());
+        arm = new Arm(new ArmIO() {});
+        elevator = new Elevator(new ElevatorIO() {});
         aprilTagVision =
             new AprilTagVision(
                 drive::accept,
                 drive::getPose,
-                new AprilTagVisionIOPhoton(
-                    AprilTagVisionConstants.CAMERA_CONFIGS.get(0),
-                    drive::getRotation,
-                    drive::getPose),
-                new AprilTagVisionIOPhoton(
-                    AprilTagVisionConstants.CAMERA_CONFIGS.get(1),
-                    drive::getRotation,
-                    drive::getPose),
-                new AprilTagVisionIOPhoton(
-                    AprilTagVisionConstants.CAMERA_CONFIGS.get(2),
-                    drive::getRotation,
-                    drive::getPose),
-                new AprilTagVisionIOPhoton(
-                    AprilTagVisionConstants.CAMERA_CONFIGS.get(3),
-                    drive::getRotation,
-                    drive::getPose));
-        manipulator =
-            new Manipulator(new ManipulatorIOKraken(), new ManipulatorSensorsIOCANrange());
+                new AprilTagVisionIO() {},
+                new AprilTagVisionIO() {},
+                new AprilTagVisionIO() {},
+                new AprilTagVisionIO() {});
+        manipulator = new Manipulator(new ManipulatorIO() {}, new ManipulatorSensorIO() {});
         break;
 
       case SIM:
