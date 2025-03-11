@@ -1,0 +1,75 @@
+package frc.robot.subsystem.manipulator;
+
+import static frc.robot.subsystem.manipulator.ManipulatorConstants.*;
+
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.TorqueCurrentFOC;
+import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.hardware.TalonFX;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
+import java.util.function.DoubleSupplier;
+
+public class ManipulatorIOKraken implements ManipulatorIO {
+
+  private final TalonFX motor;
+  private final StatusSignal<AngularVelocity> velocity;
+  private final StatusSignal<Voltage> appliedVoltage;
+  private final StatusSignal<Current> supplyCurrent;
+  private final StatusSignal<Angle> position;
+
+  private final VoltageOut voltageControl =
+      new VoltageOut(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
+  private final TorqueCurrentFOC currentControl = new TorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
+
+  private final TalonFXConfiguration config = new TalonFXConfiguration();
+
+  public ManipulatorIOKraken() {
+    motor = new TalonFX(0);
+
+    config.Slot0.kP = gains.kP();
+    config.Slot0.kI = gains.kI();
+    config.Slot0.kD = gains.kD();
+    // config.Slot0.kS = gains.ffkS();
+    // config.Slot0.kV = gains.ffkV();
+    // config.Slot0.kG = gains.ffkG();
+
+    position = motor.getPosition();
+    velocity = motor.getVelocity();
+    supplyCurrent = motor.getSupplyCurrent();
+    appliedVoltage = motor.getMotorVoltage();
+    BaseStatusSignal.setUpdateFrequencyForAll(
+        100, position, velocity, appliedVoltage, supplyCurrent);
+
+    motor.optimizeBusUtilization(0.0, 1.0);
+  }
+
+  @Override
+  public void updateInputs(ManipulatorIOInputs inputs) {
+    inputs.appliedCurrentOut = supplyCurrent.getValueAsDouble();
+    inputs.appliedVoltageOut = appliedVoltage.getValueAsDouble();
+    inputs.positionRad = Units.rotationsToRadians(position.getValueAsDouble());
+    inputs.velocityRadsPerSecond =
+        Units.rotationsPerMinuteToRadiansPerSecond(velocity.getValueAsDouble() / 60);
+  }
+
+  @Override
+  public void setCurrentOutput(DoubleSupplier current) {
+    motor.setControl(currentControl.withOutput(current.getAsDouble()));
+  }
+
+  @Override
+  public void setVoltage(DoubleSupplier voltage) {
+    motor.setControl(voltageControl.withOutput(voltage.getAsDouble()));
+  }
+
+  @Override
+  public void stop() {
+    motor.stopMotor();
+  }
+}
