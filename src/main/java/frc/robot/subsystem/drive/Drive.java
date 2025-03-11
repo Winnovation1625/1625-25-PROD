@@ -61,8 +61,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import lombok.Getter;
+import lombok.Setter;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -97,6 +99,7 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
   @Getter @AutoLogOutput private Pose2d odometryPose = new Pose2d();
   private final SwerveSetpointGenerator setpointGenerator;
   private SwerveSetpoint previousSetpoint;
+  @Setter private BooleanSupplier NearBargeSupplier = () -> false;
 
   private final Consumer<Pose2d> resetSimulationPoseCallBack;
 
@@ -367,6 +370,10 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
   public Optional<Pose2d> getPoseAtTime(double timestamp) {
     return poseEstimator.sampleAt(timestamp);
   }
+
+  // public Command nearBargeRumble(Pose2d robotPose){
+  //   return
+  // }
 
   /** Get 2d pose estimate of robot if not stale. */
   public Optional<Pose2d> getTxTyPose(int tagId) {

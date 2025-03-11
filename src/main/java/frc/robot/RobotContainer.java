@@ -22,10 +22,9 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.FieldConstants.ReefPosition;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.DriveToReef;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystem.apriltagvision.AprilTagVision;
 import frc.robot.subsystem.apriltagvision.AprilTagVisionConstants;
@@ -58,6 +57,7 @@ import frc.robot.subsystem.superstructure.elevator.Elevator;
 import frc.robot.subsystem.superstructure.elevator.ElevatorIO;
 import frc.robot.subsystem.superstructure.elevator.ElevatorIOKraken;
 import frc.robot.subsystem.superstructure.elevator.ElevatorIOSim;
+import frc.robot.util.AllianceFlipUtil;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
@@ -190,6 +190,13 @@ public class RobotContainer {
         manipulator = new Manipulator(new ManipulatorIO() {}, new ManipulatorSensorIO() {});
         break;
     }
+
+    drive.setNearBargeSupplier(
+        () ->
+            AllianceFlipUtil.apply(drive.getPose()).getY()
+                    - AllianceFlipUtil.apply(FieldConstants.Barge.middleCage).getY()
+                < 0.4);
+
     superstructure = new Superstructure(arm, elevator, manipulator::hasAlgae);
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -212,6 +219,10 @@ public class RobotContainer {
     // Configure the button bindings
     configureButtonBindings();
   }
+
+  Trigger readyToShoot =
+        new Trigger(
+            () -> drive.);
 
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
@@ -280,20 +291,18 @@ public class RobotContainer {
 
     controller
         .rightTrigger()
-        .and(
-            () ->
-                manipulator.getGamepieceState() == Manipulator.GamepieceState.CORAL_IN_MANIPULATOR)
+        .and(() -> manipulator.getGamepieceState() == Manipulator.GamepieceState.ALGAE_IN_CLAW)
         .onTrue(
             superstructure
-                .setSuperstructureCommand(() -> SuperstructureStates.CLVL4)
+                .setSuperstructureCommand(() -> SuperstructureStates.BARGE)
                 .andThen(
                     Commands.waitUntil(() -> superstructure.atSuperStructureGoal())
-                        .andThen(manipulator.setManipulatorState(ManipulatorState.SHOOTING_CORAL)))
+                        .andThen(manipulator.setManipulatorState(ManipulatorState.SHOOTING_ALGAE)))
                 .andThen(
                     Commands.waitUntil(
                         () ->
                             manipulator.getGamepieceState()
-                                != Manipulator.GamepieceState.CORAL_IN_MANIPULATOR))
+                                != Manipulator.GamepieceState.ALGAE_IN_CLAW))
                 .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
 
     controller
@@ -320,6 +329,7 @@ public class RobotContainer {
                 .andThen(
                     superstructure.setSuperstructureCommand(
                         () -> SuperstructureStates.ALGAE_STOW)));
+
     // controller
     //     .rightBumper()
     //     .onTrue(
@@ -336,7 +346,6 @@ public class RobotContainer {
     //                             == Manipulator.GamepieceState.CORAL_IN_MANIPULATOR))
     //             .andThen(superstructure.setSuperstructureCommand(() ->
     // SuperstructureStates.STOW)));
-    controller.rightBumper().whileTrue(new DriveToReef(drive, ReefPosition.D));
   }
 
   /**
