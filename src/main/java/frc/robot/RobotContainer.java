@@ -44,6 +44,10 @@ import frc.robot.subsystem.manipulator.ManipulatorIO;
 import frc.robot.subsystem.manipulator.ManipulatorIOSim;
 import frc.robot.subsystem.manipulator.manipulatorSensors.ManipulatorSensorIO;
 import frc.robot.subsystem.manipulator.manipulatorSensors.ManipulatorSensorIOSim;
+import frc.robot.subsystem.climber.Climber;
+import frc.robot.subsystem.climber.ClimberIO;
+import frc.robot.subsystem.climber.ClimberIOServo;
+import frc.robot.subsystem.climber.ClimberIOSim;
 import frc.robot.subsystem.superstructure.Superstructure;
 import frc.robot.subsystem.superstructure.Superstructure.SuperstructureStates;
 import frc.robot.subsystem.superstructure.arm.Arm;
@@ -71,6 +75,7 @@ public class RobotContainer {
   private final Elevator elevator;
   private final Superstructure superstructure;
   private final Manipulator manipulator;
+  private final Climber climber;
   private Leds leds = Leds.getInstance();
 
   @SuppressWarnings("unused")
@@ -108,6 +113,7 @@ public class RobotContainer {
                 new AprilTagVisionIO() {},
                 new AprilTagVisionIO() {});
         manipulator = new Manipulator(new ManipulatorIO() {}, new ManipulatorSensorIO() {});
+        climber = new Climber(new ClimberIOServo());
         break;
 
       case SIM:
@@ -148,6 +154,7 @@ public class RobotContainer {
                     drive::getRotation,
                     driveSimulation::getSimulatedDriveTrainPose));
         manipulator = new Manipulator(new ManipulatorIOSim(), new ManipulatorSensorIOSim());
+        climber = new Climber(new ClimberIOSim());
         break;
 
       default:
@@ -171,6 +178,7 @@ public class RobotContainer {
                 new AprilTagVisionIO() {},
                 new AprilTagVisionIO() {});
         manipulator = new Manipulator(new ManipulatorIO() {}, new ManipulatorSensorIO() {});
+        climber = new Climber(new ClimberIO() {});
         break;
     }
 
