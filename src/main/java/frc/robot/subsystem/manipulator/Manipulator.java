@@ -11,6 +11,7 @@ import java.util.function.DoubleSupplier;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.AutoLogOutput;
+import frc.robot.subsystem.leds.Leds;
 import org.littletonrobotics.junction.Logger;
 
 public class Manipulator extends SubsystemBase {
@@ -72,6 +73,8 @@ public class Manipulator extends SubsystemBase {
 
     if (sensorInputs.isFrontCoralDetected == true && sensorInputs.isBackCoralDetected == true) {
       gamepieceState = GamepieceState.CORAL_IN_MANIPULATOR;
+      Leds.getInstance().setCoralInBot(true);
+      Leds.getInstance().setAlgaeInBot(false);
     }
 
     if (sensorInputs.isFrontCoralDetected == false && sensorInputs.isBackCoralDetected == false) {
@@ -80,6 +83,8 @@ public class Manipulator extends SubsystemBase {
 
     if (sensorInputs.isAlgaeDetected == true) {
       gamepieceState = GamepieceState.ALGAE_IN_CLAW;
+      Leds.getInstance().setAlgaeInBot(true);
+      Leds.getInstance().setCoralInBot(false);
     }
 
     if (DriverStation.isDisabled()) {

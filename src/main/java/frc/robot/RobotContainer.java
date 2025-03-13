@@ -16,12 +16,14 @@ package frc.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
@@ -48,6 +50,7 @@ import frc.robot.subsystem.climber.Climber;
 import frc.robot.subsystem.climber.ClimberIO;
 import frc.robot.subsystem.climber.ClimberIOServo;
 import frc.robot.subsystem.climber.ClimberIOSim;
+import frc.robot.subsystem.climber.Climber.ClimberState;
 import frc.robot.subsystem.superstructure.Superstructure;
 import frc.robot.subsystem.superstructure.Superstructure.SuperstructureStates;
 import frc.robot.subsystem.superstructure.arm.Arm;
@@ -57,10 +60,13 @@ import frc.robot.subsystem.superstructure.elevator.Elevator;
 import frc.robot.subsystem.superstructure.elevator.ElevatorIO;
 import frc.robot.subsystem.superstructure.elevator.ElevatorIOSim;
 import frc.robot.util.AllianceFlipUtil;
+import frc.robot.util.LoggedTunableNumber;
+
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -77,6 +83,10 @@ public class RobotContainer {
   private final Manipulator manipulator;
   private final Climber climber;
   private Leds leds = Leds.getInstance();
+
+   private final LoggedTunableNumber endgameAlert1 = new LoggedTunableNumber("EndgameAlert2", 30.0);
+   private final LoggedDashboardNumber endgameAlert2 =
+      new LoggedDashboardNumber("Endgame Alert #2", 15.0);
 
   @SuppressWarnings("unused")
   private final AprilTagVision aprilTagVision;
@@ -209,6 +219,33 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
+
+    new Trigger(
+        () ->
+            DriverStation.isTeleopEnabled()
+                && DriverStation.getMatchTime() > 0
+                && DriverStation.getMatchTime() <= Math.round(endgameAlert1.get()))
+    .onTrue(
+        controllerRumbleCommand()
+            .withTimeout(0.5)
+            .beforeStarting(() -> leds.setEndGameWarning(true))
+            .finallyDo(() -> leds.setEndGameWarning(false)));
+
+    new Trigger(
+    () ->
+        DriverStation.isTeleopEnabled()
+            && DriverStation.getMatchTime() > 0
+            && DriverStation.getMatchTime() <= Math.round(endgameAlert2.get()))
+    .onTrue(
+        controllerRumbleCommand()
+        .withTimeout(0.2)
+        .andThen(Commands.waitSeconds(0.1))
+        .repeatedly()
+        .withTimeout(0.9) // Rumble three times
+        .beforeStarting(() -> leds.setEndGameWarning(true))
+        .finallyDo(() -> leds.setEndGameWarning(false)));
+
+
   }
 
   /**
@@ -316,6 +353,11 @@ public class RobotContainer {
                 .andThen(
                     superstructure.setSuperstructureCommand(
                         () -> SuperstructureStates.ALGAE_STOW)));
+            
+    controller
+        .start()
+        //.and(AuxAllows)
+        .onTrue(climber.runClimber(ClimberState.RELEASE));
 
     // controller
     //     .rightBumper()
