@@ -23,6 +23,8 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.generated.TunerConstants;
@@ -54,6 +56,7 @@ public class Robot extends LoggedRobot {
   private static final double lowBatteryDisabledTime = 1.5;
   private final Timer disabledTimer = new Timer();
   private boolean isBotAuto = false;
+  private Field2d dashboardField = new Field2d();
 
   private final Alert lowBatteryAlert =
       new Alert(
@@ -100,6 +103,8 @@ public class Robot extends LoggedRobot {
         Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
         break;
     }
+
+    SmartDashboard.putData("Field", dashboardField);
 
     // Start AdvantageKit logger
     Logger.start();
@@ -167,6 +172,8 @@ public class Robot extends LoggedRobot {
       Elastic.selectTab("Auton");
       isBotAuto = true;
     }
+
+    //dashboardField.setRobotPose(RobotState.getInstance().getEstimatedPose());
 
     // Runs the Scheduler. This is responsible for polling buttons, adding
     // newly-scheduled commands, running already-scheduled commands, removing

@@ -119,19 +119,18 @@ public class Leds extends VirtualSubsystem {
                 LEDS_PER_STRIP * i + HARDWARE_LEDS),
             i);
       }
-    }
-    else if (coralInBot) {
-        for (int i = 0; i < NUM_LED_STRIPS; i++) {
-          // Solid Green
-          candle.animate(
-              new RainbowAnimation(
-                  animationBrightness.getAsDouble(),
-                  animationSpeed.get(),
-                  LEDS_PER_STRIP,
-                  false,
-                  LEDS_PER_STRIP * i + HARDWARE_LEDS),
-              i);
-        }
+    } else if (coralInBot) {
+      for (int i = 0; i < NUM_LED_STRIPS; i++) {
+        // Solid Green
+        candle.animate(
+            new RainbowAnimation(
+                animationBrightness.getAsDouble(),
+                animationSpeed.get(),
+                LEDS_PER_STRIP,
+                false,
+                LEDS_PER_STRIP * i + HARDWARE_LEDS),
+            i);
+      }
     }
     // } else if (ampScore) {
     //   for (int i = 0; i < NUM_LED_STRIPS; i++) {
