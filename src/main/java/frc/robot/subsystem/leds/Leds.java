@@ -7,7 +7,6 @@ import com.ctre.phoenix.led.CANdleConfiguration;
 import com.ctre.phoenix.led.RainbowAnimation;
 import com.ctre.phoenix.led.SingleFadeAnimation;
 import com.ctre.phoenix.led.StrobeAnimation;
-
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.util.LoggedTunableNumber;
 import frc.robot.util.VirtualSubsystem;
@@ -132,19 +131,28 @@ public class Leds extends VirtualSubsystem {
                 LEDS_PER_STRIP * i + HARDWARE_LEDS),
             i);
       }
+    } else if (coralInBot) {
+        // Solid White
+        candle.setLEDs(255, 255, 255)
     }
-    else if (coralInBot) {
-        for (int i = 0; i < NUM_LED_STRIPS; i++) {
-          // Solid Green
-          candle.animate(
-              new RainbowAnimation(
-                  animationBrightness.getAsDouble(),
-                  animationSpeed.get(),
-                  LEDS_PER_STRIP,
-                  false,
-                  LEDS_PER_STRIP * i + HARDWARE_LEDS),
-              i);
-        }
+    else if(algaeInBot){
+      //Solid Green 
+      candle.setLEDs(0, 255, 0);
+    }
+    else if(whenLinedUp){
+
+      for (int i = 0; i < NUM_LED_STRIPS; i++) {
+            // rainbow pattern when lined up
+            candle.animate(
+                new RainbowAnimation(
+                    animationBrightness.getAsDouble(),
+                    animationSpeed.get(),
+                    LEDS_PER_STRIP,
+                    false,
+                    LEDS_PER_STRIP * i + HARDWARE_LEDS),
+                i);
+
+      }
     }
     // } else if (ampScore) {
     //   for (int i = 0; i < NUM_LED_STRIPS; i++) {

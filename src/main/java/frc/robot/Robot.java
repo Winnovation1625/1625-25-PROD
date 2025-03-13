@@ -32,7 +32,6 @@ import frc.robot.util.VirtualSubsystem;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
-
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -54,9 +53,9 @@ public class Robot extends LoggedRobot {
   private final Timer disabledTimer = new Timer();
 
   private final Alert lowBatteryAlert =
-  new Alert(
-      "Battery voltage is very low, consider turning off the robot or replacing the battery.",
-      AlertType.WARNING);
+      new Alert(
+          "Battery voltage is very low, consider turning off the robot or replacing the battery.",
+          AlertType.WARNING);
 
   public Robot() {
     // Record metadata
@@ -186,11 +185,12 @@ public class Robot extends LoggedRobot {
       autonomousCommand.schedule();
     }
 
-    if (RobotController.getBatteryVoltage() <= lowBatteryVoltage && disabledTimer.hasElapsed(lowBatteryDisabledTime)) {
+    if (RobotController.getBatteryVoltage() <= lowBatteryVoltage
+        && disabledTimer.hasElapsed(lowBatteryDisabledTime)) {
       lowBatteryAlert.set(true);
-      Leds.getInstance().setLowBattery(true);          
-   }
-}
+      Leds.getInstance().setLowBattery(true);
+    }
+  }
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {}
