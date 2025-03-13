@@ -7,7 +7,6 @@ import com.ctre.phoenix.led.CANdleConfiguration;
 import com.ctre.phoenix.led.RainbowAnimation;
 import com.ctre.phoenix.led.SingleFadeAnimation;
 import com.ctre.phoenix.led.StrobeAnimation;
-
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.util.LoggedTunableNumber;
 import frc.robot.util.VirtualSubsystem;
@@ -88,18 +87,6 @@ public class Leds extends VirtualSubsystem {
     //     lastAprilTagCams[i] = aprilTagCams[i];
     //   }
     // }
-    // if (objectDetectionCam != lastObjectDetectionCam) {
-    //   if (objectDetectionCam) {
-    //     // cams are good to go
-    //     candle.setLEDs(0, 255, 0, 0, 5, 1);
-    //     candle.setLEDs(0, 255, 0, 0, 6, 1);
-    //   } else {
-    //     // cams are disconnected
-    //     candle.setLEDs(255, 0, 0, 0, 5, 1);
-    //     candle.setLEDs(255, 0, 0, 0, 6, 1);
-    //   }
-    //   lastObjectDetectionCam = objectDetectionCam;
-    // }
 
     if (DriverStation.isEStopped()) {
       // solid red
@@ -132,19 +119,18 @@ public class Leds extends VirtualSubsystem {
                 LEDS_PER_STRIP * i + HARDWARE_LEDS),
             i);
       }
-    }
-    else if (coralInBot) {
-        for (int i = 0; i < NUM_LED_STRIPS; i++) {
-          // Solid Green
-          candle.animate(
-              new RainbowAnimation(
-                  animationBrightness.getAsDouble(),
-                  animationSpeed.get(),
-                  LEDS_PER_STRIP,
-                  false,
-                  LEDS_PER_STRIP * i + HARDWARE_LEDS),
-              i);
-        }
+    } else if (coralInBot) {
+      for (int i = 0; i < NUM_LED_STRIPS; i++) {
+        // Solid Green
+        candle.animate(
+            new RainbowAnimation(
+                animationBrightness.getAsDouble(),
+                animationSpeed.get(),
+                LEDS_PER_STRIP,
+                false,
+                LEDS_PER_STRIP * i + HARDWARE_LEDS),
+            i);
+      }
     }
     // } else if (ampScore) {
     //   for (int i = 0; i < NUM_LED_STRIPS; i++) {

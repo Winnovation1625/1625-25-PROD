@@ -31,6 +31,11 @@ import frc.robot.subsystem.apriltagvision.AprilTagVision;
 import frc.robot.subsystem.apriltagvision.AprilTagVisionConstants;
 import frc.robot.subsystem.apriltagvision.AprilTagVisionIO;
 import frc.robot.subsystem.apriltagvision.AprilTagVisionIOPhotonSim;
+import frc.robot.subsystem.climber.Climber;
+import frc.robot.subsystem.climber.Climber.ClimberState;
+import frc.robot.subsystem.climber.ClimberIO;
+import frc.robot.subsystem.climber.ClimberIOServo;
+import frc.robot.subsystem.climber.ClimberIOSim;
 import frc.robot.subsystem.drive.Drive;
 import frc.robot.subsystem.drive.DriveConstants;
 import frc.robot.subsystem.drive.GyroIO;
@@ -46,11 +51,6 @@ import frc.robot.subsystem.manipulator.ManipulatorIO;
 import frc.robot.subsystem.manipulator.ManipulatorIOSim;
 import frc.robot.subsystem.manipulator.manipulatorSensors.ManipulatorSensorIO;
 import frc.robot.subsystem.manipulator.manipulatorSensors.ManipulatorSensorIOSim;
-import frc.robot.subsystem.climber.Climber;
-import frc.robot.subsystem.climber.ClimberIO;
-import frc.robot.subsystem.climber.ClimberIOServo;
-import frc.robot.subsystem.climber.ClimberIOSim;
-import frc.robot.subsystem.climber.Climber.ClimberState;
 import frc.robot.subsystem.superstructure.Superstructure;
 import frc.robot.subsystem.superstructure.Superstructure.SuperstructureStates;
 import frc.robot.subsystem.superstructure.arm.Arm;
@@ -61,7 +61,6 @@ import frc.robot.subsystem.superstructure.elevator.ElevatorIO;
 import frc.robot.subsystem.superstructure.elevator.ElevatorIOSim;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.LoggedTunableNumber;
-
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
@@ -84,8 +83,8 @@ public class RobotContainer {
   private final Climber climber;
   private Leds leds = Leds.getInstance();
 
-   private final LoggedTunableNumber endgameAlert1 = new LoggedTunableNumber("EndgameAlert2", 30.0);
-   private final LoggedDashboardNumber endgameAlert2 =
+  private final LoggedTunableNumber endgameAlert1 = new LoggedTunableNumber("EndgameAlert2", 30.0);
+  private final LoggedDashboardNumber endgameAlert2 =
       new LoggedDashboardNumber("Endgame Alert #2", 15.0);
 
   @SuppressWarnings("unused")
@@ -221,31 +220,29 @@ public class RobotContainer {
     configureButtonBindings();
 
     new Trigger(
-        () ->
-            DriverStation.isTeleopEnabled()
-                && DriverStation.getMatchTime() > 0
-                && DriverStation.getMatchTime() <= Math.round(endgameAlert1.get()))
-    .onTrue(
-        controllerRumbleCommand()
-            .withTimeout(0.5)
-            .beforeStarting(() -> leds.setEndGameWarning(true))
-            .finallyDo(() -> leds.setEndGameWarning(false)));
+            () ->
+                DriverStation.isTeleopEnabled()
+                    && DriverStation.getMatchTime() > 0
+                    && DriverStation.getMatchTime() <= Math.round(endgameAlert1.get()))
+        .onTrue(
+            controllerRumbleCommand()
+                .withTimeout(0.5)
+                .beforeStarting(() -> leds.setEndGameWarning(true))
+                .finallyDo(() -> leds.setEndGameWarning(false)));
 
     new Trigger(
-    () ->
-        DriverStation.isTeleopEnabled()
-            && DriverStation.getMatchTime() > 0
-            && DriverStation.getMatchTime() <= Math.round(endgameAlert2.get()))
-    .onTrue(
-        controllerRumbleCommand()
-        .withTimeout(0.2)
-        .andThen(Commands.waitSeconds(0.1))
-        .repeatedly()
-        .withTimeout(0.9) // Rumble three times
-        .beforeStarting(() -> leds.setEndGameWarning(true))
-        .finallyDo(() -> leds.setEndGameWarning(false)));
-
-
+            () ->
+                DriverStation.isTeleopEnabled()
+                    && DriverStation.getMatchTime() > 0
+                    && DriverStation.getMatchTime() <= Math.round(endgameAlert2.get()))
+        .onTrue(
+            controllerRumbleCommand()
+                .withTimeout(0.2)
+                .andThen(Commands.waitSeconds(0.1))
+                .repeatedly()
+                .withTimeout(0.9) // Rumble three times
+                .beforeStarting(() -> leds.setEndGameWarning(true))
+                .finallyDo(() -> leds.setEndGameWarning(false)));
   }
 
   /**
@@ -353,10 +350,10 @@ public class RobotContainer {
                 .andThen(
                     superstructure.setSuperstructureCommand(
                         () -> SuperstructureStates.ALGAE_STOW)));
-            
+
     controller
         .start()
-        //.and(AuxAllows)
+        // .and(AuxAllows)
         .onTrue(climber.runClimber(ClimberState.RELEASE));
 
     // controller

@@ -2,24 +2,19 @@ package frc.robot.subsystem.climber;
 
 import java.util.function.DoubleSupplier;
 
-import frc.robot.util.LoggedTunableNumber;
+public class ClimberIOSim implements ClimberIO {
 
-public class ClimberIOSim implements ClimberIO { 
+  private double servoPosition = 0.0;
+  ;
 
-    private double servoPosition = 0.0;;
-    
-    
-    @Override
-     public void updateInputs(ClimberIOInputs inputs) {
+  @Override
+  public void updateInputs(ClimberIOInputs inputs) {
 
-        inputs.servoPositionRads = servoPosition;
+    inputs.servoPositionRads = servoPosition;
+  }
 
-    }
-
-    @Override
-    public void setRelease(DoubleSupplier angle) {
-        servoPosition = angle.getAsDouble();
-    }
-
-
+  @Override
+  public void setRelease(DoubleSupplier angle) {
+    servoPosition = angle.getAsDouble();
+  }
 }

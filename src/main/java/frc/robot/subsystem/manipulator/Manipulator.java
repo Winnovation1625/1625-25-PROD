@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystem.leds.Leds;
 import frc.robot.subsystem.manipulator.manipulatorSensors.ManipulatorSensorIO;
 import frc.robot.subsystem.manipulator.manipulatorSensors.ManipulatorSensorIOInputsAutoLogged;
 import frc.robot.util.LoggedTunableNumber;
@@ -11,7 +12,6 @@ import java.util.function.DoubleSupplier;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.AutoLogOutput;
-import frc.robot.subsystem.leds.Leds;
 import org.littletonrobotics.junction.Logger;
 
 public class Manipulator extends SubsystemBase {
