@@ -61,9 +61,13 @@ import frc.robot.subsystem.superstructure.elevator.ElevatorIO;
 import frc.robot.subsystem.superstructure.elevator.ElevatorIOSim;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.LoggedTunableNumber;
+
+import java.util.function.BooleanSupplier;
+
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
@@ -86,6 +90,7 @@ public class RobotContainer {
   private final LoggedTunableNumber endgameAlert1 = new LoggedTunableNumber("EndgameAlert2", 30.0);
   private final LoggedDashboardNumber endgameAlert2 =
       new LoggedDashboardNumber("Endgame Alert #2", 15.0);
+   private LoggedDashboardChooser pathOverride;
 
   @SuppressWarnings("unused")
   private final AprilTagVision aprilTagVision;
@@ -215,6 +220,11 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    
+    pathOverride.addDefaultOption("off", "off");
+    pathOverride.addOption("on", "on");
+
+    
 
     // Configure the button bindings
     configureButtonBindings();
@@ -244,6 +254,20 @@ public class RobotContainer {
                 .beforeStarting(() -> leds.setEndGameWarning(true))
                 .finallyDo(() -> leds.setEndGameWarning(false)));
   }
+
+  BooleanSupplier pathingOverrideSupplier = () -> {
+
+    switch(pathOverride.getSendableChooser().toString()){
+        case "off":
+            return false;
+        case "on":
+            return true;
+        default:
+            return false;
+
+    }
+
+};
 
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
@@ -313,7 +337,9 @@ public class RobotContainer {
     controller
         .rightTrigger()
         .and(() -> manipulator.getGamepieceState() == Manipulator.GamepieceState.ALGAE_IN_CLAW)
+        .and(pathingOverrideSupplier)
         .onTrue(
+            //path
             superstructure
                 .setSuperstructureCommand(() -> SuperstructureStates.BARGE)
                 .andThen(
