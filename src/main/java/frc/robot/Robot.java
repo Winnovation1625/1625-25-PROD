@@ -16,7 +16,8 @@ package frc.robot;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerMotorArrangement;
-import com.pathplanner.lib.commands.FollowPathCommand;
+import com.pathplanner.lib.commands.PathfindingCommand;
+import com.pathplanner.lib.pathfinding.Pathfinding;
 import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
@@ -32,6 +33,7 @@ import frc.robot.subsystem.leds.Leds;
 import frc.robot.util.Alert;
 import frc.robot.util.Alert.AlertType;
 import frc.robot.util.Elastic;
+import frc.robot.util.LocalADStarAK;
 import frc.robot.util.VirtualSubsystem;
 import java.util.HashMap;
 import java.util.Map;
@@ -155,8 +157,8 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void robotInit() {
-
-    FollowPathCommand.warmupCommand().schedule();
+    Pathfinding.setPathfinder(new LocalADStarAK());
+    PathfindingCommand.warmupCommand().schedule();
   }
 
   /** This function is called periodically during all modes. */
@@ -173,7 +175,7 @@ public class Robot extends LoggedRobot {
       isBotAuto = true;
     }
 
-    //dashboardField.setRobotPose(RobotState.getInstance().getEstimatedPose());
+    // dashboardField.setRobotPose(RobotState.getInstance().getEstimatedPose());
 
     // Runs the Scheduler. This is responsible for polling buttons, adding
     // newly-scheduled commands, running already-scheduled commands, removing

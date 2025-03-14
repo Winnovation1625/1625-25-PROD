@@ -1,5 +1,6 @@
 package frc.robot.util;
 
+import frc.robot.FieldConstants.AlgaeObjective;
 import frc.robot.FieldConstants.CoralObjective;
 import frc.robot.FieldConstants.ReefLevel;
 import frc.robot.FieldConstants.ReefPosition;
@@ -15,6 +16,12 @@ public class AuxControllerUtil {
         .position(ReefPosition.fromIndex(reefPositionIndex))
         .reefLevel(ReefLevel.fromLevel(reefLevelIndex))
         .build();
+  }
+
+  public static AlgaeObjective getAlgaeObjective(
+      List<Boolean> algaePositionButtons, Boolean bargeScore) {
+    int algaeFace = getTrueIndex(algaePositionButtons);
+    return AlgaeObjective.builder().reefFace(algaeFace).bargeScore(bargeScore).build();
   }
 
   private static int getTrueIndex(List<Boolean> list) {

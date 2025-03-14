@@ -11,12 +11,12 @@ public class AprilTagVisionConstants {
 
   // Basic filtering thresholds
   public static final double MAX_AMBIGUITY = 0.3;
-  public static final double MAX_Z_ERROR = 0.75;
+  public static final double MAX_Z_ERROR = 0.4;
 
   // Standard deviation baselines, for 1 meter distance and 1 tag
   // (Adjusted automatically based on distance and # of tags)
-  public static final double LINEAR_STD_DEV_BASELINE = 0.02; // Meters
-  public static final double ANGULAR_STD_DEV_BASELINE = 0.06; // Radians
+  public static final double LINEAR_STD_DEV_BASELINE = 0.04; // Meters
+  public static final double ANGULAR_STD_DEV_BASELINE = 0.03; // Radians
 
   // public static final double ambiguityThreshold = 0.4;
   // public static final double targetLogTimeSecs = 0.1;
@@ -33,7 +33,7 @@ public class AprilTagVisionConstants {
       List.of(
           new CameraConfig(
               0,
-              "Front Right",
+              "Battery Support Camera",
               new Transform3d(
                   Units.inchesToMeters(10.340901),
                   Units.inchesToMeters(-12.659099),
@@ -42,7 +42,7 @@ public class AprilTagVisionConstants {
               1.0),
           new CameraConfig(
               1,
-              "Back Right",
+              "Elevator Support Camera",
               new Transform3d(
                   Units.inchesToMeters(-10.340901),
                   Units.inchesToMeters(-12.659099),
@@ -51,22 +51,20 @@ public class AprilTagVisionConstants {
               1.0),
           new CameraConfig(
               0,
-              "Back Left",
+              "Elevator Cage Camera",
               new Transform3d(
                   Units.inchesToMeters(-10.340901),
                   Units.inchesToMeters(12.659099),
                   Units.inchesToMeters(8),
                   new Rotation3d(0, Units.degreesToRadians(-32), Units.degreesToRadians(85))),
-              0.6),
+              0.5),
           new CameraConfig(
               0,
-              "Back Center",
+              "Elevator Top Camera",
               new Transform3d(
                   Units.inchesToMeters(0),
                   Units.inchesToMeters(-0.375),
                   Units.inchesToMeters(30.25),
-                  new Rotation3d(0, Units.degreesToRadians(-15), Units.degreesToRadians(180))),
-              0.6));
-  // new CameraConfig(0, "front left", new Transform3d(Units.inchesToMeters(10.319),
-  // Units.inchesToMeters(-12.686), Units.inchesToMeters(8), new Rotation3d(0, 0, 0)), 1.0));
+                  new Rotation3d(0, Units.degreesToRadians(-30), Units.degreesToRadians(180))),
+              0.4));
 }

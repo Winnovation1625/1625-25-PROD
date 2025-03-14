@@ -13,19 +13,31 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Volts;
+
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.FieldConstants.AlgaeObjective;
+import frc.robot.FieldConstants.CoralObjective;
+import frc.robot.FieldConstants.ReefPosition;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.DriveToReef;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystem.apriltagvision.AprilTagVision;
 import frc.robot.subsystem.apriltagvision.AprilTagVisionConstants;
@@ -60,7 +72,10 @@ import frc.robot.subsystem.superstructure.elevator.Elevator;
 import frc.robot.subsystem.superstructure.elevator.ElevatorIO;
 import frc.robot.subsystem.superstructure.elevator.ElevatorIOSim;
 import frc.robot.util.AllianceFlipUtil;
+import frc.robot.util.AuxControllerUtil;
 import frc.robot.util.LoggedTunableNumber;
+import java.util.List;
+import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
@@ -95,8 +110,14 @@ public class RobotContainer {
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
 
+  private final Joystick auxController = new Joystick(1);
+
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+
+  private final Supplier<CoralObjective> currentCoralObjective;
+
+  private final Supplier<AlgaeObjective> currentAlgaeObjective;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -196,6 +217,42 @@ public class RobotContainer {
             AllianceFlipUtil.apply(drive.getPose()).getY()
                     - AllianceFlipUtil.apply(FieldConstants.Barge.middleCage).getY()
                 < 0.4);
+    currentCoralObjective =
+        () ->
+            AuxControllerUtil.getCoralObjective(
+                List.of(
+                    auxController.getRawButton(0), // A
+                    auxController.getRawButton(1), // B
+                    auxController.getRawButton(2), // C
+                    auxController.getRawButton(3), // D
+                    auxController.getRawButton(4), // E
+                    auxController.getRawButton(5), // F
+                    auxController.getRawButton(6), // G
+                    auxController.getRawButton(7), // H
+                    auxController.getRawButton(8), // I
+                    auxController.getRawButton(9), // J
+                    auxController.getRawButton(10), // K
+                    auxController.getRawButton(11) // L
+                    ),
+                List.of(
+                    auxController.getRawButton(18), // L1
+                    auxController.getRawButton(19), // L2
+                    auxController.getRawButton(20), // L3
+                    auxController.getRawButton(21) // L4
+                    ));
+
+    currentAlgaeObjective =
+        () ->
+            AuxControllerUtil.getAlgaeObjective(
+                List.of(
+                    auxController.getRawButton(12), // AB Face
+                    auxController.getRawButton(13), // CD Face
+                    auxController.getRawButton(14), // EF Face
+                    auxController.getRawButton(15), // GH Face
+                    auxController.getRawButton(16), // IJ Face
+                    auxController.getRawButton(17) // KL Face
+                    ),
+                auxController.getRawButton(22));
 
     superstructure = new Superstructure(arm, elevator, manipulator::hasAlgae);
     // Set up auto routines
@@ -296,6 +353,39 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
+    controller
+        .rightTrigger()
+        .whileTrue(new DriveToReef(drive, currentCoralObjective.get().position()));
+    PathConstraints PATH_CONSTRAINTS =
+        new PathConstraints(
+            MetersPerSecond.of(16.16),
+            MetersPerSecondPerSecond.of(32),
+            RadiansPerSecond.of(2 * Math.PI),
+            RadiansPerSecondPerSecond.of(10),
+            Volts.of(12),
+            false);
+    Supplier<Command> algaeAquireCommand =
+        () ->
+            currentAlgaeObjective.get().reefFace() != -1
+                ? drive.getPathFindingCommand(
+                    () -> FieldConstants.Reef.centerFaces[currentAlgaeObjective.get().reefFace()],
+                    PATH_CONSTRAINTS,
+                    0)
+                // AutoScoreCommands.getAlgaeAutoAquireCommand(
+                //     drive, superstructure, manipulator, currentAlgaeObjective)
+                : Commands.none();
+
+    controller
+        .leftTrigger()
+        .and(() -> currentAlgaeObjective.get().reefFace() != -1)
+        .whileTrue(
+            drive.getPathFindingCommand(
+                () ->
+                    currentAlgaeObjective.get().reefFace() != -1
+                        ? FieldConstants.Reef.centerFaces[currentAlgaeObjective.get().reefFace()]
+                        : new Pose2d(),
+                PATH_CONSTRAINTS,
+                0));
 
     // controller
     //     .x()
@@ -333,28 +423,29 @@ public class RobotContainer {
                 .setSuperstructureCommand(() -> SuperstructureStates.STOW)
                 .alongWith(manipulator.setManipulatorState(ManipulatorState.IDLE)));
 
-    controller
-        .leftTrigger()
-        .onTrue(
-            superstructure
-                .setSuperstructureCommand(() -> SuperstructureStates.ALGAE_INTAKING)
-                .andThen(
-                    Commands.waitUntil(() -> superstructure.atSuperStructureGoal())
-                        .andThen(manipulator.setManipulatorState(ManipulatorState.INTAKING_ALGAE)))
-                .andThen(
-                    Commands.waitUntil(
-                        () ->
-                            manipulator.getGamepieceState()
-                                == Manipulator.GamepieceState.ALGAE_IN_CLAW))
-                .andThen(controllerRumbleCommand().withTimeout(0.5))
-                .andThen(
-                    superstructure.setSuperstructureCommand(
-                        () -> SuperstructureStates.ALGAE_STOW)));
+    // controller
+    //     .leftTrigger()
+    //     .onTrue(
+    //         superstructure
+    //             .setSuperstructureCommand(() -> SuperstructureStates.CORAL_INTAKING)
+    //             .andThen(
+    //                 Commands.waitUntil(() -> superstructure.atSuperStructureGoal())
+    //
+    // .andThen(manipulator.setManipulatorState(ManipulatorState.INTAKING_ALGAE)))
+    //             .andThen(
+    //                 Commands.waitUntil(
+    //                     manipulator::hasAlgae)
+    //             .andThen(controllerRumbleCommand().withTimeout(0.5))
+    //             .andThen(
+    //                 superstructure.setSuperstructureCommand(
+    //                     () -> SuperstructureStates.STOW))));
 
     controller
         .start()
         // .and(AuxAllows)
         .onTrue(climber.runClimber(ClimberState.RELEASE));
+
+    controller.rightBumper().whileTrue(new DriveToReef(drive, ReefPosition.A));
 
     // controller
     //     .rightBumper()
@@ -400,6 +491,7 @@ public class RobotContainer {
         "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
     Logger.recordOutput(
         "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
+    Logger.recordOutput("Testing/AlgaeObjective", currentAlgaeObjective.get().reefFace());
   }
 
   private Command controllerRumbleCommand() {

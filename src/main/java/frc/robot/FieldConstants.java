@@ -254,7 +254,10 @@ public class FieldConstants {
   @Builder
   public record CoralObjective(ReefPosition position, ReefLevel reefLevel) {}
 
-  public record AlgaeObjective(int id) {}
+  @Builder
+  public record AlgaeObjective(
+      int reefFace,
+      boolean bargeScore) {} // bargescore on true is scoring barge on false its scoring processor
 
   @RequiredArgsConstructor
   public enum FieldType {
