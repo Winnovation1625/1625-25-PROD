@@ -36,6 +36,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.FieldConstants.AlgaeObjective;
 import frc.robot.FieldConstants.CoralObjective;
 import frc.robot.FieldConstants.ReefPosition;
+import frc.robot.commands.AutoScoreCommands;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveToReef;
 import frc.robot.generated.TunerConstants;
@@ -353,9 +354,8 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
-    controller
-        .rightTrigger()
-        .whileTrue(new DriveToReef(drive, currentCoralObjective.get().position()));
+    
+
     PathConstraints PATH_CONSTRAINTS =
         new PathConstraints(
             MetersPerSecond.of(16.16),
@@ -364,28 +364,59 @@ public class RobotContainer {
             RadiansPerSecondPerSecond.of(10),
             Volts.of(12),
             false);
+
     Supplier<Command> algaeAquireCommand =
         () ->
-            currentAlgaeObjective.get().reefFace() != -1
-                ? drive.getPathFindingCommand(
-                    () -> FieldConstants.Reef.centerFaces[currentAlgaeObjective.get().reefFace()],
-                    PATH_CONSTRAINTS,
-                    0)
-                // AutoScoreCommands.getAlgaeAutoAquireCommand(
-                //     drive, superstructure, manipulator, currentAlgaeObjective)
-                : Commands.none();
+            Commands.either(
+                AutoScoreCommands.getAlgaeAutoAquireCommand(
+                    drive, superstructure, manipulator, currentAlgaeObjective),
+                Commands.none(),
+                () -> currentAlgaeObjective.get().reefFace() != -1);
+
+    Supplier<Command> coralAquireCommand =
+        () ->
+            Commands.either(
+                AutoScoreCommands.getCoralAutoScoreCommand(
+                    drive, superstructure, manipulator, null),
+                Commands.none(),
+                () -> currentCoralObjective.get().position() != null);
+
+    // controller
+    //     .rightTrigger()
+    //     .and(() -> currentCoralObjective.get().position() != null)
+    //     .onTrue(
+    //         Commands.either(
+    //             drive.getPathFindingCommand(
+    //                 () -> currentCoralObjective.get()., PATH_CONSTRAINTS, 0),
+    //             Commands.none(),
+    //             () -> currentAlgaeObjective.get().reefFace() != -1));
+
+    // controller
+    //     .leftTrigger()
+    //     .and(() -> currentAlgaeObjective.get().reefFace() != -1)
+    //     .whileTrue(
+    //         drive.getPathFindingCommand(
+    //             () ->
+    //                 currentAlgaeObjective.get().reefFace() != -1
+    //                     ? FieldConstants.Reef.centerFaces[currentAlgaeObjective.get().reefFace()]
+    //                     : new Pose2d(),
+    //             PATH_CONSTRAINTS,
+    //             0));
 
     controller
         .leftTrigger()
         .and(() -> currentAlgaeObjective.get().reefFace() != -1)
-        .whileTrue(
-            drive.getPathFindingCommand(
-                () ->
-                    currentAlgaeObjective.get().reefFace() != -1
-                        ? FieldConstants.Reef.centerFaces[currentAlgaeObjective.get().reefFace()]
-                        : new Pose2d(),
-                PATH_CONSTRAINTS,
-                0));
+        .onTrue(
+            Commands.either(
+                drive.getPathFindingCommand(
+                    () -> FieldConstants.Reef.centerFaces[0], PATH_CONSTRAINTS, 0),
+                Commands.none(),
+                () -> currentAlgaeObjective.get().reefFace() != -1));
+
+    // controller
+    //     .leftTrigger()
+    //     .and(() -> currentAlgaeObjective.get().reefFace() == -1)
+    //     .onTrue(Commands.none());
 
     // controller
     //     .x()
@@ -400,21 +431,23 @@ public class RobotContainer {
     //     .rightBumper()
     //     .onTrue(superstructure.setSuperstructureCommand(() -> SuperstructureStates.CLVL4));
 
-    controller
-        .rightTrigger()
-        .and(() -> manipulator.getGamepieceState() == Manipulator.GamepieceState.ALGAE_IN_CLAW)
-        .onTrue(
-            superstructure
-                .setSuperstructureCommand(() -> SuperstructureStates.BARGE)
-                .andThen(
-                    Commands.waitUntil(() -> superstructure.atSuperStructureGoal())
-                        .andThen(manipulator.setManipulatorState(ManipulatorState.SHOOTING_ALGAE)))
-                .andThen(
-                    Commands.waitUntil(
-                        () ->
-                            manipulator.getGamepieceState()
-                                != Manipulator.GamepieceState.ALGAE_IN_CLAW))
-                .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
+    // controller
+    //     .rightTrigger()
+    //     .and(() -> manipulator.getGamepieceState() == Manipulator.GamepieceState.ALGAE_IN_CLAW)
+    //     .onTrue(
+    //         superstructure
+    //             .setSuperstructureCommand(() -> SuperstructureStates.BARGE)
+    //             .andThen(
+    //                 Commands.waitUntil(() -> superstructure.atSuperStructureGoal())
+    //
+    // .andThen(manipulator.setManipulatorState(ManipulatorState.SHOOTING_ALGAE)))
+    //             .andThen(
+    //                 Commands.waitUntil(
+    //                     () ->
+    //                         manipulator.getGamepieceState()
+    //                             != Manipulator.GamepieceState.ALGAE_IN_CLAW))
+    //             .andThen(superstructure.setSuperstructureCommand(() ->
+    // SuperstructureStates.STOW)));
 
     controller
         .leftBumper()
