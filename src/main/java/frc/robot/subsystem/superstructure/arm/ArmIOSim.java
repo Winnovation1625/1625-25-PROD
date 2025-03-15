@@ -1,5 +1,6 @@
 package frc.robot.subsystem.superstructure.arm;
 
+import static edu.wpi.first.units.Units.Radians;
 import static frc.robot.subsystem.superstructure.arm.ArmConstants.*;
 
 import edu.wpi.first.math.MathUtil;
@@ -29,8 +30,8 @@ public class ArmIOSim implements ArmIO {
           armMotorSim,
           ARM_GEARING,
           ARM_LENGTH,
-          ARM_MIN_ANGLE_RADS,
-          ARM_MAX_ANGLE_RADS,
+          ARM_MIN_ANGLE_RADS.in(Radians),
+          ARM_MAX_ANGLE_RADS.in(Radians),
           true,
           .1);
 

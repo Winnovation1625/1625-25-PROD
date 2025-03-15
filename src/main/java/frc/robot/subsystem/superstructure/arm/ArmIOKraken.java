@@ -1,5 +1,7 @@
 package frc.robot.subsystem.superstructure.arm;
 
+import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Rotations;
 import static frc.robot.subsystem.superstructure.arm.ArmConstants.*;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -37,7 +39,7 @@ public class ArmIOKraken implements ArmIO {
   private final NeutralOut neutralOut = new NeutralOut();
 
   public ArmIOKraken() {
-    armTalon = new TalonFX(0);
+    armTalon = new TalonFX(Constants.SUPERSTRUCTURE_CAN_IDS.armMotor(), Constants.CANIVORE_NAME);
     armConfig = new TalonFXConfiguration();
 
     armConfig.Slot0.kP = gains.kP();
@@ -50,19 +52,15 @@ public class ArmIOKraken implements ArmIO {
     armConfig.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseClosedLoopSign;
     armConfig.TorqueCurrent.PeakForwardTorqueCurrent = 80.0;
     armConfig.TorqueCurrent.PeakReverseTorqueCurrent = -80.0;
-    armConfig.MotorOutput.Inverted =
-        ARM_INVERTED ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
-    armConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     armConfig.Feedback.FeedbackRemoteSensorID = Constants.SUPERSTRUCTURE_CAN_IDS.armEncoder();
     armConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
-    armConfig.Feedback.RotorToSensorRatio = ARM_GEARING;
-    armConfig.Feedback.SensorToMechanismRatio = 1.0;
+    // armConfig.Feedback.FeedbackRotorOffset = ARM_ENCODER_OFFSET.in(Rotations);
+    armConfig.Feedback.RotorToSensorRatio = 1.0; // when using a real encoder this is ARM_GEARING
+    armConfig.Feedback.SensorToMechanismRatio = ARM_GEARING; // when using a real encoder this is 1
     armConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-    armConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
-        Units.degreesToRotations(ARM_MAX_ANGLE_RADS);
+    armConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = ARM_MAX_ANGLE_RADS.in(Rotations);
     armConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
-    armConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold =
-        Units.degreesToRotations(ARM_MIN_ANGLE_RADS);
+    armConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = ARM_MIN_ANGLE_RADS.in(Rotations);
     armConfig.MotionMagic.MotionMagicAcceleration = gains.cruiseAcceleration();
     armConfig.MotionMagic.MotionMagicCruiseVelocity = gains.cruiseVelocity();
     armTalon.getConfigurator().apply(armConfig, 1.0);
@@ -82,7 +80,9 @@ public class ArmIOKraken implements ArmIO {
     BaseStatusSignal.refreshAll(
         positionRotations, appliedVolts, velocityRadPerSec, supplyCurrentAmps, tempCelsius);
     inputs.appliedVolts = appliedVolts.getValueAsDouble();
-    inputs.positionRad = Units.rotationsToRadians(positionRotations.getValueAsDouble());
+    inputs.positionRad =
+        Units.rotationsToRadians(positionRotations.getValueAsDouble())
+            - ARM_ENCODER_OFFSET.in(Radians);
     inputs.supplyCurrentAmps = supplyCurrentAmps.getValueAsDouble();
     inputs.tempCelsius = tempCelsius.getValueAsDouble();
     inputs.velocityRadPerSec = velocityRadPerSec.getValueAsDouble();

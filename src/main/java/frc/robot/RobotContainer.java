@@ -55,6 +55,7 @@ import frc.robot.subsystem.manipulator.manipulatorSensors.ManipulatorSensorsIOCA
 import frc.robot.subsystem.superstructure.Superstructure;
 import frc.robot.subsystem.superstructure.arm.Arm;
 import frc.robot.subsystem.superstructure.arm.ArmIO;
+import frc.robot.subsystem.superstructure.arm.ArmIOKraken;
 import frc.robot.subsystem.superstructure.arm.ArmIOSim;
 import frc.robot.subsystem.superstructure.elevator.Elevator;
 import frc.robot.subsystem.superstructure.elevator.ElevatorIO;
@@ -117,7 +118,7 @@ public class RobotContainer {
                 new ModuleIOTalonFXReal(TunerConstants.BackLeft),
                 new ModuleIOTalonFXReal(TunerConstants.BackRight),
                 (pose) -> {});
-        arm = new Arm(new ArmIO() {});
+        arm = new Arm(new ArmIOKraken());
         elevator = new Elevator(new ElevatorIO() {});
         aprilTagVision =
             new AprilTagVision(

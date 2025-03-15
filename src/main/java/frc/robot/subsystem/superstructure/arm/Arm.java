@@ -17,13 +17,11 @@ import org.littletonrobotics.junction.Logger;
 public class Arm {
   private final ArmIO io;
   private final ArmIOInputsAutoLogged inputs = new ArmIOInputsAutoLogged();
-  // private final ArmVisualizer visualizer = new ArmVisualizer();
   private static final LoggedTunableNumber kP = new LoggedTunableNumber("Arm/kP", gains.kP());
   private static final LoggedTunableNumber kI = new LoggedTunableNumber("Arm/kI", gains.kI());
   private static final LoggedTunableNumber kD = new LoggedTunableNumber("Arm/kD", gains.kD());
   private static final LoggedTunableNumber armTolerance =
       new LoggedTunableNumber("Arm/Tolerance", ARM_TOLERANCE);
-  // private boolean characterizing;
   private boolean brakeModeEnabled;
   private BooleanSupplier disableSupplier = DriverStation::isDisabled;
 
@@ -61,7 +59,7 @@ public class Arm {
 
   public Arm(ArmIO io) {
     this.io = io;
-    io.setBrakeMode(true);
+    io.setBrakeMode(false);
     io.setInverted(ARM_INVERTED);
   }
 

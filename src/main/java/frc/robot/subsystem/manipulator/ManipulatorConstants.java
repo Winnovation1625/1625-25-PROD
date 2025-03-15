@@ -12,7 +12,7 @@ public class ManipulatorConstants {
 
   public static final Distance REQUIRED_CORAL_DISTANCE = Inches.of(4);
   public static final Distance REQUIRED_ALGAE_DISTANCE = Inches.of(4);
-  public static final double ROLLERS_REDUCTION = 12.0;
+  public static final double ROLLERS_REDUCTION = 3.0;
   public static CANrangeConfiguration CORAL_SENSOR_CONFIG = new CANrangeConfiguration();
   public static CANrangeConfiguration ALGAE_SENSOR_CONFIG = new CANrangeConfiguration();
 

@@ -68,7 +68,7 @@ public class Superstructure extends SubsystemBase {
   @Override
   public void periodic() {
     arm.periodic();
-    elevator.periodic();
+    // elevator.periodic();
     // switch (superstructureGoal) {
     //   case INTAKING -> {
     //     buildSuperStructureCommand(previousState, superstructureGoal);
@@ -219,7 +219,7 @@ public class Superstructure extends SubsystemBase {
     // }
   }
 
-  private Command runArmToState(Supplier<ArmState> armState) {
+  public Command runArmToState(Supplier<ArmState> armState) {
     return Commands.runOnce(() -> arm.setPosition(armState.get().getArmAngle()))
         .alongWith(Commands.runOnce(() -> this.armState = armState.get()));
   }
