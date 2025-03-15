@@ -45,13 +45,14 @@ public class ManipulatorIOKraken implements ManipulatorIO {
     supplyCurrent = motor.getSupplyCurrent();
     appliedVoltage = motor.getMotorVoltage();
     BaseStatusSignal.setUpdateFrequencyForAll(
-        100, position, velocity, appliedVoltage, supplyCurrent);
+        50, position, velocity, appliedVoltage, supplyCurrent);
 
     motor.optimizeBusUtilization(0.0, 1.0);
   }
 
   @Override
   public void updateInputs(ManipulatorIOInputs inputs) {
+    BaseStatusSignal.refreshAll(appliedVoltage, supplyCurrent, position, velocity);
     inputs.appliedCurrentOut = supplyCurrent.getValueAsDouble();
     inputs.appliedVoltageOut = appliedVoltage.getValueAsDouble();
     inputs.positionRad = Units.rotationsToRadians(position.getValueAsDouble());

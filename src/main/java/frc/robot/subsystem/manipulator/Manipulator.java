@@ -24,11 +24,11 @@ public class Manipulator extends SubsystemBase {
 
   @RequiredArgsConstructor
   public enum ManipulatorState {
-    INTAKING_CORAL(new LoggedTunableNumber("Manipulator/CoralIntakeVoltage", 12)),
-    INTAKING_ALGAE(new LoggedTunableNumber("Manipulator/AlgaeIntakeVoltage", -12)),
-    STAGING_CORAL(new LoggedTunableNumber("Manipulator/CoralStagingVoltage", 4)),
-    SHOOTING_CORAL(new LoggedTunableNumber("Manipulator/CoralShootingVoltage", 12)),
-    SHOOTING_ALGAE(new LoggedTunableNumber("Manipulator/AlgaeShootingVoltage", 10)),
+    INTAKING_CORAL(new LoggedTunableNumber("Manipulator/CoralIntakeVoltage", -3)),
+    INTAKING_ALGAE(new LoggedTunableNumber("Manipulator/AlgaeIntakeVoltage", 4)),
+    STAGING_CORAL(new LoggedTunableNumber("Manipulator/CoralStagingVoltage", -1.5)),
+    SHOOTING_CORAL(new LoggedTunableNumber("Manipulator/CoralShootingVoltage", -6)),
+    SHOOTING_ALGAE(new LoggedTunableNumber("Manipulator/AlgaeShootingVoltage", -12)),
     IDLE(() -> 0);
 
     private final DoubleSupplier voltageSupplier;
@@ -55,6 +55,8 @@ public class Manipulator extends SubsystemBase {
   @Getter
   private ManipulatorState manipulatorState = ManipulatorState.IDLE;
 
+  private ManipulatorState prevManipulatorState = ManipulatorState.IDLE;
+
   public boolean hasAlgae() {
     return gamepieceState == GamepieceState.ALGAE_IN_CLAW;
   }
@@ -67,22 +69,28 @@ public class Manipulator extends SubsystemBase {
     Logger.processInputs("Manipulator/Sensors", sensorInputs);
 
     if (sensorInputs.isFrontCoralDetected == false && sensorInputs.isBackCoralDetected == true) {
-      manipulatorState = ManipulatorState.INTAKING_CORAL;
+      manipulatorState = ManipulatorState.STAGING_CORAL;
       gamepieceState = GamepieceState.CORAL_STAGING;
     }
 
     if (sensorInputs.isFrontCoralDetected == true && sensorInputs.isBackCoralDetected == true) {
       gamepieceState = GamepieceState.CORAL_IN_MANIPULATOR;
+      if (prevManipulatorState == ManipulatorState.STAGING_CORAL) {
+        manipulatorState = ManipulatorState.IDLE;
+      }
       Leds.getInstance().setCoralInBot(true);
       Leds.getInstance().setAlgaeInBot(false);
     }
 
-    if (sensorInputs.isFrontCoralDetected == false && sensorInputs.isBackCoralDetected == false) {
+    if (!sensorInputs.isFrontCoralDetected && !sensorInputs.isBackCoralDetected) {
       gamepieceState = GamepieceState.NONE;
     }
 
     if (sensorInputs.isAlgaeDetected == true) {
       gamepieceState = GamepieceState.ALGAE_IN_CLAW;
+      if (prevManipulatorState == ManipulatorState.INTAKING_ALGAE) {
+        manipulatorState = ManipulatorState.IDLE;
+      }
       Leds.getInstance().setAlgaeInBot(true);
       Leds.getInstance().setCoralInBot(false);
     }
@@ -90,7 +98,7 @@ public class Manipulator extends SubsystemBase {
     if (DriverStation.isDisabled()) {
       manipulatorState = ManipulatorState.IDLE;
     }
-
+    prevManipulatorState = manipulatorState;
     io.setVoltage(manipulatorState.voltageSupplier);
   }
 
