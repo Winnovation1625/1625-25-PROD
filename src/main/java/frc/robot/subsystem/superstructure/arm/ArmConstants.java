@@ -15,13 +15,22 @@ public class ArmConstants {
   public static final double ARM_MAX_ANGLE_RADS = Units.degreesToRadians(200);
   public static final double ARM_MAX_VELOCITY = 25.0;
   public static final double ARM_MAX_ACCELERATION = 50.0;
+  public static final boolean ARM_INVERTED = false;
 
   public static Gains gains =
       switch (Constants.CURRENT_MODE) {
-        case SIM -> new Gains(4.0, 0, 0.0, 0.0, 0.0, 0.0, 0.0);
-        case REAL, REPLAY -> new Gains(600.0, 0.0, 40.0, 3.0, 0.0, 0.0, 4.0);
+        case SIM -> new Gains(4.0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 200.0, 400.0);
+        case REAL, REPLAY -> new Gains(600.0, 0.0, 40.0, 3.0, 0.0, 0.0, 4.0, 200, 400);
       };
 
   public record Gains(
-      double kP, double kI, double kD, double ffkS, double ffkV, double ffkA, double ffkG) {}
+      double kP,
+      double kI,
+      double kD,
+      double ffkS,
+      double ffkV,
+      double ffkA,
+      double ffkG,
+      double cruiseVelocity,
+      double cruiseAcceleration) {}
 }

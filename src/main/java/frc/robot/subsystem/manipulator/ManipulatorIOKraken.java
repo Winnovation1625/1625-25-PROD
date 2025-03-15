@@ -13,6 +13,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.Constants;
 import java.util.function.DoubleSupplier;
 
 public class ManipulatorIOKraken implements ManipulatorIO {
@@ -30,11 +31,11 @@ public class ManipulatorIOKraken implements ManipulatorIO {
   private final TalonFXConfiguration config = new TalonFXConfiguration();
 
   public ManipulatorIOKraken() {
-    motor = new TalonFX(0);
+    motor = new TalonFX(Constants.MANIPULATOR_CAN_IDS.manipulatorMotor(), Constants.CANIVORE_NAME);
 
-    config.Slot0.kP = gains.kP();
-    config.Slot0.kI = gains.kI();
-    config.Slot0.kD = gains.kD();
+    // config.Slot0.kP = gains.kP();
+    // config.Slot0.kI = gains.kI();
+    // config.Slot0.kD = gains.kD();
     // config.Slot0.kS = gains.ffkS();
     // config.Slot0.kV = gains.ffkV();
     // config.Slot0.kG = gains.ffkG();

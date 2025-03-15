@@ -19,6 +19,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.Constants;
 
 public class ElevatorIOKraken implements ElevatorIO {
 
@@ -43,8 +44,10 @@ public class ElevatorIOKraken implements ElevatorIO {
   private final NeutralOut neutralout = new NeutralOut();
 
   public ElevatorIOKraken() {
-    elevatorTalon = new TalonFX(0); // will use device Id's when created.
-    elevatorFollower = new TalonFX(1);
+    elevatorTalon =
+        new TalonFX(Constants.SUPERSTRUCTURE_CAN_IDS.elevatorLeft(), Constants.CANIVORE_NAME);
+    elevatorFollower =
+        new TalonFX(Constants.SUPERSTRUCTURE_CAN_IDS.elevatorRight(), Constants.CANIVORE_NAME);
 
     // numbers from Elevator Constant that will be implemented later.
     config.Slot0.kP = gains.kP();

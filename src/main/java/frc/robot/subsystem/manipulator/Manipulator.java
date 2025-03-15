@@ -26,7 +26,7 @@ public class Manipulator extends SubsystemBase {
   public enum ManipulatorState {
     INTAKING_CORAL(new LoggedTunableNumber("Manipulator/CoralIntakeVoltage", 12)),
     INTAKING_ALGAE(new LoggedTunableNumber("Manipulator/AlgaeIntakeVoltage", -12)),
-    STAGING_CORAL(new LoggedTunableNumber("Manipulator/CoralStagingVoltage", 12)),
+    STAGING_CORAL(new LoggedTunableNumber("Manipulator/CoralStagingVoltage", 4)),
     SHOOTING_CORAL(new LoggedTunableNumber("Manipulator/CoralShootingVoltage", 12)),
     SHOOTING_ALGAE(new LoggedTunableNumber("Manipulator/AlgaeShootingVoltage", 10)),
     IDLE(() -> 0);

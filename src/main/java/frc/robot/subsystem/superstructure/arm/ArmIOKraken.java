@@ -9,16 +9,22 @@ import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.Constants;
 import frc.robot.subsystem.superstructure.arm.ArmIO.ArmIOInputs;
 
 public class ArmIOKraken implements ArmIO {
+
   private final StatusSignal<Angle> positionRotations;
   private final StatusSignal<Voltage> appliedVolts;
   private final StatusSignal<AngularVelocity> velocityRadPerSec;
@@ -37,36 +43,38 @@ public class ArmIOKraken implements ArmIO {
     armConfig.Slot0.kP = gains.kP();
     armConfig.Slot0.kI = gains.kI();
     armConfig.Slot0.kD = gains.kD();
-    // armConfig.Slot0.kS = gains.ffkS();
-    // armConfig.Slot0.kV = gains.ffkV();
-    // armConfig.Slot0.kG = gains.ffkG();
-    // armConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
-    // armConfig.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseClosedLoopSign;
-    // armConfig.TorqueCurrent.PeakForwardTorqueCurrent = 80.0;
-    // armConfig.TorqueCurrent.PeakReverseTorqueCurrent = -80.0;
-    // armConfig.MotorOutput.Inverted =
-    //     inverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
-    // armConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    // armConfig.Feedback.FeedbackRemoteSensorID = Constants.getMotorIds().SHOOTER_CANCODER;
-    // armConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
-    // armConfig.Feedback.RotorToSensorRatio = armReduction;
-    // armConfig.Feedback.SensorToMechanismRatio = 1.0;
-    // armConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-    // armConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = Units.degreesToRotations(maxAngle);
-    // armConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
-    // armConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = Units.degreesToRotations(minAngle);
-    // armConfig.MotionMagic.MotionMagicAcceleration = cruiseAcceleration;
-    // armConfig.MotionMagic.MotionMagicCruiseVelocity = cruiseVelocity;
-    // armConfig.MotionMagic.MotionMagicJerk = cruiseJerk;
-    // armTalon.getConfigurator().apply(armConfig, 1.0);
+    armConfig.Slot0.kS = gains.ffkS();
+    armConfig.Slot0.kV = gains.ffkV();
+    armConfig.Slot0.kG = gains.ffkG();
+    armConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
+    armConfig.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseClosedLoopSign;
+    armConfig.TorqueCurrent.PeakForwardTorqueCurrent = 80.0;
+    armConfig.TorqueCurrent.PeakReverseTorqueCurrent = -80.0;
+    armConfig.MotorOutput.Inverted =
+        ARM_INVERTED ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
+    armConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    armConfig.Feedback.FeedbackRemoteSensorID = Constants.SUPERSTRUCTURE_CAN_IDS.armEncoder();
+    armConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
+    armConfig.Feedback.RotorToSensorRatio = ARM_GEARING;
+    armConfig.Feedback.SensorToMechanismRatio = 1.0;
+    armConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+    armConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
+        Units.degreesToRotations(ARM_MAX_ANGLE_RADS);
+    armConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+    armConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold =
+        Units.degreesToRotations(ARM_MIN_ANGLE_RADS);
+    armConfig.MotionMagic.MotionMagicAcceleration = gains.cruiseAcceleration();
+    armConfig.MotionMagic.MotionMagicCruiseVelocity = gains.cruiseVelocity();
+    armTalon.getConfigurator().apply(armConfig, 1.0);
 
     positionRotations = armTalon.getPosition();
     velocityRadPerSec = armTalon.getVelocity();
     appliedVolts = armTalon.getMotorVoltage();
     supplyCurrentAmps = armTalon.getSupplyCurrent();
     tempCelsius = armTalon.getDeviceTemp();
+    BaseStatusSignal.setUpdateFrequencyForAll(250, positionRotations);
     BaseStatusSignal.setUpdateFrequencyForAll(
-        50, positionRotations, velocityRadPerSec, appliedVolts, supplyCurrentAmps, tempCelsius);
+        50, velocityRadPerSec, appliedVolts, supplyCurrentAmps, tempCelsius);
   }
 
   @Override
@@ -104,10 +112,32 @@ public class ArmIOKraken implements ArmIO {
   }
 
   @Override
-  public void setPID(double p, double i, double d) {
+  public void setPID(
+      double p,
+      double i,
+      double d,
+      double kS,
+      double kV,
+      double kA,
+      double kG,
+      double cruiseA,
+      double cruiseV) {
     armConfig.Slot0.kP = p;
     armConfig.Slot0.kI = i;
-    armConfig.Slot0.kP = p;
-    armTalon.getConfigurator().apply(armConfig);
+    armConfig.Slot0.kD = d;
+    armConfig.Slot0.kS = kS;
+    armConfig.Slot0.kV = kV;
+    armConfig.Slot0.kA = kA;
+    armConfig.Slot0.kG = kG;
+    armConfig.MotionMagic.MotionMagicCruiseVelocity = cruiseV;
+    armConfig.MotionMagic.MotionMagicAcceleration = cruiseA;
+    armTalon.getConfigurator().apply(armConfig, 0.5);
+  }
+
+  @Override
+  public void setInverted(boolean inverted) {
+    armConfig.MotorOutput.Inverted =
+        inverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
+    armTalon.getConfigurator().apply(armConfig, 0.5);
   }
 }

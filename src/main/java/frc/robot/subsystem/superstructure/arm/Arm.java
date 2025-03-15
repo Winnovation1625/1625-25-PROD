@@ -26,26 +26,21 @@ public class Arm {
   // private boolean characterizing;
   private boolean brakeModeEnabled;
   private BooleanSupplier disableSupplier = DriverStation::isDisabled;
-  private BooleanSupplier coastSupplier = () -> false;
 
   @AutoLogOutput(key = "Superstructure/Arm/Position")
   private DoubleSupplier positionSetpoint = ArmState.STOP.getArmAngle();
 
   private Debouncer atGoalDebouncer = new Debouncer(0.1, DebounceType.kRising);
-  // private static final LoggedTunableNumber kS =
-  //     new LoggedTunableNumber("Arm/kS", gains.ffkS());
-  // private static final LoggedTunableNumber kV =
-  //     new LoggedTunableNumber("Arm/kV", gains.ffkV());
-  // private static final LoggedTunableNumber kA =
-  //     new LoggedTunableNumber("Arm/kA", gains.ffkA());
-  // private static final LoggedTunableNumber kG =
-  //     new LoggedTunableNumber("Arm/kG", gains.ffkG());
-  // private static final LoggedTunableNumber cruiseV =
-  //     new LoggedTunableNumber("Arm/cruiseV", cruiseVelocity);
-  // private static final LoggedTunableNumber cruiseA =
-  //     new LoggedTunableNumber("Arm/cruiseA", cruiseAcceleration);
-  // private static final LoggedTunableNumber cruiseJ =
-  //     new LoggedTunableNumber("Arm/cruiseJ", cruiseJerk);
+  private boolean characterizing;
+  private static final LoggedTunableNumber kS = new LoggedTunableNumber("Arm/kS", gains.ffkS());
+  private static final LoggedTunableNumber kV = new LoggedTunableNumber("Arm/kV", gains.ffkV());
+  private static final LoggedTunableNumber kA = new LoggedTunableNumber("Arm/kA", gains.ffkA());
+  private static final LoggedTunableNumber kG = new LoggedTunableNumber("Arm/kG", gains.ffkG());
+  private static final LoggedTunableNumber cruiseV =
+      new LoggedTunableNumber("Arm/cruiseV", gains.cruiseVelocity());
+  private static final LoggedTunableNumber cruiseA =
+      new LoggedTunableNumber("Arm/cruiseA", gains.cruiseAcceleration());
+
   @RequiredArgsConstructor
   public enum ArmState {
     ALGAE_INTAKING(new LoggedTunableNumber("Superstructure/Arm/INTAKING", -.2)),
@@ -66,6 +61,8 @@ public class Arm {
 
   public Arm(ArmIO io) {
     this.io = io;
+    io.setBrakeMode(true);
+    io.setInverted(ARM_INVERTED);
   }
 
   public void periodic() {
@@ -76,8 +73,20 @@ public class Arm {
       io.stop();
     }
 
-    LoggedTunableNumber.ifChanged(hashCode(), pid -> io.setPID(pid[0], pid[1], pid[2]), kP, kI, kD);
-
+    LoggedTunableNumber.ifChanged(
+        hashCode(),
+        pid -> io.setPID(pid[0], pid[1], pid[2], pid[3], pid[4], pid[5], pid[6], pid[7], pid[8]),
+        kP,
+        kI,
+        kD,
+        kS,
+        kV,
+        kA,
+        kG,
+        cruiseV,
+        cruiseA);
+    // LoggedNetworkBoolean.ifChanged(hashCode(), brakeEnabled -> io.setBrakeMode(brakeModeEnabled),
+    // brakeEnabled);
     // io.setBrakeMode(!coastSupplier.getAsBoolean() || armState == ArmState.STOW);
 
     // if (!disableSupplier.getAsBoolean()) {
@@ -93,14 +102,14 @@ public class Arm {
             inputs.positionRad, positionSetpoint.getAsDouble(), armTolerance.get()));
   }
 
-  public void setBreakMode(boolean enabled) {
+  public void setBrakeMode(boolean enabled) {
     if (brakeModeEnabled == enabled) return;
     brakeModeEnabled = enabled;
     io.setBrakeMode(enabled);
   }
 
   public void runCharacterizaiton(double amps) {
-    // characterizing = true;
+    characterizing = true;
     io.runCurrent(amps);
   }
 
@@ -109,7 +118,7 @@ public class Arm {
   }
 
   public void endCharacterization() {
-    // characterizing = false;
+    characterizing = false;
   }
 
   public double getArmPos() {
@@ -123,4 +132,63 @@ public class Arm {
       io.setArmPosition(positionSetpoint.getAsDouble());
     }
   }
+
+  // public Command upStaticCharacterization() {
+  //   final StaticCharacterizationState state = new StaticCharacterizationState();
+  //   Timer timer = new Timer();
+  //   return Commands.startRun(
+  //           () -> {
+  //             stopProfile = true;
+  //             timer.restart();
+  //           },
+  //           () -> {
+  //             stopProfile = true;
+  //             state.characterizationOutput = characterizationRampRate.get() * timer.get();
+  //             io.runOpenLoop(state.characterizationOutput);
+  //             Logger.recordOutput(
+  //                 "Elevator/CharacterizationOutputUp", state.characterizationOutput);
+  //           })
+  //       .until(() -> inputs.data.velocityRadPerSec() >= characterizationUpVelocityThresh.get())
+  //       .andThen(io::stop)
+  //       .andThen(Commands.idle())
+  //       .finallyDo(
+  //           () -> {
+  //             stopProfile = false;
+  //             timer.stop();
+  //             Logger.recordOutput(
+  //                 "Elevator/CharacterizationOutputUp", state.characterizationOutput);
+  //           });
+  // }
+
+  // public Command downStaticCharacterization() {
+  //   final StaticCharacterizationState state = new StaticCharacterizationState();
+  //   Timer timer = new Timer();
+  //   return Commands.startRun(
+  //           () -> {
+  //             stopProfile = true;
+  //             timer.restart();
+  //           },
+  //           () -> {
+  //             state.characterizationOutput =
+  //                 characterizationDownStartAmps.get()
+  //                     - characterizationRampRate.get() * timer.get();
+  //             io.runOpenLoop(state.characterizationOutput);
+  //             Logger.recordOutput(
+  //                 "Elevator/CharacterizationOutputDown", state.characterizationOutput);
+  //           })
+  //       .until(() -> inputs.data.velocityRadPerSec() <= characterizationDownVelocityThresh.get())
+  //       .andThen(io::stop)
+  //       .andThen(Commands.idle())
+  //       .finallyDo(
+  //           () -> {
+  //             stopProfile = false;
+  //             timer.stop();
+  //             Logger.recordOutput("Arm/CharacterizationOutputDown",
+  // state.characterizationOutput);
+  //           });
+  // }
+
+  // private static class StaticCharacterizationState {
+  //   public double characterizationOutput = 0.0;
+  // }
 }
