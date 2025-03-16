@@ -230,7 +230,6 @@ public class Superstructure extends SubsystemBase {
   // }
 
   public Command runElevatorToState(Supplier<ElevatorState> state) {
-    this.elevatorState = state.get();
     return Commands.runOnce(() -> elevator.setPosition(state.get().getElevatorHeight()))
         .alongWith(Commands.runOnce(() -> elevatorState = state.get()));
   }
@@ -249,5 +248,9 @@ public class Superstructure extends SubsystemBase {
 
   public boolean elevatorClearofBumpers() {
     return elevator.getElevatorHeight() > elevatorThreshold.get();
+  }
+
+  public boolean atElevatorGoal() {
+    return elevator.atGoal();
   }
 }

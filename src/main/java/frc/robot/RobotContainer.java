@@ -54,7 +54,6 @@ import frc.robot.subsystem.manipulator.manipulatorSensors.ManipulatorSensorsIOCA
 import frc.robot.subsystem.superstructure.Superstructure;
 import frc.robot.subsystem.superstructure.arm.Arm;
 import frc.robot.subsystem.superstructure.arm.ArmIO;
-import frc.robot.subsystem.superstructure.arm.ArmIOKraken;
 import frc.robot.subsystem.superstructure.arm.ArmIOSim;
 import frc.robot.subsystem.superstructure.elevator.Elevator;
 import frc.robot.subsystem.superstructure.elevator.Elevator.ElevatorState;
@@ -117,7 +116,7 @@ public class RobotContainer {
                 new ModuleIOTalonFXReal(TunerConstants.BackLeft),
                 new ModuleIOTalonFXReal(TunerConstants.BackRight),
                 (pose) -> {});
-        arm = new Arm(new ArmIOKraken());
+        arm = new Arm(new ArmIO() {});
         elevator = new Elevator(new ElevatorIO() {});
         aprilTagVision =
             new AprilTagVision(
@@ -443,10 +442,30 @@ public class RobotContainer {
     //             .andThen(Commands.waitSeconds(0.5))
     //             .andThen(manipulator.setManipulatorState(ManipulatorState.IDLE)));
 
-    controller.a().whileTrue(superstructure.runElevatorToState(() -> ElevatorState.STOW));
-    controller.y().whileTrue(superstructure.runElevatorToState(() -> ElevatorState.CLVL4));
-    controller.x().whileTrue(superstructure.runElevatorToState(() -> ElevatorState.CORAL_INTAKING));
-    controller.b().whileTrue(superstructure.runElevatorToState(() -> ElevatorState.ALGAE_INTAKING));
+    controller
+        .a()
+        .onTrue(
+            superstructure
+                .runElevatorToState(() -> ElevatorState.STOW)
+                .andThen(Commands.waitUntil(() -> superstructure.atElevatorGoal())));
+    controller
+        .y()
+        .onTrue(
+            superstructure
+                .runElevatorToState(() -> ElevatorState.CLVL4)
+                .andThen(Commands.waitUntil(() -> superstructure.atElevatorGoal())));
+    controller
+        .x()
+        .onTrue(
+            superstructure
+                .runElevatorToState(() -> ElevatorState.CORAL_INTAKING)
+                .andThen(Commands.waitUntil(() -> superstructure.atElevatorGoal())));
+    controller
+        .b()
+        .onTrue(
+            superstructure
+                .runElevatorToState(() -> ElevatorState.ALGAE_INTAKING)
+                .andThen(Commands.waitUntil(() -> superstructure.atElevatorGoal())));
   }
 
   /**

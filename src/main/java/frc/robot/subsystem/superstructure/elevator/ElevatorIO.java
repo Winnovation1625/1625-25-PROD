@@ -31,7 +31,19 @@ public interface ElevatorIO {
 
   public default void setBrakeMode(boolean enabled) {}
 
-  public default void setPID(
+  public default void setPositionPID(
+      double p,
+      double i,
+      double d,
+      double kG,
+      double kS,
+      double kV,
+      double kA,
+      double cruiseA,
+      double cruiseV,
+      double cruiseJ) {}
+
+  public default void setFollowerPID(
       double p,
       double i,
       double d,

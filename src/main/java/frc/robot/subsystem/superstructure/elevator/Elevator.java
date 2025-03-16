@@ -21,16 +21,56 @@ public class Elevator {
   //  private final ElevatorVisualizer visualizer =
   //   new ElevatorVisualizer(ElevatorConstants.elevatorPose);
 
-  private static final LoggedTunableNumber kP = new LoggedTunableNumber("Elevator/kP", gains.kP());
-  private static final LoggedTunableNumber kI = new LoggedTunableNumber("Elevator/kI", gains.kI());
-  private static final LoggedTunableNumber kD = new LoggedTunableNumber("Elevator/kD", gains.kD());
+  private static final LoggedTunableNumber kP =
+      new LoggedTunableNumber("Elevator/kP", positionGains.kP());
+  private static final LoggedTunableNumber kI =
+      new LoggedTunableNumber("Elevator/kI", positionGains.kI());
+  private static final LoggedTunableNumber kD =
+      new LoggedTunableNumber("Elevator/kD", positionGains.kD());
+  private static final LoggedTunableNumber kS =
+      new LoggedTunableNumber("Elevator/kS", positionGains.ffkS());
+  private static final LoggedTunableNumber kV =
+      new LoggedTunableNumber("Elevator/kV", positionGains.ffkV());
+  private static final LoggedTunableNumber kA =
+      new LoggedTunableNumber("Elevator/kA", positionGains.ffkA());
+  private static final LoggedTunableNumber kG =
+      new LoggedTunableNumber("Elevator/kG", positionGains.ffkG());
+  private static final LoggedTunableNumber cruiseV =
+      new LoggedTunableNumber("Elevator/cruiseV", positionGains.cruiseV());
+  private static final LoggedTunableNumber cruiseA =
+      new LoggedTunableNumber("Elevator/cruiseA", positionGains.cruiseA());
+  private static final LoggedTunableNumber cruiseJ =
+      new LoggedTunableNumber("Elevator/cruiseJ", positionGains.cruiseJ());
+  private static final LoggedTunableNumber differentialKP =
+      new LoggedTunableNumber("Elevator/Differential/kP", followerGains.kP());
+  private static final LoggedTunableNumber differentialKI =
+      new LoggedTunableNumber("Elevator/Differential/kI", followerGains.kI());
+  private static final LoggedTunableNumber differentialKD =
+      new LoggedTunableNumber("Elevator/Differential/kD", followerGains.kD());
+  private static final LoggedTunableNumber differentialKS =
+      new LoggedTunableNumber("Elevator/Differential/kS", followerGains.ffkS());
+  private static final LoggedTunableNumber differentialKV =
+      new LoggedTunableNumber("Elevator/Differential/kV", followerGains.ffkV());
+  private static final LoggedTunableNumber differentialKA =
+      new LoggedTunableNumber("Elevator/Differential/kA", followerGains.ffkA());
+  private static final LoggedTunableNumber differentialKG =
+      new LoggedTunableNumber("Elevator/Differential/kG", followerGains.ffkG());
+  private static final LoggedTunableNumber differentialCruiseV =
+      new LoggedTunableNumber("Elevator/Differential/cruiseV", followerGains.cruiseV());
+  private static final LoggedTunableNumber differentialCruiseA =
+      new LoggedTunableNumber("Elevator/Differential/cruiseA", followerGains.cruiseA());
+  private static final LoggedTunableNumber differentialCruiseJ =
+      new LoggedTunableNumber("Elevator/Differential/cruiseJ", followerGains.cruiseJ());
   private static final LoggedTunableNumber elevatorTolerance =
       new LoggedTunableNumber("Elevator/ToleranceMeters", ELEVATOR_TOLERANCE_METERS);
   private boolean characterizing;
   private boolean brakeModeEnabled;
   private BooleanSupplier disableSupplier = DriverStation::isDisabled;
   private BooleanSupplier coastSupplier = () -> false;
-  private DoubleSupplier setpoint = () -> ElevatorConstants.ELEVATOR_MIN_HEIGHT_METERS;
+
+  @AutoLogOutput(key = "Superstructure/Elevator/Position")
+  private DoubleSupplier setpoint = () -> 0;
+
   private Debouncer atGoalDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kRising);
 
   @RequiredArgsConstructor
@@ -40,7 +80,7 @@ public class Elevator {
             "Superstructure/Elevator/ALGAE_INTAKING", Units.inchesToMeters(19.685))),
     CORAL_INTAKING(
         new LoggedTunableNumber(
-            "Superstructure/Elevator/CORAL_INTAKING", Units.inchesToMeters(27.5591))),
+            "Superstructure/Elevator/CORAL_INTAKING", Units.inchesToMeters(10))),
     STOW(new LoggedTunableNumber("Superstructure/Elevator/STOW", Units.inchesToMeters(27.5591))),
     ALGAE_STOW(
         new LoggedTunableNumber("Superstructure/Elevator/ALGAE STOW", Units.inchesToMeters(34))),
@@ -52,28 +92,13 @@ public class Elevator {
     CLVL2(new LoggedTunableNumber("Superstructure/Elevator/CLVL2", Units.inchesToMeters(38.38583))),
     TROUGH(new LoggedTunableNumber("Superstructure/Elevator/TROUGH", Units.inchesToMeters(27.107))),
     CLVL3(new LoggedTunableNumber("Superstructure/Elevator/CLVL3", Units.inchesToMeters(55.1181))),
-    CLVL4(new LoggedTunableNumber("Superstructure/Elevator/CLVL4", Units.inchesToMeters(84.80315))),
+    CLVL4(new LoggedTunableNumber("Superstructure/Elevator/CLVL4", Units.inchesToMeters(59.80315))),
     ALVL2(new LoggedTunableNumber("Superstructure/Elevator/ALVL2", Units.inchesToMeters(30))),
     ALVL3(new LoggedTunableNumber("Superstructure/Elevator/ALVL3", Units.inchesToMeters(35))),
     PROCESS(new LoggedTunableNumber("Superstructure/Elevator/PROCESS", Units.inchesToMeters(13))),
     STOP(() -> 0);
     @Getter private final DoubleSupplier elevatorHeight;
   }
-
-  private static final LoggedTunableNumber kS =
-      new LoggedTunableNumber("Elevator/kS", gains.ffkS());
-  private static final LoggedTunableNumber kV =
-      new LoggedTunableNumber("Elevator/kV", gains.ffkV());
-  private static final LoggedTunableNumber kA =
-      new LoggedTunableNumber("Elevator/kA", gains.ffkA());
-  private static final LoggedTunableNumber kG =
-      new LoggedTunableNumber("Elevator/kG", gains.ffkG());
-  private static final LoggedTunableNumber cruiseV =
-      new LoggedTunableNumber("Elevator/cruiseV", gains.cruiseV());
-  private static final LoggedTunableNumber cruiseA =
-      new LoggedTunableNumber("Elevator/cruiseA", gains.cruiseA());
-  private static final LoggedTunableNumber cruiseJ =
-      new LoggedTunableNumber("Elevator/cruiseJ", gains.cruiseJ());
 
   public Elevator(ElevatorIO io) {
     this.io = io;
@@ -91,7 +116,7 @@ public class Elevator {
     LoggedTunableNumber.ifChanged(
         hashCode(),
         pid ->
-            io.setPID(
+            io.setPositionPID(
                 pid[0], pid[1], pid[2], pid[3], pid[4], pid[5], pid[6], pid[7], pid[8], pid[9]),
         kP,
         kI,
@@ -104,11 +129,27 @@ public class Elevator {
         cruiseV,
         cruiseJ);
 
+    LoggedTunableNumber.ifChanged(
+        hashCode(),
+        pid ->
+            io.setFollowerPID(
+                pid[0], pid[1], pid[2], pid[3], pid[4], pid[5], pid[6], pid[7], pid[8], pid[9]),
+        differentialKP,
+        differentialKI,
+        differentialKD,
+        differentialKG,
+        differentialKS,
+        differentialKV,
+        differentialKA,
+        differentialCruiseA,
+        differentialCruiseV,
+        differentialCruiseJ);
+
     setBrakeMode(!coastSupplier.getAsBoolean() || DriverStation.isEnabled());
 
     // visualizer.updateVisualizer(inputs.positionRads);
 
-    if (!characterizing && brakeModeEnabled && !disableSupplier.getAsBoolean()) {
+    if (!characterizing && !disableSupplier.getAsBoolean()) {
       // io.setPosition(convertDistanceMetersToRadians(positionSetpoint));
       Logger.recordOutput(
           "Superstructure/Elevator/ElevatorSetpointInches",
@@ -117,6 +158,12 @@ public class Elevator {
           "Superstructure/Elevator/ElevatorSetpointRads",
           convertDistanceMetersToRadians(setpoint.getAsDouble()));
     }
+    Logger.recordOutput(
+        "Superstructure/Elevator/LeftElevatorPositionMeters",
+        convertRadiansToDistanceMeters(inputs.positionRad));
+    Logger.recordOutput(
+        "Superstructure/Elevator/RightElevatorPositionMeters",
+        convertRadiansToDistanceMeters(inputs.positionRotationsFollower));
   }
 
   @AutoLogOutput(key = "Superstructure/Elevator/AtGoal")
