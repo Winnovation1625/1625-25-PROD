@@ -211,4 +211,30 @@ public abstract class ModuleIOTalonFX implements ModuleIO {
               rotation.getRotations());
         });
   }
+
+  @Override
+  public void setTurnPID(
+      double kP, double kI, double kD, double kG, double kS, double kV, double kA) {
+    constants.SteerMotorGains.kP = kP;
+    constants.SteerMotorGains.kI = kI;
+    constants.SteerMotorGains.kD = kD;
+    constants.SteerMotorGains.kG = kG;
+    constants.SteerMotorGains.kS = kS;
+    constants.SteerMotorGains.kV = kV;
+    constants.SteerMotorGains.kA = kA;
+    tryUntilOk(5, () -> turnTalon.getConfigurator().apply(constants.SteerMotorGains, 0.25));
+  }
+
+  @Override
+  public void setDrivePID(
+      double kP, double kI, double kD, double kG, double kS, double kV, double kA) {
+    constants.DriveMotorGains.kP = kP;
+    constants.DriveMotorGains.kI = kI;
+    constants.DriveMotorGains.kD = kD;
+    constants.DriveMotorGains.kG = kG;
+    constants.DriveMotorGains.kS = kS;
+    constants.DriveMotorGains.kV = kV;
+    constants.DriveMotorGains.kA = kA;
+    tryUntilOk(5, () -> driveTalon.getConfigurator().apply(constants.DriveMotorGains, 0.25));
+  }
 }

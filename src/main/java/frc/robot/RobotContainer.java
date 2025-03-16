@@ -58,6 +58,7 @@ import frc.robot.subsystem.superstructure.arm.ArmIOSim;
 import frc.robot.subsystem.superstructure.elevator.Elevator;
 import frc.robot.subsystem.superstructure.elevator.Elevator.ElevatorState;
 import frc.robot.subsystem.superstructure.elevator.ElevatorIO;
+import frc.robot.subsystem.superstructure.elevator.ElevatorIOKraken;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.BooleanSupplier;
 import lombok.Setter;
@@ -117,7 +118,7 @@ public class RobotContainer {
                 new ModuleIOTalonFXReal(TunerConstants.BackRight),
                 (pose) -> {});
         arm = new Arm(new ArmIO() {});
-        elevator = new Elevator(new ElevatorIO() {});
+        elevator = new Elevator(new ElevatorIOKraken());
         aprilTagVision =
             new AprilTagVision(
                 drive::accept,

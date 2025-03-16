@@ -79,6 +79,35 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
       new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
   private static final LoggedTunableNumber txTyObservationStaleSecs =
       new LoggedTunableNumber("Drive/TxTyObservationStaleSeconds", 0.5);
+  private static final LoggedTunableNumber turnKP =
+      new LoggedTunableNumber("Drive/turnkP", DriveConstants.FrontLeft.SteerMotorGains.kP);
+  private static final LoggedTunableNumber turnKI =
+      new LoggedTunableNumber("Drive/turnkI", DriveConstants.FrontLeft.SteerMotorGains.kI);
+  private static final LoggedTunableNumber turnKD =
+      new LoggedTunableNumber("Drive/turnkD", DriveConstants.FrontLeft.SteerMotorGains.kD);
+  private static final LoggedTunableNumber turnKS =
+      new LoggedTunableNumber("Drive/turnkS", DriveConstants.FrontLeft.SteerMotorGains.kS);
+  private static final LoggedTunableNumber turnKA =
+      new LoggedTunableNumber("Drive/turnkA", DriveConstants.FrontLeft.SteerMotorGains.kA);
+  private static final LoggedTunableNumber turnKV =
+      new LoggedTunableNumber("Drive/turnkV", DriveConstants.FrontLeft.SteerMotorGains.kV);
+  private static final LoggedTunableNumber turnKG =
+      new LoggedTunableNumber("Drive/turnkG", DriveConstants.FrontLeft.SteerMotorGains.kG);
+
+  private static final LoggedTunableNumber driveKP =
+      new LoggedTunableNumber("Drive/drivekP", DriveConstants.FrontLeft.DriveMotorGains.kP);
+  private static final LoggedTunableNumber driveKI =
+      new LoggedTunableNumber("Drive/drivekI", DriveConstants.FrontLeft.DriveMotorGains.kI);
+  private static final LoggedTunableNumber driveKD =
+      new LoggedTunableNumber("Drive/drivekD", DriveConstants.FrontLeft.DriveMotorGains.kD);
+  private static final LoggedTunableNumber driveKS =
+      new LoggedTunableNumber("Drive/drivekS", DriveConstants.FrontLeft.DriveMotorGains.kS);
+  private static final LoggedTunableNumber driveKA =
+      new LoggedTunableNumber("Drive/drivekA", DriveConstants.FrontLeft.DriveMotorGains.kA);
+  private static final LoggedTunableNumber driveKV =
+      new LoggedTunableNumber("Drive/drivekV", DriveConstants.FrontLeft.DriveMotorGains.kV);
+  private static final LoggedTunableNumber driveKG =
+      new LoggedTunableNumber("Drive/drivekG", DriveConstants.FrontLeft.DriveMotorGains.kG);
 
   private static SwerveDriveKinematics kinematics =
       new SwerveDriveKinematics(DriveConstants.getModuleTranslations());
@@ -176,7 +205,26 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
       module.periodic();
     }
     odometryLock.unlock();
-
+    LoggedTunableNumber.ifChanged(
+        hashCode(),
+        pid -> setSteerPid(pid[0], pid[1], pid[2], pid[3], pid[4], pid[5], pid[6]),
+        turnKP,
+        turnKI,
+        turnKD,
+        turnKG,
+        turnKS,
+        turnKV,
+        turnKA);
+    LoggedTunableNumber.ifChanged(
+        hashCode(),
+        pid -> setDrivePid(pid[0], pid[1], pid[2], pid[3], pid[4], pid[5], pid[6]),
+        driveKP,
+        driveKI,
+        driveKD,
+        driveKG,
+        driveKS,
+        driveKV,
+        driveKA);
     // Stop moving when disabled
     if (DriverStation.isDisabled()) {
       for (var module : modules) {
@@ -417,6 +465,20 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
           visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
     } else {
       txTyPoses.put(tagId, new TxTyPoseRecord(visionRobotPoseMeters, distance, timestampSeconds));
+    }
+  }
+
+  private void setSteerPid(
+      double kP, double kI, double kD, double kG, double kS, double kV, double kA) {
+    for (var module : modules) {
+      module.setSteerPid(kP, kI, kD, kG, kS, kV, kA);
+    }
+  }
+
+  private void setDrivePid(
+      double kP, double kI, double kD, double kG, double kS, double kV, double kA) {
+    for (var module : modules) {
+      module.setDrivePid(kP, kI, kD, kG, kS, kV, kA);
     }
   }
 }
