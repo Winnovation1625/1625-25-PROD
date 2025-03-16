@@ -55,8 +55,9 @@ public class ArmIOKraken implements ArmIO {
     armConfig.Feedback.FeedbackRemoteSensorID = Constants.SUPERSTRUCTURE_CAN_IDS.armEncoder();
     armConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
     // armConfig.Feedback.FeedbackRotorOffset = ARM_ENCODER_OFFSET.in(Rotations);
-    armConfig.Feedback.RotorToSensorRatio = 1.0; // when using a real encoder this is ARM_GEARING
+    // armConfig.Feedback.RotorToSensorRatio = 1.0; // when using a real encoder this is ARM_GEARING
     armConfig.Feedback.SensorToMechanismRatio = ARM_GEARING; // when using a real encoder this is 1
+    armConfig.ClosedLoopGeneral.ContinuousWrap = false;
     armConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
     armConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = ARM_MAX_ANGLE_RADS.in(Rotations);
     armConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;

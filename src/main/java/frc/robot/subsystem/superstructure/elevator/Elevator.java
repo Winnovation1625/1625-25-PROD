@@ -59,20 +59,21 @@ public class Elevator {
     STOP(() -> 0);
     @Getter private final DoubleSupplier elevatorHeight;
   }
-  // private static final LoggedTunableNumber kS =
-  //   new LoggedTunableNumber("Elevator/kS", gains.ffkS());
-  // private static final LoggedTunableNumber kV =
-  //   new LoggedTunableNumber("Elevator/kV", gains.ffkV());
-  // private static final LoggedTunableNumber kA =
-  //   new LoggedTunableNumber("Elevator/kA", gains.ffkA());
-  // private static final LoggedTunableNumber kG =
-  //   new LoggedTunableNumber("Elevator/kG", gains.ffkG());
-  // private static final LoggedTunableNumber cruiseV =
-  //   new LoggedTunableNumber("Elevator/cruiseV", cruiseVelocity);
-  // private static final LoggedTunableNumber cruiseA =
-  //   new LoggedTunableNumber("Elevator/cruiseA", cruiseAcceleration);
-  // private static final LoggedTunableNumber cruiseJ =
-  //   new LoggedTunableNumber("Elevator/cruiseJ", cruiseJerk);
+
+  private static final LoggedTunableNumber kS =
+      new LoggedTunableNumber("Elevator/kS", gains.ffkS());
+  private static final LoggedTunableNumber kV =
+      new LoggedTunableNumber("Elevator/kV", gains.ffkV());
+  private static final LoggedTunableNumber kA =
+      new LoggedTunableNumber("Elevator/kA", gains.ffkA());
+  private static final LoggedTunableNumber kG =
+      new LoggedTunableNumber("Elevator/kG", gains.ffkG());
+  private static final LoggedTunableNumber cruiseV =
+      new LoggedTunableNumber("Elevator/cruiseV", gains.cruiseV());
+  private static final LoggedTunableNumber cruiseA =
+      new LoggedTunableNumber("Elevator/cruiseA", gains.cruiseA());
+  private static final LoggedTunableNumber cruiseJ =
+      new LoggedTunableNumber("Elevator/cruiseJ", gains.cruiseJ());
 
   public Elevator(ElevatorIO io) {
     this.io = io;
@@ -87,7 +88,21 @@ public class Elevator {
       io.stop();
     }
 
-    LoggedTunableNumber.ifChanged(hashCode(), pid -> io.setPID(pid[0], pid[1], pid[2]), kP, kI, kD);
+    LoggedTunableNumber.ifChanged(
+        hashCode(),
+        pid ->
+            io.setPID(
+                pid[0], pid[1], pid[2], pid[3], pid[4], pid[5], pid[6], pid[7], pid[8], pid[9]),
+        kP,
+        kI,
+        kD,
+        kG,
+        kS,
+        kV,
+        kA,
+        cruiseA,
+        cruiseV,
+        cruiseJ);
 
     setBrakeMode(!coastSupplier.getAsBoolean() || DriverStation.isEnabled());
 

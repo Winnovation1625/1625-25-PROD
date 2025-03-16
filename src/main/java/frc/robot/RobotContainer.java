@@ -45,7 +45,6 @@ import frc.robot.subsystem.drive.ModuleIOTalonFXReal;
 import frc.robot.subsystem.drive.ModuleIOTalonFXSim;
 import frc.robot.subsystem.leds.Leds;
 import frc.robot.subsystem.manipulator.Manipulator;
-import frc.robot.subsystem.manipulator.Manipulator.ManipulatorState;
 import frc.robot.subsystem.manipulator.ManipulatorIO;
 import frc.robot.subsystem.manipulator.ManipulatorIOKraken;
 import frc.robot.subsystem.manipulator.ManipulatorIOSim;
@@ -58,8 +57,8 @@ import frc.robot.subsystem.superstructure.arm.ArmIO;
 import frc.robot.subsystem.superstructure.arm.ArmIOKraken;
 import frc.robot.subsystem.superstructure.arm.ArmIOSim;
 import frc.robot.subsystem.superstructure.elevator.Elevator;
+import frc.robot.subsystem.superstructure.elevator.Elevator.ElevatorState;
 import frc.robot.subsystem.superstructure.elevator.ElevatorIO;
-import frc.robot.subsystem.superstructure.elevator.ElevatorIOSim;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.BooleanSupplier;
 import lombok.Setter;
@@ -149,7 +148,7 @@ public class RobotContainer {
                 driveSimulation::setSimulationWorldPose);
 
         arm = new Arm(new ArmIOSim());
-        elevator = new Elevator(new ElevatorIOSim());
+        elevator = new Elevator(new ElevatorIO() {});
         aprilTagVision =
             new AprilTagVision(
                 drive::accept,
@@ -393,53 +392,61 @@ public class RobotContainer {
     //                             == Manipulator.GamepieceState.CORAL_IN_MANIPULATOR))
     //             .andThen(superstructure.setSuperstructureCommand(() ->
     // SuperstructureStates.STOW)));
-    controller
-        .a()
-        .and(
-            () ->
-                manipulator.getGamepieceState() == Manipulator.GamepieceState.CORAL_IN_MANIPULATOR)
-        .onTrue(
-            manipulator
-                .setManipulatorState(ManipulatorState.SHOOTING_CORAL)
-                .andThen(
-                    Commands.waitUntil(
-                        () -> manipulator.getGamepieceState() == Manipulator.GamepieceState.NONE))
-                .andThen(manipulator.setManipulatorState(ManipulatorState.IDLE)));
-    controller
-        .y()
-        .and(() -> manipulator.getGamepieceState() == Manipulator.GamepieceState.NONE)
-        .whileTrue(
-            manipulator
-                .setManipulatorState(ManipulatorState.INTAKING_CORAL)
-                .andThen(
-                    Commands.waitUntil(
-                        () ->
-                            manipulator.getGamepieceState()
-                                == Manipulator.GamepieceState.CORAL_IN_MANIPULATOR))
-                .andThen(manipulator.setManipulatorState(ManipulatorState.IDLE)));
-    controller
-        .b()
-        .and(() -> manipulator.getGamepieceState() == Manipulator.GamepieceState.NONE)
-        .whileTrue(
-            manipulator
-                .setManipulatorState(ManipulatorState.INTAKING_ALGAE)
-                .andThen(
-                    Commands.waitUntil(
-                        () ->
-                            manipulator.getGamepieceState()
-                                == Manipulator.GamepieceState.ALGAE_IN_CLAW))
-                .andThen(manipulator.setManipulatorState(ManipulatorState.IDLE)));
-    controller
-        .x()
-        .and(() -> manipulator.getGamepieceState() == Manipulator.GamepieceState.ALGAE_IN_CLAW)
-        .onTrue(
-            manipulator
-                .setManipulatorState(ManipulatorState.SHOOTING_ALGAE)
-                .andThen(
-                    Commands.waitUntil(
-                        () -> manipulator.getGamepieceState() == Manipulator.GamepieceState.NONE))
-                .andThen(Commands.waitSeconds(0.5))
-                .andThen(manipulator.setManipulatorState(ManipulatorState.IDLE)));
+    // controller
+    //     .a()
+    //     .and(
+    //         () ->
+    //             manipulator.getGamepieceState() ==
+    // Manipulator.GamepieceState.CORAL_IN_MANIPULATOR)
+    //     .onTrue(
+    //         manipulator
+    //             .setManipulatorState(ManipulatorState.SHOOTING_CORAL)
+    //             .andThen(
+    //                 Commands.waitUntil(
+    //                     () -> manipulator.getGamepieceState() ==
+    // Manipulator.GamepieceState.NONE))
+    //             .andThen(manipulator.setManipulatorState(ManipulatorState.IDLE)));
+    // controller
+    //     .y()
+    //     .and(() -> manipulator.getGamepieceState() == Manipulator.GamepieceState.NONE)
+    //     .whileTrue(
+    //         manipulator
+    //             .setManipulatorState(ManipulatorState.INTAKING_CORAL)
+    //             .andThen(
+    //                 Commands.waitUntil(
+    //                     () ->
+    //                         manipulator.getGamepieceState()
+    //                             == Manipulator.GamepieceState.CORAL_IN_MANIPULATOR))
+    //             .andThen(manipulator.setManipulatorState(ManipulatorState.IDLE)));
+    // controller
+    //     .b()
+    //     .and(() -> manipulator.getGamepieceState() == Manipulator.GamepieceState.NONE)
+    //     .whileTrue(
+    //         manipulator
+    //             .setManipulatorState(ManipulatorState.INTAKING_ALGAE)
+    //             .andThen(
+    //                 Commands.waitUntil(
+    //                     () ->
+    //                         manipulator.getGamepieceState()
+    //                             == Manipulator.GamepieceState.ALGAE_IN_CLAW))
+    //             .andThen(manipulator.setManipulatorState(ManipulatorState.IDLE)));
+    // controller
+    //     .x()
+    //     .and(() -> manipulator.getGamepieceState() == Manipulator.GamepieceState.ALGAE_IN_CLAW)
+    //     .onTrue(
+    //         manipulator
+    //             .setManipulatorState(ManipulatorState.SHOOTING_ALGAE)
+    //             .andThen(
+    //                 Commands.waitUntil(
+    //                     () -> manipulator.getGamepieceState() ==
+    // Manipulator.GamepieceState.NONE))
+    //             .andThen(Commands.waitSeconds(0.5))
+    //             .andThen(manipulator.setManipulatorState(ManipulatorState.IDLE)));
+
+    controller.a().whileTrue(superstructure.runElevatorToState(() -> ElevatorState.STOW));
+    controller.y().whileTrue(superstructure.runElevatorToState(() -> ElevatorState.CLVL4));
+    controller.x().whileTrue(superstructure.runElevatorToState(() -> ElevatorState.CORAL_INTAKING));
+    controller.b().whileTrue(superstructure.runElevatorToState(() -> ElevatorState.ALGAE_INTAKING));
   }
 
   /**

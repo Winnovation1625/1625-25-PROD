@@ -59,7 +59,7 @@ public class Arm {
 
   public Arm(ArmIO io) {
     this.io = io;
-    io.setBrakeMode(false);
+    io.setBrakeMode(true);
     io.setInverted(ARM_INVERTED);
   }
 
