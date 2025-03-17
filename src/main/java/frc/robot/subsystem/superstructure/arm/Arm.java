@@ -26,7 +26,7 @@ public class Arm {
   private BooleanSupplier disableSupplier = DriverStation::isDisabled;
 
   @AutoLogOutput(key = "Superstructure/Arm/Position")
-  private DoubleSupplier positionSetpoint = ArmState.STOP.getArmAngle();
+  private ArmState positionSetpoint = ArmState.STOP;
 
   private Debouncer atGoalDebouncer = new Debouncer(0.1, DebounceType.kRising);
   private boolean characterizing;
@@ -41,18 +41,19 @@ public class Arm {
 
   @RequiredArgsConstructor
   public enum ArmState {
-    ALGAE_INTAKING(new LoggedTunableNumber("Superstructure/Arm/INTAKING", -.2)),
-    CORAL_INTAKING(new LoggedTunableNumber("Superstructure/Arm/CORAL_INTAKING", 0)),
+    ALGAE_INTAKING(new LoggedTunableNumber("Superstructure/Arm/INTAKING", -0.427)),
+    CORAL_INTAKING(new LoggedTunableNumber("Superstructure/Arm/CORAL_INTAKING", 0.295)),
     STOW(new LoggedTunableNumber("Superstructure/Arm/STOW", Math.PI / 2)),
     CLIMB(new LoggedTunableNumber("Superstructure/Arm/CLIMB", Math.PI / 2)),
-    BARGE(new LoggedTunableNumber("Superstructure/Arm/BARGE", 1)),
-    CLVL2(new LoggedTunableNumber("Superstructure/Arm/CLVL2", .5)),
-    TROUGH(new LoggedTunableNumber("Superstructure/Arm/TROUGH", .3)),
-    CLVL3(new LoggedTunableNumber("Superstructure/Arm/CLVL3", .6)),
-    CLVL4(new LoggedTunableNumber("Superstructure/Arm/CLVL4", .7)),
-    ALVL2(new LoggedTunableNumber("Superstructure/Arm/ALVL2", .2)),
-    ALVL3(new LoggedTunableNumber("Superstructure/Arm/ALVL3", .3)),
-    PROCESS(new LoggedTunableNumber("Superstructure/Arm/PROCESS", .9)),
+    BARGE(new LoggedTunableNumber("Superstructure/Arm/BARGE", 0.83)),
+    CLVL2(new LoggedTunableNumber("Superstructure/Arm/CLVL2", 0.32)),
+    TROUGH(new LoggedTunableNumber("Superstructure/Arm/TROUGH", 0)),
+    CLVL3(new LoggedTunableNumber("Superstructure/Arm/CLVL3", 0.32)),
+    CLVL4(new LoggedTunableNumber("Superstructure/Arm/CLVL4", 0.53)),
+    ALVL2(new LoggedTunableNumber("Superstructure/Arm/ALVL2", 0.38)),
+    ALVL3(new LoggedTunableNumber("Superstructure/Arm/ALVL3", 0.51)),
+    PROCESS(new LoggedTunableNumber("Superstructure/Arm/PROCESS", 0.05)),
+    FLAT(() -> 0),
     STOP(() -> 0);
     @Getter private final DoubleSupplier armAngle;
   }
@@ -68,9 +69,11 @@ public class Arm {
 
     Logger.processInputs("Superstructure/Arm", inputs);
     if (disableSupplier.getAsBoolean()) {
+      positionSetpoint = ArmState.STOP;
       io.stop();
     }
-
+    Logger.recordOutput(
+        "Superstructure/Arm/SetpointAngleRads", positionSetpoint.getArmAngle().getAsDouble());
     LoggedTunableNumber.ifChanged(
         hashCode(),
         pid -> io.setPID(pid[0], pid[1], pid[2], pid[3], pid[4], pid[5], pid[6], pid[7], pid[8]),
@@ -95,9 +98,12 @@ public class Arm {
   @AutoLogOutput(key = "Superstructure/Arm/AtGoal")
   public boolean atGoal() {
 
-    return atGoalDebouncer.calculate(
-        EqualsUtil.epsilonEquals(
-            inputs.positionRad, positionSetpoint.getAsDouble(), armTolerance.get()));
+    return positionSetpoint == ArmState.STOP
+        || atGoalDebouncer.calculate(
+            EqualsUtil.epsilonEquals(
+                inputs.positionRad,
+                positionSetpoint.getArmAngle().getAsDouble(),
+                armTolerance.get()));
   }
 
   public void setBrakeMode(boolean enabled) {
@@ -123,11 +129,13 @@ public class Arm {
     return inputs.positionRad;
   }
 
-  public void setPosition(DoubleSupplier positionSetpoint) {
-    System.out.println("Set Command For Arm Ran to " + positionSetpoint.getAsDouble());
-    if (this.positionSetpoint.getAsDouble() != positionSetpoint.getAsDouble()) {
+  public void setPosition(ArmState positionSetpoint) {
+    System.out.println(
+        "Set Command For Arm Ran to " + positionSetpoint.getArmAngle().getAsDouble());
+    if (this.positionSetpoint.getArmAngle().getAsDouble()
+        != positionSetpoint.getArmAngle().getAsDouble()) {
       this.positionSetpoint = positionSetpoint;
-      io.setArmPosition(positionSetpoint.getAsDouble());
+      io.setArmPosition(positionSetpoint.getArmAngle().getAsDouble());
     }
   }
 

@@ -13,12 +13,15 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Seconds;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -45,6 +48,8 @@ import frc.robot.subsystem.drive.ModuleIOTalonFXReal;
 import frc.robot.subsystem.drive.ModuleIOTalonFXSim;
 import frc.robot.subsystem.leds.Leds;
 import frc.robot.subsystem.manipulator.Manipulator;
+import frc.robot.subsystem.manipulator.Manipulator.GamepieceState;
+import frc.robot.subsystem.manipulator.Manipulator.ManipulatorState;
 import frc.robot.subsystem.manipulator.ManipulatorIO;
 import frc.robot.subsystem.manipulator.ManipulatorIOKraken;
 import frc.robot.subsystem.manipulator.ManipulatorIOSim;
@@ -52,15 +57,18 @@ import frc.robot.subsystem.manipulator.manipulatorSensors.ManipulatorSensorIO;
 import frc.robot.subsystem.manipulator.manipulatorSensors.ManipulatorSensorIOSim;
 import frc.robot.subsystem.manipulator.manipulatorSensors.ManipulatorSensorsIOCANrange;
 import frc.robot.subsystem.superstructure.Superstructure;
+import frc.robot.subsystem.superstructure.Superstructure.SuperstructureStates;
 import frc.robot.subsystem.superstructure.arm.Arm;
+import frc.robot.subsystem.superstructure.arm.Arm.ArmState;
 import frc.robot.subsystem.superstructure.arm.ArmIO;
+import frc.robot.subsystem.superstructure.arm.ArmIOKraken;
 import frc.robot.subsystem.superstructure.arm.ArmIOSim;
 import frc.robot.subsystem.superstructure.elevator.Elevator;
-import frc.robot.subsystem.superstructure.elevator.Elevator.ElevatorState;
 import frc.robot.subsystem.superstructure.elevator.ElevatorIO;
 import frc.robot.subsystem.superstructure.elevator.ElevatorIOKraken;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 import lombok.Setter;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -97,6 +105,7 @@ public class RobotContainer {
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
+  private final Joystick auxController = new Joystick(1);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -117,7 +126,7 @@ public class RobotContainer {
                 new ModuleIOTalonFXReal(TunerConstants.BackLeft),
                 new ModuleIOTalonFXReal(TunerConstants.BackRight),
                 (pose) -> {});
-        arm = new Arm(new ArmIO() {});
+        arm = new Arm(new ArmIOKraken());
         elevator = new Elevator(new ElevatorIOKraken());
         aprilTagVision =
             new AprilTagVision(
@@ -254,6 +263,40 @@ public class RobotContainer {
     pathOverride.addDefaultOption("off", pathingOverrideSupplier = () -> false);
     pathOverride.addOption("on", pathingOverrideSupplier = () -> true);
   }
+
+  private Supplier<SuperstructureStates> getCoralLevel =
+      () -> {
+        if (auxController.getRawButton(19)) {
+          return SuperstructureStates.TROUGH;
+        } else if (auxController.getRawButton(20)) {
+          return SuperstructureStates.CLVL2;
+        } else if (auxController.getRawButton(21)) {
+          return SuperstructureStates.CLVL3;
+        } else if (auxController.getRawButton(22)) {
+          return SuperstructureStates.CLVL4;
+        } else {
+          return SuperstructureStates.TROUGH;
+        }
+      };
+
+  private Supplier<SuperstructureStates> getAlgaeScore =
+      () ->
+          auxController.getRawButton(23)
+              ? SuperstructureStates.BARGE
+              : SuperstructureStates.PROCESS;
+
+  private Supplier<SuperstructureStates> getAlgaeReefLevel =
+      () -> {
+        if (auxController.getRawButton(11)
+            || auxController.getRawButton(13)
+            || auxController.getRawButton(15)) {
+          return SuperstructureStates.ALVL3;
+        } else {
+          // if(auxController.getRawButton(12) || auxController.getRawButton(14) ||
+          // auxController.getRawButton(16))
+          return SuperstructureStates.ALVL2;
+        }
+      };
 
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
@@ -393,7 +436,7 @@ public class RobotContainer {
     //             .andThen(superstructure.setSuperstructureCommand(() ->
     // SuperstructureStates.STOW)));
     // controller
-    //     .a()
+    //     .rightTrigger()
     //     .and(
     //         () ->
     //             manipulator.getGamepieceState() ==
@@ -407,7 +450,7 @@ public class RobotContainer {
     // Manipulator.GamepieceState.NONE))
     //             .andThen(manipulator.setManipulatorState(ManipulatorState.IDLE)));
     // controller
-    //     .y()
+    //     .rightBumper()
     //     .and(() -> manipulator.getGamepieceState() == Manipulator.GamepieceState.NONE)
     //     .whileTrue(
     //         manipulator
@@ -418,20 +461,108 @@ public class RobotContainer {
     //                         manipulator.getGamepieceState()
     //                             == Manipulator.GamepieceState.CORAL_IN_MANIPULATOR))
     //             .andThen(manipulator.setManipulatorState(ManipulatorState.IDLE)));
+
+    // Coral Controls
+    controller
+        .rightTrigger()
+        .and(() -> manipulator.getGamepieceState() == Manipulator.GamepieceState.NONE)
+        .onTrue(
+            superstructure
+                .setSuperstructureCommand(() -> SuperstructureStates.CORAL_INTAKING)
+                .alongWith(manipulator.setManipulatorState(ManipulatorState.INTAKING_CORAL))
+                .andThen(
+                    Commands.waitUntil(
+                        () ->
+                            superstructure.atSuperStructureGoal()
+                                && manipulator.getGamepieceState()
+                                    == Manipulator.GamepieceState.CORAL_STAGING))
+                .andThen(
+                    manipulator
+                        .setManipulatorState(ManipulatorState.IDLE)
+                        .alongWith(
+                            superstructure.setSuperstructureCommand(
+                                () -> SuperstructureStates.STOW))));
+    controller
+        .rightTrigger()
+        .and(
+            () ->
+                manipulator.getGamepieceState() == Manipulator.GamepieceState.CORAL_IN_MANIPULATOR)
+        .onTrue(
+            superstructure
+                .setSuperstructureCommand(getCoralLevel)
+                .andThen(
+                    Commands.waitUntil(
+                        () ->
+                            superstructure.atSuperStructureGoal()
+                                && manipulator.getGamepieceState()
+                                    == Manipulator.GamepieceState.NONE))
+                .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
+    controller
+        .a()
+        .and(
+            () ->
+                manipulator.getGamepieceState() == GamepieceState.CORAL_IN_MANIPULATOR
+                    || manipulator.getGamepieceState() == GamepieceState.ALGAE_IN_CLAW)
+        .onTrue(
+            Commands.either(
+                    manipulator.setManipulatorState(ManipulatorState.SHOOTING_ALGAE),
+                    manipulator.setManipulatorState(ManipulatorState.SHOOTING_CORAL),
+                    manipulator::hasAlgae)
+                .andThen(Commands.waitTime(Seconds.of(0.25)))
+                .andThen(manipulator.setManipulatorState(ManipulatorState.IDLE)));
+
+    controller
+        .rightBumper()
+        .and(() -> manipulator.getGamepieceState() == Manipulator.GamepieceState.ALGAE_IN_CLAW)
+        .onTrue(
+            superstructure
+                .setSuperstructureCommand(getAlgaeScore)
+                .andThen(
+                    Commands.waitUntil(
+                        () ->
+                            superstructure.atSuperStructureGoal()
+                                && manipulator.getGamepieceState()
+                                    == Manipulator.GamepieceState.NONE))
+                .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
+
+    controller
+        .leftTrigger()
+        .and(() -> manipulator.getGamepieceState() == Manipulator.GamepieceState.NONE)
+        .onTrue(
+            superstructure
+                .setSuperstructureCommand(() -> SuperstructureStates.ALGAE_INTAKING)
+                .alongWith(manipulator.setManipulatorState(ManipulatorState.INTAKING_ALGAE))
+                .andThen(
+                    Commands.waitUntil(
+                        () ->
+                            superstructure.atSuperStructureGoal()
+                                && manipulator.getGamepieceState()
+                                    == Manipulator.GamepieceState.ALGAE_IN_CLAW))
+                .andThen(
+                    superstructure
+                        .runArmToState(() -> ArmState.FLAT)
+                        .alongWith(manipulator.setManipulatorState(ManipulatorState.IDLE)))
+                .andThen(Commands.waitUntil(() -> superstructure.atArmGoal()))
+                .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
+    controller
+        .leftBumper()
+        .and(() -> manipulator.getGamepieceState() == Manipulator.GamepieceState.NONE)
+        .onTrue(
+            superstructure
+                .setSuperstructureCommand(getAlgaeReefLevel)
+                .alongWith(manipulator.setManipulatorState(ManipulatorState.INTAKING_ALGAE))
+                .andThen(
+                    Commands.waitUntil(
+                        () ->
+                            superstructure.atSuperStructureGoal()
+                                && manipulator.getGamepieceState()
+                                    == Manipulator.GamepieceState.ALGAE_IN_CLAW))
+                .andThen(
+                    superstructure
+                        .setSuperstructureCommand(() -> SuperstructureStates.STOW)
+                        .alongWith(manipulator.setManipulatorState(ManipulatorState.IDLE))));
     // controller
-    //     .b()
-    //     .and(() -> manipulator.getGamepieceState() == Manipulator.GamepieceState.NONE)
-    //     .whileTrue(
-    //         manipulator
-    //             .setManipulatorState(ManipulatorState.INTAKING_ALGAE)
-    //             .andThen(
-    //                 Commands.waitUntil(
-    //                     () ->
-    //                         manipulator.getGamepieceState()
-    //                             == Manipulator.GamepieceState.ALGAE_IN_CLAW))
-    //             .andThen(manipulator.setManipulatorState(ManipulatorState.IDLE)));
-    // controller
-    //     .x()
+    //     .leftTrigger()
     //     .and(() -> manipulator.getGamepieceState() == Manipulator.GamepieceState.ALGAE_IN_CLAW)
     //     .onTrue(
     //         manipulator
@@ -443,30 +574,31 @@ public class RobotContainer {
     //             .andThen(Commands.waitSeconds(0.5))
     //             .andThen(manipulator.setManipulatorState(ManipulatorState.IDLE)));
 
-    controller
-        .a()
-        .onTrue(
-            superstructure
-                .runElevatorToState(() -> ElevatorState.STOW)
-                .andThen(Commands.waitUntil(() -> superstructure.atElevatorGoal())));
-    controller
-        .y()
-        .onTrue(
-            superstructure
-                .runElevatorToState(() -> ElevatorState.CLVL4)
-                .andThen(Commands.waitUntil(() -> superstructure.atElevatorGoal())));
-    controller
-        .x()
-        .onTrue(
-            superstructure
-                .runElevatorToState(() -> ElevatorState.CORAL_INTAKING)
-                .andThen(Commands.waitUntil(() -> superstructure.atElevatorGoal())));
-    controller
-        .b()
-        .onTrue(
-            superstructure
-                .runElevatorToState(() -> ElevatorState.ALGAE_INTAKING)
-                .andThen(Commands.waitUntil(() -> superstructure.atElevatorGoal())));
+    // controller
+    //     .a()
+    //     .onTrue(
+    //         superstructure
+    //             .runArmToState(() -> ArmState.STOW)
+    //             .andThen(Commands.waitUntil(() -> superstructure.atArmGoal())));
+    // controller
+    //     .a()
+    //     .onTrue(
+    //         superstructure
+    //             .setSuperstructureCommand(() -> SuperstructureStates.STOW)
+    //             .andThen(Commands.waitUntil(() -> superstructure.atSuperStructureGoal())));
+
+    // controller
+    //     .x()
+    //     .onTrue(
+    //         superstructure
+    //             .setSuperstructureCommand(() -> SuperstructureStates.ALVL3)
+    //             .andThen(Commands.waitUntil(() -> superstructure.atSuperStructureGoal())));
+    // controller
+    //     .y()
+    //     .onTrue(
+    //         superstructure
+    //             .setSuperstructureCommand(() -> SuperstructureStates.CLVL3)
+    //             .andThen(Commands.waitUntil(() -> superstructure.atSuperStructureGoal())));
   }
 
   /**

@@ -14,7 +14,7 @@ public class ArmConstants {
   public static final double ARM_MOI = 0.0308663843;
   public static final double ARM_MASS_KG = 5.06571959;
   public static final double ARM_LENGTH = 1.02108;
-  public static final Angle ARM_ENCODER_OFFSET = Radian.of(-1.8438449070385408);
+  public static final Angle ARM_ENCODER_OFFSET = Radian.of(0);
   public static final Angle ARM_MIN_ANGLE_RADS = Rotations.of(-0.3);
   public static final Angle ARM_MAX_ANGLE_RADS = Rotations.of(0.4);
   public static final double ARM_MAX_VELOCITY = 1.0;

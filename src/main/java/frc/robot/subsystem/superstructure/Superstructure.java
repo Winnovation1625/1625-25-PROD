@@ -1,6 +1,5 @@
 package frc.robot.subsystem.superstructure;
 
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -26,9 +25,9 @@ public class Superstructure extends SubsystemBase {
       new SuperstructureVisualizer("measured");
 
   private LoggedTunableNumber elevatorThreshold =
-      new LoggedTunableNumber("Superstructure/ElevatorThreshold", Units.inchesToMeters(27.5591));
+      new LoggedTunableNumber("Superstructure/ElevatorThreshold", 0.259);
   private LoggedTunableNumber elevatorAlgaeThreshold =
-      new LoggedTunableNumber("Superstructure/ElevatorAlgaeThreshold", Units.inchesToMeters(40.0));
+      new LoggedTunableNumber("Superstructure/ElevatorAlgaeThreshold", 0.479);
 
   @AutoLogOutput @Getter
   private SuperstructureStates superstructureGoal = SuperstructureStates.STOP;
@@ -67,7 +66,7 @@ public class Superstructure extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // arm.periodic();
+    arm.periodic();
     elevator.periodic();
     // switch (superstructureGoal) {
     //   case INTAKING -> {
@@ -153,14 +152,15 @@ public class Superstructure extends SubsystemBase {
                 .andThen(Commands.waitUntil(() -> atGoal()))
                 .andThen(runElevatorToState(toElevatorState))
                 .andThen(() -> superstructureGoal = to.get(), this)
-                .withName("Worst Case Superstructure Run"),
+                .andThen(Commands.print("Worst Case Superstructure Run")),
             // true, false starting below thresh, but going above
             runElevatorToState(intermediateState)
                 .andThen(Commands.waitUntil(() -> atGoal()))
-                .andThen(runArmToState(() -> to.get().getArmState()))
-                .alongWith(runElevatorToState(toElevatorState))
+                .andThen(
+                    runArmToState(() -> to.get().getArmState())
+                        .alongWith(runElevatorToState(toElevatorState)))
                 .andThen(() -> superstructureGoal = to.get(), this)
-                .withName("From Under Superstructure Run"),
+                .andThen(Commands.print("From Under Superstructure Run")),
             goingBelowThreshold),
         Commands.either(
             // false, true above thresh going below
@@ -169,12 +169,12 @@ public class Superstructure extends SubsystemBase {
                 .andThen(Commands.waitUntil(() -> atGoal()))
                 .andThen(runElevatorToState(toElevatorState))
                 .andThen(() -> superstructureGoal = to.get(), this)
-                .withName("From Above Case Superstructure Run"),
+                .andThen(Commands.print("From Above Case Superstructure Run")),
             // false false no issues with threshold
             runElevatorToState(toElevatorState)
                 .alongWith(runArmToState(() -> to.get().armState))
                 .andThen(() -> superstructureGoal = to.get(), this)
-                .withName("Best Case Superstructure Run"),
+                .andThen(Commands.print("Best Case Superstructure Run")),
             goingBelowThreshold),
         currentlyBelowThreshold);
 
@@ -220,7 +220,7 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command runArmToState(Supplier<ArmState> armState) {
-    return Commands.runOnce(() -> arm.setPosition(armState.get().getArmAngle()))
+    return Commands.runOnce(() -> arm.setPosition(armState.get()))
         .alongWith(Commands.runOnce(() -> this.armState = armState.get()));
   }
 
@@ -230,7 +230,7 @@ public class Superstructure extends SubsystemBase {
   // }
 
   public Command runElevatorToState(Supplier<ElevatorState> state) {
-    return Commands.runOnce(() -> elevator.setPosition(state.get().getElevatorHeight()))
+    return Commands.runOnce(() -> elevator.setPosition(state.get()))
         .alongWith(Commands.runOnce(() -> elevatorState = state.get()));
   }
 
@@ -252,5 +252,9 @@ public class Superstructure extends SubsystemBase {
 
   public boolean atElevatorGoal() {
     return elevator.atGoal();
+  }
+
+  public boolean atArmGoal() {
+    return arm.atGoal();
   }
 }
