@@ -21,23 +21,31 @@ public class DriveToReef extends DriveToPose {
   private static final LoggedTunableNumber maxDistanceTagPoseBlend =
       new LoggedTunableNumber("DriveToReef/MaxDistanceTagPoseBlend", Units.inchesToMeters(36.0));
   private static final LoggedTunableNumber reefPoseOffsetX =
-      new LoggedTunableNumber("DriveToReef/ReefCoralScoreXOffset", Units.inchesToMeters(17));
+      new LoggedTunableNumber("DriveToReef/ReefCoralScoreXOffset", Units.inchesToMeters(20));
   private static final LoggedTunableNumber reefPoseOffsetY =
       new LoggedTunableNumber("DriveToReef/ReefCoralScoreYOffset", Units.inchesToMeters(-10.9));
+
+  static {
+    minDistanceTagPoseBlend.initDefault(Units.inchesToMeters(24.0));
+    maxDistanceTagPoseBlend.initDefault(Units.inchesToMeters(36.0));
+    reefPoseOffsetX.initDefault(Units.inchesToMeters(20));
+    reefPoseOffsetY.initDefault(Units.inchesToMeters(-10.9));
+  }
 
   public DriveToReef(Drive drive, ReefPosition reefPosition) {
     super(
         drive,
         // goal supplier
         () ->
-            FieldConstants.Reef.branchPositions2d
-                .get(reefPosition.getFieldConstantsIndex())
-                .get(ReefLevel.L4)
-                .transformBy(
-                    new Transform2d(
-                        reefPoseOffsetX.get(),
-                        reefPoseOffsetY.get(),
-                        new Rotation2d(Degrees.of(-90)))),
+            AllianceFlipUtil.apply(
+                FieldConstants.Reef.branchPositions2d
+                    .get(reefPosition.getFieldConstantsIndex())
+                    .get(ReefLevel.L4)
+                    .transformBy(
+                        new Transform2d(
+                            reefPoseOffsetX.get(),
+                            reefPoseOffsetY.get(),
+                            new Rotation2d(Degrees.of(-90))))),
         // robot position supplier
         () -> {
           Optional<Pose2d> txPose =
@@ -59,14 +67,59 @@ public class DriveToReef extends DriveToPose {
                               .getPose()
                               .getTranslation()
                               .getDistance(
-                                  FieldConstants.Reef.branchPositions2d
-                                      .get(reefPosition.getFieldConstantsIndex())
-                                      .get(ReefLevel.L4)
+                                  AllianceFlipUtil.apply(
+                                          FieldConstants.Reef.branchPositions2d
+                                              .get(reefPosition.getFieldConstantsIndex())
+                                              .get(ReefLevel.L4)
+                                              .transformBy(
+                                                  new Transform2d(
+                                                      reefPoseOffsetX.get(),
+                                                      reefPoseOffsetY.get(),
+                                                      new Rotation2d(Degrees.of(-90)))))
+                                      .getTranslation())
+                          - minDistanceTagPoseBlend.get())
+                      / (maxDistanceTagPoseBlend.get() - minDistanceTagPoseBlend.get()),
+                  0.0,
+                  1.0);
+          return drive.getPose().interpolate(txPose.get(), 1.0 - t);
+        });
+  }
+
+  public DriveToReef(Drive drive, int reefFace) {
+    super(
+        drive,
+        // goal supplier
+        () ->
+            FieldConstants.Reef.centerFaces[reefFace].transformBy(
+                new Transform2d(
+                    reefPoseOffsetX.get(), reefPoseOffsetY.get(), new Rotation2d(Degrees.of(90)))),
+        // robot position supplier
+        () -> {
+          Optional<Pose2d> txPose =
+              drive.getTxTyPose(
+                  switch (reefFace) {
+                    case 1 -> AllianceFlipUtil.shouldFlip() ? 6 : 19;
+                    case 2 -> AllianceFlipUtil.shouldFlip() ? 11 : 20;
+                    case 3 -> AllianceFlipUtil.shouldFlip() ? 10 : 21;
+                    case 4 -> AllianceFlipUtil.shouldFlip() ? 9 : 22;
+                    case 5 -> AllianceFlipUtil.shouldFlip() ? 8 : 17;
+                    default -> AllianceFlipUtil.shouldFlip() ? 7 : 18;
+                  });
+          if (!txPose.isPresent()) {
+            return drive.getPose();
+          }
+          double t =
+              MathUtil.clamp(
+                  (drive
+                              .getPose()
+                              .getTranslation()
+                              .getDistance(
+                                  FieldConstants.Reef.centerFaces[reefFace]
                                       .transformBy(
                                           new Transform2d(
                                               reefPoseOffsetX.get(),
                                               reefPoseOffsetY.get(),
-                                              new Rotation2d(Degrees.of(-90))))
+                                              new Rotation2d(Degrees.of(90))))
                                       .getTranslation())
                           - minDistanceTagPoseBlend.get())
                       / (maxDistanceTagPoseBlend.get() - minDistanceTagPoseBlend.get()),

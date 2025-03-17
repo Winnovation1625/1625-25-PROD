@@ -28,11 +28,14 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.FieldConstants.ReefPosition;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.DriveToReef;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystem.apriltagvision.AprilTagVision;
 import frc.robot.subsystem.apriltagvision.AprilTagVisionConstants;
 import frc.robot.subsystem.apriltagvision.AprilTagVisionIO;
+import frc.robot.subsystem.apriltagvision.AprilTagVisionIOPhoton;
 import frc.robot.subsystem.apriltagvision.AprilTagVisionIOPhotonSim;
 import frc.robot.subsystem.climber.Climber;
 import frc.robot.subsystem.climber.ClimberIO;
@@ -132,10 +135,14 @@ public class RobotContainer {
             new AprilTagVision(
                 drive::accept,
                 drive::getPose,
-                new AprilTagVisionIO() {},
-                new AprilTagVisionIO() {},
-                new AprilTagVisionIO() {},
-                new AprilTagVisionIO() {});
+                new AprilTagVisionIOPhoton(
+                    AprilTagVisionConstants.CAMERA_CONFIGS.get(0),
+                    drive::getRotation,
+                    drive::getPose),
+                new AprilTagVisionIOPhoton(
+                    AprilTagVisionConstants.CAMERA_CONFIGS.get(1),
+                    drive::getRotation,
+                    drive::getPose));
         manipulator =
             new Manipulator(new ManipulatorIOKraken(), new ManipulatorSensorsIOCANrange());
         climber = new Climber(new ClimberIOServo());
@@ -474,8 +481,10 @@ public class RobotContainer {
                     Commands.waitUntil(
                         () ->
                             superstructure.atSuperStructureGoal()
-                                && manipulator.getGamepieceState()
-                                    == Manipulator.GamepieceState.CORAL_STAGING))
+                                && (manipulator.getGamepieceState()
+                                        == Manipulator.GamepieceState.CORAL_STAGING
+                                    || manipulator.getGamepieceState()
+                                        == Manipulator.GamepieceState.CORAL_IN_MANIPULATOR)))
                 .andThen(
                     manipulator
                         .setManipulatorState(ManipulatorState.IDLE)
@@ -561,6 +570,7 @@ public class RobotContainer {
                     superstructure
                         .setSuperstructureCommand(() -> SuperstructureStates.STOW)
                         .alongWith(manipulator.setManipulatorState(ManipulatorState.IDLE))));
+    controller.x().whileTrue(new DriveToReef(drive, ReefPosition.A));
     // controller
     //     .leftTrigger()
     //     .and(() -> manipulator.getGamepieceState() == Manipulator.GamepieceState.ALGAE_IN_CLAW)

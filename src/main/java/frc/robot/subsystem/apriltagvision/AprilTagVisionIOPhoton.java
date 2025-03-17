@@ -55,7 +55,6 @@ public class AprilTagVisionIOPhoton implements AprilTagVisionIO {
     Set<Short> tagIds = new HashSet<>();
     List<PoseObservation> poseObservations = new LinkedList<>();
     for (var result : camera.getAllUnreadResults()) {
-      // TODO: Add txty results into the mix
       multiTagPnp.setReferencePose(currentPoseSupplier.get());
       var tag = multiTagPnp.update(result);
       var txtyResult = txtyPoseEstimator.update(result);
