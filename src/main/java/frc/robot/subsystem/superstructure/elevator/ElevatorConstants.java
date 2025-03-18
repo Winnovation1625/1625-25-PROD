@@ -4,7 +4,7 @@ import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
 
 public class ElevatorConstants {
-  public static final double ELEVATOR_TOLERANCE_METERS = 0.0125;
+  public static final double ELEVATOR_TOLERANCE_METERS = 0.02;
   public static final double ELEVATOR_KV = 1.91;
   public static final double ELEVATOR_KA = 0.04;
   public static final double ELEVATOR_KG = 0.39;

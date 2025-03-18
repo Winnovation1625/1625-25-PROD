@@ -51,7 +51,6 @@ import frc.robot.subsystem.drive.ModuleIOTalonFXReal;
 import frc.robot.subsystem.drive.ModuleIOTalonFXSim;
 import frc.robot.subsystem.leds.Leds;
 import frc.robot.subsystem.manipulator.Manipulator;
-import frc.robot.subsystem.manipulator.Manipulator.GamepieceState;
 import frc.robot.subsystem.manipulator.Manipulator.ManipulatorState;
 import frc.robot.subsystem.manipulator.ManipulatorIO;
 import frc.robot.subsystem.manipulator.ManipulatorIOKraken;
@@ -69,7 +68,9 @@ import frc.robot.subsystem.superstructure.arm.ArmIOSim;
 import frc.robot.subsystem.superstructure.elevator.Elevator;
 import frc.robot.subsystem.superstructure.elevator.ElevatorIO;
 import frc.robot.subsystem.superstructure.elevator.ElevatorIOKraken;
+import frc.robot.util.AuxControllerUtil;
 import frc.robot.util.LoggedTunableNumber;
+import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import lombok.Setter;
@@ -138,11 +139,11 @@ public class RobotContainer {
                 new AprilTagVisionIOPhoton(
                     AprilTagVisionConstants.CAMERA_CONFIGS.get(0),
                     drive::getRotation,
-                    drive::getPose),
-                new AprilTagVisionIOPhoton(
-                    AprilTagVisionConstants.CAMERA_CONFIGS.get(1),
-                    drive::getRotation,
                     drive::getPose));
+        // new AprilTagVisionIOPhoton(
+        //     AprilTagVisionConstants.CAMERA_CONFIGS.get(1),
+        //     drive::getRotation,
+        //     drive::getPose));
         manipulator =
             new Manipulator(new ManipulatorIOKraken(), new ManipulatorSensorsIOCANrange());
         climber = new Climber(new ClimberIOServo());
@@ -271,6 +272,30 @@ public class RobotContainer {
     pathOverride.addOption("on", pathingOverrideSupplier = () -> true);
   }
 
+  private Supplier<ReefPosition> getCoralObjective =
+      () ->
+          AuxControllerUtil.getCoralObjective(
+                  List.of(
+                      auxController.getRawButton(2), // A
+                      auxController.getRawButton(1), // B
+                      auxController.getRawButton(12), // C
+                      auxController.getRawButton(11), // D
+                      auxController.getRawButton(10), // E
+                      auxController.getRawButton(9), // F
+                      auxController.getRawButton(8), // G
+                      auxController.getRawButton(7), // H
+                      auxController.getRawButton(6), // I
+                      auxController.getRawButton(5), // J
+                      auxController.getRawButton(4), // K
+                      auxController.getRawButton(3) // L
+                      ),
+                  List.of(
+                      auxController.getRawButton(19), // L1
+                      auxController.getRawButton(20), // L2
+                      auxController.getRawButton(21), // L3
+                      auxController.getRawButton(22) // L4
+                      ))
+              .position();
   private Supplier<SuperstructureStates> getCoralLevel =
       () -> {
         if (auxController.getRawButton(19)) {
@@ -344,7 +369,7 @@ public class RobotContainer {
             : () ->
                 drive.setPose(
                     new Pose2d(drive.getPose().getTranslation(), new Rotation2d())); // zero gyro
-    // controller.start().onTrue(Commands.runOnce(resetGyro, drive).ignoringDisable(true));
+    controller.start().onTrue(Commands.runOnce(resetGyro, drive).ignoringDisable(true));
 
     // Reset gyro to 0° when B button is pressed
     // controller
@@ -505,20 +530,16 @@ public class RobotContainer {
                             superstructure.atSuperStructureGoal()
                                 && manipulator.getGamepieceState()
                                     == Manipulator.GamepieceState.NONE))
+                .andThen(Commands.waitTime(Seconds.of(0.5)))
                 .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
     controller
         .a()
-        .and(
-            () ->
-                manipulator.getGamepieceState() == GamepieceState.CORAL_IN_MANIPULATOR
-                    || manipulator.getGamepieceState() == GamepieceState.ALGAE_IN_CLAW)
-        .onTrue(
+        .whileTrue(
             Commands.either(
-                    manipulator.setManipulatorState(ManipulatorState.SHOOTING_ALGAE),
-                    manipulator.setManipulatorState(ManipulatorState.SHOOTING_CORAL),
-                    manipulator::hasAlgae)
-                .andThen(Commands.waitTime(Seconds.of(0.25)))
-                .andThen(manipulator.setManipulatorState(ManipulatorState.IDLE)));
+                manipulator.setManipulatorState(ManipulatorState.SHOOTING_ALGAE),
+                manipulator.setManipulatorState(ManipulatorState.SHOOTING_CORAL),
+                manipulator::hasAlgae));
+    controller.a().onFalse(manipulator.setManipulatorState(ManipulatorState.IDLE));
 
     controller
         .rightBumper()
@@ -570,7 +591,7 @@ public class RobotContainer {
                     superstructure
                         .setSuperstructureCommand(() -> SuperstructureStates.STOW)
                         .alongWith(manipulator.setManipulatorState(ManipulatorState.IDLE))));
-    controller.x().whileTrue(new DriveToReef(drive, ReefPosition.A));
+    controller.x().whileTrue(new DriveToReef(drive, getCoralObjective));
     // controller
     //     .leftTrigger()
     //     .and(() -> manipulator.getGamepieceState() == Manipulator.GamepieceState.ALGAE_IN_CLAW)

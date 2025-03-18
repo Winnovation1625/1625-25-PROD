@@ -47,7 +47,7 @@ public final class Constants {
           .elevatorLeft(7)
           .elevatorRight(6)
           .armMotor(14)
-          .armEncoder(15)
+          .armEncoder(44)
           .build();
   public static final ManipulatorCANIds MANIPULATOR_CAN_IDS =
       ManipulatorCANIds.builder()

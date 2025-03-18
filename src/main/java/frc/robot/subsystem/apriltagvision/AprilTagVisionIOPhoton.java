@@ -2,7 +2,7 @@ package frc.robot.subsystem.apriltagvision;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.util.WPIUtilJNI;
+import edu.wpi.first.wpilibj.Timer;
 import frc.robot.FieldConstants;
 import frc.robot.subsystem.apriltagvision.AprilTagVisionConstants.CameraConfig;
 import java.util.HashSet;
@@ -50,7 +50,7 @@ public class AprilTagVisionIOPhoton implements AprilTagVisionIO {
   @Override
   public void updateInputs(AprilTagVisionIOInputs inputs) {
     inputs.connected = camera.isConnected();
-    txtyPoseEstimator.addHeadingData(WPIUtilJNI.getSystemTime(), headingSupplier.get());
+    txtyPoseEstimator.addHeadingData(Timer.getFPGATimestamp(), headingSupplier.get());
     // Read new camera observations
     Set<Short> tagIds = new HashSet<>();
     List<PoseObservation> poseObservations = new LinkedList<>();
@@ -80,7 +80,7 @@ public class AprilTagVisionIOPhoton implements AprilTagVisionIO {
                   txtyPose,
                   bestTarget.poseAmbiguity,
                   bestTarget.fiducialId,
-                  txtyPose.getTranslation().getNorm(),
+                  totalTagDistance / result.targets.size(),
                   PoseObservationType.PHOTONVISION_TX_TY));
         }
         // Add pose observation

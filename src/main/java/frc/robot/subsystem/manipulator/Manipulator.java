@@ -73,7 +73,9 @@ public class Manipulator extends SubsystemBase {
       gamepieceState = GamepieceState.CORAL_STAGING;
     }
 
-    if (sensorInputs.isFrontCoralDetected == true && sensorInputs.isBackCoralDetected == true) {
+    if (sensorInputs.isFrontCoralDetected == true
+        && (sensorInputs.isBackCoralDetected == true
+            || manipulatorState == ManipulatorState.SHOOTING_CORAL)) {
       gamepieceState = GamepieceState.CORAL_IN_MANIPULATOR;
       if (prevManipulatorState == ManipulatorState.STAGING_CORAL) {
         manipulatorState = ManipulatorState.IDLE;

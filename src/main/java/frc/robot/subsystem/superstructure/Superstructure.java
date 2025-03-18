@@ -1,5 +1,7 @@
 package frc.robot.subsystem.superstructure;
 
+import static edu.wpi.first.units.Units.Seconds;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -144,6 +146,13 @@ public class Superstructure extends SubsystemBase {
                 < (hasAlgaeSupplier.get() ? elevatorAlgaeThreshold.get() : elevatorThreshold.get());
     Supplier<ElevatorState> intermediateState =
         () -> hasAlgaeSupplier.get() ? ElevatorState.ALGAE_CLEARANCE : ElevatorState.STOW;
+    BooleanSupplier comingFromCoralScore =
+        () ->
+            superstructureGoal == SuperstructureStates.CLVL4
+                || superstructureGoal == SuperstructureStates.CLVL3
+                || superstructureGoal == SuperstructureStates.CLVL2
+                || superstructureGoal == SuperstructureStates.ALVL2
+                || superstructureGoal == SuperstructureStates.ALVL3;
     return Commands.either(
         Commands.either( // true, true worst case
             runElevatorToState(intermediateState)
@@ -151,7 +160,7 @@ public class Superstructure extends SubsystemBase {
                 .andThen(runArmToState(() -> to.get().getArmState()))
                 .andThen(Commands.waitUntil(() -> atGoal()))
                 .andThen(runElevatorToState(toElevatorState))
-                .andThen(() -> superstructureGoal = to.get(), this)
+                .andThen(() -> superstructureGoal = to.get())
                 .andThen(Commands.print("Worst Case Superstructure Run")),
             // true, false starting below thresh, but going above
             runElevatorToState(intermediateState)
@@ -159,7 +168,7 @@ public class Superstructure extends SubsystemBase {
                 .andThen(
                     runArmToState(() -> to.get().getArmState())
                         .alongWith(runElevatorToState(toElevatorState)))
-                .andThen(() -> superstructureGoal = to.get(), this)
+                .andThen(() -> superstructureGoal = to.get())
                 .andThen(Commands.print("From Under Superstructure Run")),
             goingBelowThreshold),
         Commands.either(
@@ -168,13 +177,21 @@ public class Superstructure extends SubsystemBase {
                 .alongWith(runArmToState(() -> to.get().getArmState()))
                 .andThen(Commands.waitUntil(() -> atGoal()))
                 .andThen(runElevatorToState(toElevatorState))
-                .andThen(() -> superstructureGoal = to.get(), this)
+                .andThen(() -> superstructureGoal = to.get())
                 .andThen(Commands.print("From Above Case Superstructure Run")),
             // false false no issues with threshold
-            runElevatorToState(toElevatorState)
-                .alongWith(runArmToState(() -> to.get().armState))
-                .andThen(() -> superstructureGoal = to.get(), this)
-                .andThen(Commands.print("Best Case Superstructure Run")),
+            Commands.either(
+                runArmToState(() -> to.get().armState)
+                    .alongWith(
+                        Commands.waitTime(Seconds.of(1))
+                            .andThen(runElevatorToState(toElevatorState)))
+                    .andThen(() -> superstructureGoal = to.get(), this)
+                    .andThen(Commands.print("Best Case Superstructure Run")),
+                runElevatorToState(toElevatorState)
+                    .alongWith(runArmToState(() -> to.get().armState))
+                    .andThen(() -> superstructureGoal = to.get())
+                    .andThen(Commands.print("Best Case Superstructure Run")),
+                comingFromCoralScore),
             goingBelowThreshold),
         currentlyBelowThreshold);
 

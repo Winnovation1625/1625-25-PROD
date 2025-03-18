@@ -14,6 +14,7 @@ import frc.robot.subsystem.drive.Drive;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public class DriveToReef extends DriveToPose {
   private static final LoggedTunableNumber minDistanceTagPoseBlend =
@@ -32,14 +33,14 @@ public class DriveToReef extends DriveToPose {
     reefPoseOffsetY.initDefault(Units.inchesToMeters(-10.9));
   }
 
-  public DriveToReef(Drive drive, ReefPosition reefPosition) {
+  public DriveToReef(Drive drive, Supplier<ReefPosition> reefPosition) {
     super(
         drive,
         // goal supplier
         () ->
             AllianceFlipUtil.apply(
                 FieldConstants.Reef.branchPositions2d
-                    .get(reefPosition.getFieldConstantsIndex())
+                    .get(reefPosition.get().getFieldConstantsIndex())
                     .get(ReefLevel.L4)
                     .transformBy(
                         new Transform2d(
@@ -50,7 +51,7 @@ public class DriveToReef extends DriveToPose {
         () -> {
           Optional<Pose2d> txPose =
               drive.getTxTyPose(
-                  switch (reefPosition.getFace()) {
+                  switch (reefPosition.get().getFace()) {
                     case 1 -> AllianceFlipUtil.shouldFlip() ? 6 : 19;
                     case 2 -> AllianceFlipUtil.shouldFlip() ? 11 : 20;
                     case 3 -> AllianceFlipUtil.shouldFlip() ? 10 : 21;
@@ -69,7 +70,7 @@ public class DriveToReef extends DriveToPose {
                               .getDistance(
                                   AllianceFlipUtil.apply(
                                           FieldConstants.Reef.branchPositions2d
-                                              .get(reefPosition.getFieldConstantsIndex())
+                                              .get(reefPosition.get().getFieldConstantsIndex())
                                               .get(ReefLevel.L4)
                                               .transformBy(
                                                   new Transform2d(
