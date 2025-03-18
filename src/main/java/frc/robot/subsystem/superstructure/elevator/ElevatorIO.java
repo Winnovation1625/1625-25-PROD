@@ -43,18 +43,6 @@ public interface ElevatorIO {
       double cruiseV,
       double cruiseJ) {}
 
-  public default void setFollowerPID(
-      double p,
-      double i,
-      double d,
-      double kG,
-      double kS,
-      double kV,
-      double kA,
-      double cruiseA,
-      double cruiseV,
-      double cruiseJ) {}
-
   public default void runCurrent(double currentSetpoint) {}
 
   public default void stop() {}

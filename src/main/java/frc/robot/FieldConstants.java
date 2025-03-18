@@ -209,7 +209,7 @@ public class FieldConstants {
 
   public static final double aprilTagWidth = Units.inchesToMeters(6.50);
   public static final int aprilTagCount = 22;
-  public static final AprilTagLayoutType defaultAprilTagType = AprilTagLayoutType.NO_BARGE;
+  public static final AprilTagLayoutType defaultAprilTagType = AprilTagLayoutType.RED_REEF;
 
   @Getter
   public enum AprilTagLayoutType {
@@ -217,6 +217,7 @@ public class FieldConstants {
     NO_BARGE("2025-no-barge"),
     BLUE_REEF("2025-blue-reef"),
     RED_REEF("2025-red-reef"),
+    REEFS_ONLY("2025-reefs-only"),
     FIELD_BORDER("2025-field-border");
 
     AprilTagLayoutType(String name) {
@@ -242,7 +243,7 @@ public class FieldConstants {
           layoutString = new ObjectMapper().writeValueAsString(layout);
         } catch (JsonProcessingException e) {
           throw new RuntimeException(
-              "Failed to serialize AprilTag layout JSON " + toString() + "for Northstar");
+              "Failed to serialize AprilTag layout JSON " + toString() + "for Photonvision");
         }
       }
     }

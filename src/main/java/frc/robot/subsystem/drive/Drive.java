@@ -15,8 +15,11 @@ package frc.robot.subsystem.drive;
 
 import static edu.wpi.first.units.Units.*;
 
+import com.ctre.phoenix6.CANBus;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.DriveFeedforwards;
@@ -31,6 +34,7 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -39,6 +43,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -53,6 +58,7 @@ import frc.robot.Constants.Mode;
 import frc.robot.FieldConstants;
 import frc.robot.RobotState.OdometryObservation;
 import frc.robot.RobotState.TxTyPoseRecord;
+import frc.robot.generated.TunerConstants;
 import frc.robot.subsystem.apriltagvision.AprilTagVision;
 import frc.robot.util.LocalADStarAK;
 import frc.robot.util.LoggedTunableNumber;
@@ -61,14 +67,41 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
 import lombok.Getter;
-import lombok.Setter;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Drive extends SubsystemBase implements AprilTagVision.VisionConsumer {
+
+  // TunerConstants doesn't include these constants, so they are declared locally
+  static final double ODOMETRY_FREQUENCY =
+      new CANBus(TunerConstants.DrivetrainConstants.CANBusName).isNetworkFD() ? 250.0 : 100.0;
+  public static final double DRIVE_BASE_RADIUS =
+      Math.max(
+          Math.max(
+              Math.hypot(TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY),
+              Math.hypot(TunerConstants.FrontRight.LocationX, TunerConstants.FrontRight.LocationY)),
+          Math.max(
+              Math.hypot(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
+              Math.hypot(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)));
+
+  // PathPlanner config constants
+  private static final double ROBOT_MASS_KG = 74.088;
+  private static final double ROBOT_MOI = 6.883;
+  private static final double WHEEL_COF = 1.2;
+  private static final RobotConfig PP_CONFIG =
+      new RobotConfig(
+          ROBOT_MASS_KG,
+          ROBOT_MOI,
+          new ModuleConfig(
+              TunerConstants.FrontLeft.WheelRadius,
+              TunerConstants.kSpeedAt12Volts.in(MetersPerSecond),
+              WHEEL_COF,
+              DCMotor.getKrakenX60Foc(1)
+                  .withReduction(TunerConstants.FrontLeft.DriveMotorGearRatio),
+              TunerConstants.FrontLeft.SlipCurrent,
+              1),
+          getModuleTranslations());
 
   static final Lock odometryLock = new ReentrantLock();
   private final GyroIO gyroIO;
@@ -77,6 +110,27 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
   private final SysIdRoutine sysId;
   private final Alert gyroDisconnectedAlert =
       new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
+
+  private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
+  private Rotation2d rawGyroRotation = new Rotation2d();
+  private SwerveModulePosition[] lastModulePositions = // For delta tracking
+      new SwerveModulePosition[] {
+        new SwerveModulePosition(),
+        new SwerveModulePosition(),
+        new SwerveModulePosition(),
+        new SwerveModulePosition()
+      };
+  private SwerveDrivePoseEstimator poseEstimator =
+      new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
+
+  private static final double poseBufferSizeSec = 2.0;
+  private final Map<Integer, TxTyPoseRecord> txTyPoses = new HashMap<>();
+  private final TimeInterpolatableBuffer<Pose2d> poseBuffer =
+      TimeInterpolatableBuffer.createBuffer(poseBufferSizeSec);
+  @Getter @AutoLogOutput private Pose2d odometryPose = new Pose2d();
+  private final SwerveSetpointGenerator setpointGenerator;
+  private SwerveSetpoint previousSetpoint;
+
   private static final LoggedTunableNumber txTyObservationStaleSecs =
       new LoggedTunableNumber("Drive/TxTyObservationStaleSeconds", 0.5);
   private static final LoggedTunableNumber turnKP =
@@ -109,42 +163,17 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
   private static final LoggedTunableNumber driveKG =
       new LoggedTunableNumber("Drive/drivekG", DriveConstants.FrontLeft.DriveMotorGains.kG);
 
-  private static SwerveDriveKinematics kinematics =
-      new SwerveDriveKinematics(DriveConstants.getModuleTranslations());
-  private static Rotation2d rawGyroRotation = new Rotation2d();
-  private static SwerveModulePosition[] lastModulePositions = // For delta tracking
-      new SwerveModulePosition[] {
-        new SwerveModulePosition(),
-        new SwerveModulePosition(),
-        new SwerveModulePosition(),
-        new SwerveModulePosition()
-      };
-  private static SwerveDrivePoseEstimator poseEstimator =
-      new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
-  private static final double poseBufferSizeSec = 2.0;
-  private final Map<Integer, TxTyPoseRecord> txTyPoses = new HashMap<>();
-  private final TimeInterpolatableBuffer<Pose2d> poseBuffer =
-      TimeInterpolatableBuffer.createBuffer(poseBufferSizeSec);
-  @Getter @AutoLogOutput private Pose2d odometryPose = new Pose2d();
-  private final SwerveSetpointGenerator setpointGenerator;
-  private SwerveSetpoint previousSetpoint;
-  @Setter private BooleanSupplier NearBargeSupplier = () -> false;
-
-  private final Consumer<Pose2d> resetSimulationPoseCallBack;
-
   public Drive(
       GyroIO gyroIO,
       ModuleIO flModuleIO,
       ModuleIO frModuleIO,
       ModuleIO blModuleIO,
-      ModuleIO brModuleIO,
-      Consumer<Pose2d> resetSimulationPoseCallBack) {
+      ModuleIO brModuleIO) {
     this.gyroIO = gyroIO;
-    this.resetSimulationPoseCallBack = resetSimulationPoseCallBack;
-    modules[0] = new Module(flModuleIO, 0, DriveConstants.FrontLeft);
-    modules[1] = new Module(frModuleIO, 1, DriveConstants.FrontRight);
-    modules[2] = new Module(blModuleIO, 2, DriveConstants.BackLeft);
-    modules[3] = new Module(brModuleIO, 3, DriveConstants.BackRight);
+    modules[0] = new Module(flModuleIO, 0, TunerConstants.FrontLeft);
+    modules[1] = new Module(frModuleIO, 1, TunerConstants.FrontRight);
+    modules[2] = new Module(blModuleIO, 2, TunerConstants.BackLeft);
+    modules[3] = new Module(brModuleIO, 3, TunerConstants.BackRight);
 
     // Usage reporting for swerve template
     HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_AdvantageKit);
@@ -160,10 +189,9 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
         this::runVelocity,
         new PPHolonomicDriveController(
             new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
-        DriveConstants.PP_CONFIG,
+        PP_CONFIG,
         () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
         this);
-
     Pathfinding.setPathfinder(new LocalADStarAK());
     PathPlannerLogging.setLogActivePathCallback(
         (activePath) -> {
@@ -186,8 +214,7 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
             new SysIdRoutine.Mechanism(
                 (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
 
-    setpointGenerator =
-        new SwerveSetpointGenerator(DriveConstants.PP_CONFIG, Units.rotationsToRadians(10));
+    setpointGenerator = new SwerveSetpointGenerator(PP_CONFIG, Units.rotationsToRadians(10));
     previousSetpoint =
         new SwerveSetpoint(getChassisSpeeds(), getModuleStates(), DriveFeedforwards.zeros(4));
 
@@ -273,13 +300,6 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
 
     // Update gyro alert
     gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.CURRENT_MODE != Mode.SIM);
-
-    for (var tag : FieldConstants.defaultAprilTagType.getLayout().getTags()) {
-      var pose = getTxTyPose(tag.ID);
-      Logger.recordOutput(
-          "Drive/TxTyPoses/" + Integer.toString(tag.ID),
-          pose.isPresent() ? new Pose2d[] {pose.get()} : new Pose2d[] {});
-    }
   }
 
   /**
@@ -288,22 +308,14 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
    * @param speeds Speeds in meters/sec
    */
   public void runVelocity(ChassisSpeeds speeds) {
-    // Calculate module setpoints
-    ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
-    SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
-    SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, DriveConstants.kSpeedAt12Volts);
-
-    // Log unoptimized setpoints and setpoint speeds
-    Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
-    Logger.recordOutput("SwerveChassisSpeeds/Setpoints", discreteSpeeds);
-
     previousSetpoint = setpointGenerator.generateSetpoint(previousSetpoint, speeds, 0.02);
-    setpointStates = previousSetpoint.moduleStates();
+    SwerveModuleState[] setpointStates = previousSetpoint.moduleStates();
     // Send setpoints to modules
     for (int i = 0; i < 4; i++) {
       modules[i].runSetpoint(setpointStates[i]);
     }
-
+    ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
+    Logger.recordOutput("SwerveChassisSpeeds/Setpoints", discreteSpeeds);
     // Log optimized setpoints (runSetpoint mutates each state)
     Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
   }
@@ -327,7 +339,7 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
   public void stopWithX() {
     Rotation2d[] headings = new Rotation2d[4];
     for (int i = 0; i < 4; i++) {
-      headings[i] = DriveConstants.getModuleTranslations()[i].getAngle();
+      headings[i] = getModuleTranslations()[i].getAngle();
     }
     kinematics.resetHeadings(headings);
     stop();
@@ -401,27 +413,41 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
 
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
-    resetSimulationPoseCallBack.accept(pose);
     poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
+  }
+
+  /** Adds a new timestamped vision measurement. */
+  public void addVisionMeasurement(
+      Pose2d visionRobotPoseMeters,
+      double timestampSeconds,
+      Matrix<N3, N1> visionMeasurementStdDevs) {
+    poseEstimator.addVisionMeasurement(
+        visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
   }
 
   /** Returns the maximum linear speed in meters per sec. */
   public double getMaxLinearSpeedMetersPerSec() {
-    return DriveConstants.kSpeedAt12Volts.in(MetersPerSecond);
+    return TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
   }
 
   /** Returns the maximum angular speed in radians per sec. */
   public double getMaxAngularSpeedRadPerSec() {
-    return getMaxLinearSpeedMetersPerSec() / DriveConstants.DRIVE_BASE_RADIUS;
+    return getMaxLinearSpeedMetersPerSec() / DRIVE_BASE_RADIUS;
+  }
+
+  /** Returns an array of module translations. */
+  public static Translation2d[] getModuleTranslations() {
+    return new Translation2d[] {
+      new Translation2d(TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY),
+      new Translation2d(TunerConstants.FrontRight.LocationX, TunerConstants.FrontRight.LocationY),
+      new Translation2d(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
+      new Translation2d(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)
+    };
   }
 
   public Optional<Pose2d> getPoseAtTime(double timestamp) {
     return poseEstimator.sampleAt(timestamp);
   }
-
-  // public Command nearBargeRumble(Pose2d robotPose){
-  //   return
-  // }
 
   /** Get 2d pose estimate of robot if not stale. */
   public Optional<Pose2d> getTxTyPose(int tagId) {

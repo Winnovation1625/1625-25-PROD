@@ -47,8 +47,7 @@ import frc.robot.subsystem.drive.GyroIO;
 import frc.robot.subsystem.drive.GyroIOPigeon2;
 import frc.robot.subsystem.drive.GyroIOSim;
 import frc.robot.subsystem.drive.ModuleIO;
-import frc.robot.subsystem.drive.ModuleIOTalonFXReal;
-import frc.robot.subsystem.drive.ModuleIOTalonFXSim;
+import frc.robot.subsystem.drive.ModuleIOTalonFX;
 import frc.robot.subsystem.leds.Leds;
 import frc.robot.subsystem.manipulator.Manipulator;
 import frc.robot.subsystem.manipulator.Manipulator.ManipulatorState;
@@ -125,11 +124,10 @@ public class RobotContainer {
         drive =
             new Drive(
                 new GyroIOPigeon2(),
-                new ModuleIOTalonFXReal(TunerConstants.FrontLeft),
-                new ModuleIOTalonFXReal(TunerConstants.FrontRight),
-                new ModuleIOTalonFXReal(TunerConstants.BackLeft),
-                new ModuleIOTalonFXReal(TunerConstants.BackRight),
-                (pose) -> {});
+                new ModuleIOTalonFX(TunerConstants.FrontLeft),
+                new ModuleIOTalonFX(TunerConstants.FrontRight),
+                new ModuleIOTalonFX(TunerConstants.BackLeft),
+                new ModuleIOTalonFX(TunerConstants.BackRight));
         arm = new Arm(new ArmIOKraken());
         elevator = new Elevator(new ElevatorIOKraken());
         aprilTagVision =
@@ -139,11 +137,11 @@ public class RobotContainer {
                 new AprilTagVisionIOPhoton(
                     AprilTagVisionConstants.CAMERA_CONFIGS.get(0),
                     drive::getRotation,
+                    drive::getPose),
+                new AprilTagVisionIOPhoton(
+                    AprilTagVisionConstants.CAMERA_CONFIGS.get(1),
+                    drive::getRotation,
                     drive::getPose));
-        // new AprilTagVisionIOPhoton(
-        //     AprilTagVisionConstants.CAMERA_CONFIGS.get(1),
-        //     drive::getRotation,
-        //     drive::getPose));
         manipulator =
             new Manipulator(new ManipulatorIOKraken(), new ManipulatorSensorsIOCANrange());
         climber = new Climber(new ClimberIOServo());
@@ -158,11 +156,10 @@ public class RobotContainer {
         drive =
             new Drive(
                 new GyroIOSim(driveSimulation.getGyroSimulation()),
-                new ModuleIOTalonFXSim(TunerConstants.FrontLeft, driveSimulation.getModules()[0]),
-                new ModuleIOTalonFXSim(TunerConstants.FrontRight, driveSimulation.getModules()[1]),
-                new ModuleIOTalonFXSim(TunerConstants.BackLeft, driveSimulation.getModules()[2]),
-                new ModuleIOTalonFXSim(TunerConstants.BackRight, driveSimulation.getModules()[3]),
-                driveSimulation::setSimulationWorldPose);
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {});
 
         arm = new Arm(new ArmIOSim());
         elevator = new Elevator(new ElevatorIO() {});
@@ -198,8 +195,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {},
-                new ModuleIO() {},
-                (pose) -> {});
+                new ModuleIO() {});
         arm = new Arm(new ArmIO() {});
         elevator = new Elevator(new ElevatorIO() {});
         aprilTagVision =

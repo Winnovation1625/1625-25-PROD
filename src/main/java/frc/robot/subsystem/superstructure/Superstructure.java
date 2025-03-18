@@ -183,7 +183,7 @@ public class Superstructure extends SubsystemBase {
             Commands.either(
                 runArmToState(() -> to.get().armState)
                     .alongWith(
-                        Commands.waitTime(Seconds.of(1))
+                        Commands.waitTime(Seconds.of(0.5))
                             .andThen(runElevatorToState(toElevatorState)))
                     .andThen(() -> superstructureGoal = to.get(), this)
                     .andThen(Commands.print("Best Case Superstructure Run")),

@@ -18,8 +18,6 @@ public class Elevator {
 
   private final ElevatorIO io;
   private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
-  //  private final ElevatorVisualizer visualizer =
-  //   new ElevatorVisualizer(ElevatorConstants.elevatorPose);
 
   private static final LoggedTunableNumber kP =
       new LoggedTunableNumber("Elevator/kP", positionGains.kP());
@@ -41,26 +39,6 @@ public class Elevator {
       new LoggedTunableNumber("Elevator/cruiseA", positionGains.cruiseA());
   private static final LoggedTunableNumber cruiseJ =
       new LoggedTunableNumber("Elevator/cruiseJ", positionGains.cruiseJ());
-  private static final LoggedTunableNumber differentialKP =
-      new LoggedTunableNumber("Elevator/Differential/kP", followerGains.kP());
-  private static final LoggedTunableNumber differentialKI =
-      new LoggedTunableNumber("Elevator/Differential/kI", followerGains.kI());
-  private static final LoggedTunableNumber differentialKD =
-      new LoggedTunableNumber("Elevator/Differential/kD", followerGains.kD());
-  private static final LoggedTunableNumber differentialKS =
-      new LoggedTunableNumber("Elevator/Differential/kS", followerGains.ffkS());
-  private static final LoggedTunableNumber differentialKV =
-      new LoggedTunableNumber("Elevator/Differential/kV", followerGains.ffkV());
-  private static final LoggedTunableNumber differentialKA =
-      new LoggedTunableNumber("Elevator/Differential/kA", followerGains.ffkA());
-  private static final LoggedTunableNumber differentialKG =
-      new LoggedTunableNumber("Elevator/Differential/kG", followerGains.ffkG());
-  private static final LoggedTunableNumber differentialCruiseV =
-      new LoggedTunableNumber("Elevator/Differential/cruiseV", followerGains.cruiseV());
-  private static final LoggedTunableNumber differentialCruiseA =
-      new LoggedTunableNumber("Elevator/Differential/cruiseA", followerGains.cruiseA());
-  private static final LoggedTunableNumber differentialCruiseJ =
-      new LoggedTunableNumber("Elevator/Differential/cruiseJ", followerGains.cruiseJ());
   private static final LoggedTunableNumber elevatorTolerance =
       new LoggedTunableNumber("Elevator/ToleranceMeters", ELEVATOR_TOLERANCE_METERS);
   private boolean characterizing;
@@ -124,22 +102,6 @@ public class Elevator {
         cruiseA,
         cruiseV,
         cruiseJ);
-
-    LoggedTunableNumber.ifChanged(
-        hashCode(),
-        pid ->
-            io.setFollowerPID(
-                pid[0], pid[1], pid[2], pid[3], pid[4], pid[5], pid[6], pid[7], pid[8], pid[9]),
-        differentialKP,
-        differentialKI,
-        differentialKD,
-        differentialKG,
-        differentialKS,
-        differentialKV,
-        differentialKA,
-        differentialCruiseA,
-        differentialCruiseV,
-        differentialCruiseJ);
 
     setBrakeMode(!coastSupplier.getAsBoolean() || DriverStation.isEnabled());
 

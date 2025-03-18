@@ -272,33 +272,7 @@ public class ElevatorIOKraken implements ElevatorIO {
     followerConfig.MotionMagic.MotionMagicJerk = cruiseJ;
     tryUntilOk(5, () -> elevatorTalon.getConfigurator().apply(config));
     tryUntilOk(5, () -> elevatorFollower.getConfigurator().apply(followerConfig));
-    // tryUntilOk(5, () -> elevatorMechanism.applyConfigs());
   }
-
-  // @Override
-  // public void setFollowerPID(
-  //     double p,
-  //     double i,
-  //     double d,
-  //     double kG,
-  //     double kS,
-  //     double kV,
-  //     double kA,
-  //     double cruiseV,
-  //     double cruiseA,
-  //     double cruiseJ) {
-
-  //   config.Slot1.kP = p;
-  //   config.Slot1.kI = i;
-  //   config.Slot1.kD = d;
-  //   config.Slot1.kG = kG;
-  //   config.Slot1.kA = kA;
-  //   config.Slot1.kV = kV;
-  //   config.Slot1.kS = kS;
-  //   tryUntilOk(5, () -> elevatorTalon.getConfigurator().apply(config));
-  //   tryUntilOk(5, () -> elevatorFollower.getConfigurator().apply(config));
-  //   // tryUntilOk(5, () -> elevatorMechanism.applyConfigs());
-  // }
 
   @Override
   public void setPosition(double positionSetpointRads) {
