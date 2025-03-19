@@ -16,6 +16,8 @@ package frc.robot;
 import static edu.wpi.first.units.Units.Seconds;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -29,6 +31,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.FieldConstants.ReefPosition;
+import frc.robot.commands.AutoScoreCommands;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveToReef;
 import frc.robot.generated.TunerConstants;
@@ -79,6 +82,7 @@ import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -97,8 +101,8 @@ public class RobotContainer {
   private Leds leds = Leds.getInstance();
 
   private final LoggedTunableNumber endgameAlert1 = new LoggedTunableNumber("EndgameAlert2", 30.0);
-  private final LoggedDashboardNumber endgameAlert2 =
-      new LoggedDashboardNumber("Endgame Alert #2", 15.0);
+  private final LoggedNetworkNumber endgameAlert2 =
+      new LoggedNetworkNumber("Endgame Alert #2", 15.0);
   private final LoggedDashboardChooser<BooleanSupplier> pathOverride;
   @Setter BooleanSupplier pathingOverrideSupplier;
 
@@ -229,8 +233,45 @@ public class RobotContainer {
     superstructure = new Superstructure(arm, elevator, manipulator::hasAlgae);
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+    NamedCommands.registerCommand("AutoScoreL1", AutoScoreCommands.autoScoreL1(superstructure, manipulator));
+    NamedCommands.registerCommand("DriveToReefFace4", new DriveToReef(drive, 4));
     // Set up SysId routines
-    autoChooser.addOption(
+    configureSysId();    
+    
+        // Configure the button bindings
+        configureButtonBindings();
+    
+        new Trigger(
+                () ->
+                    DriverStation.isTeleopEnabled()
+                        && DriverStation.getMatchTime() > 0
+                        && DriverStation.getMatchTime() <= Math.round(endgameAlert1.get()))
+            .onTrue(
+                controllerRumbleCommand()
+                    .withTimeout(0.5)
+                    .beforeStarting(() -> leds.setEndGameWarning(true))
+                    .finallyDo(() -> leds.setEndGameWarning(false)));
+    
+        new Trigger(
+                () ->
+                    DriverStation.isTeleopEnabled()
+                        && DriverStation.getMatchTime() > 0
+                        && DriverStation.getMatchTime() <= Math.round(endgameAlert2.get()))
+            .onTrue(
+                controllerRumbleCommand()
+                    .withTimeout(0.2)
+                    .andThen(Commands.waitSeconds(0.1))
+                    .repeatedly()
+                    .withTimeout(0.9) // Rumble three times
+                    .beforeStarting(() -> leds.setEndGameWarning(true))
+                    .finallyDo(() -> leds.setEndGameWarning(false)));
+    
+        pathOverride.addDefaultOption("off", pathingOverrideSupplier = () -> false);
+        pathOverride.addOption("on", pathingOverrideSupplier = () -> true);
+      }
+    
+    private void configureSysId() {
+        autoChooser.addOption(
         "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
     autoChooser.addOption(
         "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
@@ -244,40 +285,9 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-
-    // Configure the button bindings
-    configureButtonBindings();
-
-    new Trigger(
-            () ->
-                DriverStation.isTeleopEnabled()
-                    && DriverStation.getMatchTime() > 0
-                    && DriverStation.getMatchTime() <= Math.round(endgameAlert1.get()))
-        .onTrue(
-            controllerRumbleCommand()
-                .withTimeout(0.5)
-                .beforeStarting(() -> leds.setEndGameWarning(true))
-                .finallyDo(() -> leds.setEndGameWarning(false)));
-
-    new Trigger(
-            () ->
-                DriverStation.isTeleopEnabled()
-                    && DriverStation.getMatchTime() > 0
-                    && DriverStation.getMatchTime() <= Math.round(endgameAlert2.get()))
-        .onTrue(
-            controllerRumbleCommand()
-                .withTimeout(0.2)
-                .andThen(Commands.waitSeconds(0.1))
-                .repeatedly()
-                .withTimeout(0.9) // Rumble three times
-                .beforeStarting(() -> leds.setEndGameWarning(true))
-                .finallyDo(() -> leds.setEndGameWarning(false)));
-
-    pathOverride.addDefaultOption("off", pathingOverrideSupplier = () -> false);
-    pathOverride.addOption("on", pathingOverrideSupplier = () -> true);
-  }
-
-  private Supplier<ReefPosition> getCoralObjective =
+    }
+    
+    private Supplier<ReefPosition> getCoralObjective =
       () ->
           AuxControllerUtil.getCoralObjective(
                   List.of(

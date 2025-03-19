@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -13,10 +14,15 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.FieldConstants;
 import frc.robot.FieldConstants.CoralObjective;
 import frc.robot.FieldConstants.ReefLevel;
 import frc.robot.subsystem.drive.Drive;
+import frc.robot.subsystem.manipulator.Manipulator;
+import frc.robot.subsystem.manipulator.Manipulator.ManipulatorState;
+import frc.robot.subsystem.superstructure.Superstructure;
+import frc.robot.subsystem.superstructure.Superstructure.SuperstructureStates;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.Map;
 
@@ -53,5 +59,14 @@ public class AutoScoreCommands {
                 Rotation2d.kZero));
     Command driveCommand = AutoBuilder.pathfindToPose(desiredRobotPose, PATH_CONSTRAINTS);
     return null;
+  }
+
+  public static Command autoScoreL1(Superstructure superstructure, Manipulator manipulator) {
+    return superstructure.setSuperstructureCommand(() -> SuperstructureStates.TROUGH)
+    .andThen(Commands.waitUntil(superstructure::atSuperStructureGoal))
+    .andThen(manipulator.setManipulatorState(ManipulatorState.SHOOTING_CORAL))
+    .andThen(Commands.waitTime(Seconds.of(1.0)))
+    .andThen(manipulator.setManipulatorState(ManipulatorState.IDLE))
+    .alongWith(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW));
   }
 }

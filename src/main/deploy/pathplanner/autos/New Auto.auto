@@ -1,0 +1,31 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Center Auto Path"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "DriveToReefFace4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AutoScoreL1"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": true
+}

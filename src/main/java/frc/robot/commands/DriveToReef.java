@@ -91,9 +91,12 @@ public class DriveToReef extends DriveToPose {
         drive,
         // goal supplier
         () ->
-            FieldConstants.Reef.centerFaces[reefFace].transformBy(
-                new Transform2d(
-                    reefPoseOffsetX.get(), reefPoseOffsetY.get(), new Rotation2d(Degrees.of(90)))),
+            AllianceFlipUtil.apply(
+                FieldConstants.Reef.centerFaces[reefFace].transformBy(
+                    new Transform2d(
+                        reefPoseOffsetX.get(),
+                        reefPoseOffsetY.get(),
+                        new Rotation2d(Degrees.of(90))))),
         // robot position supplier
         () -> {
           Optional<Pose2d> txPose =
@@ -115,12 +118,12 @@ public class DriveToReef extends DriveToPose {
                               .getPose()
                               .getTranslation()
                               .getDistance(
-                                  FieldConstants.Reef.centerFaces[reefFace]
-                                      .transformBy(
-                                          new Transform2d(
-                                              reefPoseOffsetX.get(),
-                                              reefPoseOffsetY.get(),
-                                              new Rotation2d(Degrees.of(90))))
+                                  AllianceFlipUtil.apply(
+                                          FieldConstants.Reef.centerFaces[reefFace].transformBy(
+                                              new Transform2d(
+                                                  reefPoseOffsetX.get(),
+                                                  reefPoseOffsetY.get(),
+                                                  new Rotation2d(Degrees.of(90)))))
                                       .getTranslation())
                           - minDistanceTagPoseBlend.get())
                       / (maxDistanceTagPoseBlend.get() - minDistanceTagPoseBlend.get()),
