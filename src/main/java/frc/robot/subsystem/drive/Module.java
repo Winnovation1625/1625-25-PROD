@@ -81,7 +81,7 @@ public class Module {
   public void runSetpoint(SwerveModuleState state) {
     // Optimize velocity setpoint
     state.optimize(getAngle());
-    state.cosineScale(inputs.turnAbsolutePosition);
+    state.cosineScale(inputs.turnPosition);
 
     // Apply setpoints
     io.setDriveVelocity(state.speedMetersPerSecond / constants.WheelRadius);
@@ -102,7 +102,7 @@ public class Module {
 
   /** Returns the current turn angle of the module. */
   public Rotation2d getAngle() {
-    return inputs.turnAbsolutePosition;
+    return inputs.turnPosition;
   }
 
   /** Returns the current drive position of the module in meters. */
@@ -143,5 +143,15 @@ public class Module {
   /** Returns the module velocity in rotations/sec (Phoenix native units). */
   public double getFFCharacterizationVelocity() {
     return Units.radiansToRotations(inputs.driveVelocityRadPerSec);
+  }
+
+  public void setSteerPid(
+      double kP, double kI, double kD, double kG, double kS, double kV, double kA) {
+    io.setTurnPID(kP, kI, kD, kG, kS, kV, kA);
+  }
+
+  public void setDrivePid(
+      double kP, double kI, double kD, double kG, double kS, double kV, double kA) {
+    io.setDrivePID(kP, kI, kD, kG, kS, kV, kA);
   }
 }

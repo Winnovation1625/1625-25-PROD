@@ -1,6 +1,7 @@
 package frc.robot.subsystem.superstructure;
 
-import edu.wpi.first.math.util.Units;
+import static edu.wpi.first.units.Units.Seconds;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -26,9 +27,9 @@ public class Superstructure extends SubsystemBase {
       new SuperstructureVisualizer("measured");
 
   private LoggedTunableNumber elevatorThreshold =
-      new LoggedTunableNumber("Superstructure/ElevatorThreshold", Units.inchesToMeters(27.5591));
+      new LoggedTunableNumber("Superstructure/ElevatorThreshold", 0.259);
   private LoggedTunableNumber elevatorAlgaeThreshold =
-      new LoggedTunableNumber("Superstructure/ElevatorAlgaeThreshold", Units.inchesToMeters(40.0));
+      new LoggedTunableNumber("Superstructure/ElevatorAlgaeThreshold", 0.479);
 
   @AutoLogOutput @Getter
   private SuperstructureStates superstructureGoal = SuperstructureStates.STOP;
@@ -145,6 +146,13 @@ public class Superstructure extends SubsystemBase {
                 < (hasAlgaeSupplier.get() ? elevatorAlgaeThreshold.get() : elevatorThreshold.get());
     Supplier<ElevatorState> intermediateState =
         () -> hasAlgaeSupplier.get() ? ElevatorState.ALGAE_CLEARANCE : ElevatorState.STOW;
+    BooleanSupplier comingFromCoralScore =
+        () ->
+            superstructureGoal == SuperstructureStates.CLVL4
+                || superstructureGoal == SuperstructureStates.CLVL3
+                || superstructureGoal == SuperstructureStates.CLVL2
+                || superstructureGoal == SuperstructureStates.ALVL2
+                || superstructureGoal == SuperstructureStates.ALVL3;
     return Commands.either(
         Commands.either( // true, true worst case
             runElevatorToState(intermediateState)
@@ -152,15 +160,16 @@ public class Superstructure extends SubsystemBase {
                 .andThen(runArmToState(() -> to.get().getArmState()))
                 .andThen(Commands.waitUntil(() -> atGoal()))
                 .andThen(runElevatorToState(toElevatorState))
-                .andThen(() -> superstructureGoal = to.get(), this)
-                .withName("Worst Case Superstructure Run"),
+                .andThen(() -> superstructureGoal = to.get())
+                .andThen(Commands.print("Worst Case Superstructure Run")),
             // true, false starting below thresh, but going above
             runElevatorToState(intermediateState)
                 .andThen(Commands.waitUntil(() -> atGoal()))
-                .andThen(runArmToState(() -> to.get().getArmState()))
-                .alongWith(runElevatorToState(toElevatorState))
-                .andThen(() -> superstructureGoal = to.get(), this)
-                .withName("From Under Superstructure Run"),
+                .andThen(
+                    runArmToState(() -> to.get().getArmState())
+                        .alongWith(runElevatorToState(toElevatorState)))
+                .andThen(() -> superstructureGoal = to.get())
+                .andThen(Commands.print("From Under Superstructure Run")),
             goingBelowThreshold),
         Commands.either(
             // false, true above thresh going below
@@ -168,13 +177,21 @@ public class Superstructure extends SubsystemBase {
                 .alongWith(runArmToState(() -> to.get().getArmState()))
                 .andThen(Commands.waitUntil(() -> atGoal()))
                 .andThen(runElevatorToState(toElevatorState))
-                .andThen(() -> superstructureGoal = to.get(), this)
-                .withName("From Above Case Superstructure Run"),
+                .andThen(() -> superstructureGoal = to.get())
+                .andThen(Commands.print("From Above Case Superstructure Run")),
             // false false no issues with threshold
-            runElevatorToState(toElevatorState)
-                .alongWith(runArmToState(() -> to.get().armState))
-                .andThen(() -> superstructureGoal = to.get(), this)
-                .withName("Best Case Superstructure Run"),
+            Commands.either(
+                runArmToState(() -> to.get().armState)
+                    .alongWith(
+                        Commands.waitTime(Seconds.of(0.5))
+                            .andThen(runElevatorToState(toElevatorState)))
+                    .andThen(() -> superstructureGoal = to.get(), this)
+                    .andThen(Commands.print("Best Case Superstructure Run")),
+                runElevatorToState(toElevatorState)
+                    .alongWith(runArmToState(() -> to.get().armState))
+                    .andThen(() -> superstructureGoal = to.get())
+                    .andThen(Commands.print("Best Case Superstructure Run")),
+                comingFromCoralScore),
             goingBelowThreshold),
         currentlyBelowThreshold);
 
@@ -219,8 +236,8 @@ public class Superstructure extends SubsystemBase {
     // }
   }
 
-  private Command runArmToState(Supplier<ArmState> armState) {
-    return Commands.runOnce(() -> arm.setPosition(armState.get().getArmAngle()))
+  public Command runArmToState(Supplier<ArmState> armState) {
+    return Commands.runOnce(() -> arm.setPosition(armState.get()))
         .alongWith(Commands.runOnce(() -> this.armState = armState.get()));
   }
 
@@ -229,9 +246,8 @@ public class Superstructure extends SubsystemBase {
   //       .withName("Superstructure " + goal);
   // }
 
-  private Command runElevatorToState(Supplier<ElevatorState> state) {
-    this.elevatorState = state.get();
-    return Commands.runOnce(() -> elevator.setPosition(state.get().getElevatorHeight()))
+  public Command runElevatorToState(Supplier<ElevatorState> state) {
+    return Commands.runOnce(() -> elevator.setPosition(state.get()))
         .alongWith(Commands.runOnce(() -> elevatorState = state.get()));
   }
 
@@ -249,5 +265,13 @@ public class Superstructure extends SubsystemBase {
 
   public boolean elevatorClearofBumpers() {
     return elevator.getElevatorHeight() > elevatorThreshold.get();
+  }
+
+  public boolean atElevatorGoal() {
+    return elevator.atGoal();
+  }
+
+  public boolean atArmGoal() {
+    return arm.atGoal();
   }
 }

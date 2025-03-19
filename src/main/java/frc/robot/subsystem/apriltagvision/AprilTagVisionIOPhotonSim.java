@@ -38,6 +38,7 @@ public class AprilTagVisionIOPhotonSim extends AprilTagVisionIOPhoton {
     var cameraProperties = new SimCameraProperties();
     cameraProperties.setFPS(50);
     cameraProperties.setCalibration(1600, 1200, new Rotation2d(Units.degreesToRadians(95)));
+
     cameraSim = new PhotonCameraSim(camera, cameraProperties);
     visionSim.addCamera(cameraSim, config.robotToCamera());
   }

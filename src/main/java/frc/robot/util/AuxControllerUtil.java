@@ -23,6 +23,6 @@ public class AuxControllerUtil {
         return i;
       }
     }
-    return -1; // Return -1 if no true value is found
+    return 1; // Return -1 if no true value is found
   }
 }

@@ -27,6 +27,13 @@ public class RobotState {
   //     }
   // }
 
+  private static RobotState instance;
+
+  public static RobotState getInstance() {
+    if (instance == null) instance = new RobotState();
+    return instance;
+  }
+
   public record OdometryObservation(
       SwerveModulePosition[] wheelPositions, Rotation2d gyroAngle, double timestamp) {}
 

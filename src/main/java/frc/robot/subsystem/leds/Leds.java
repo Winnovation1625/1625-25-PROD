@@ -5,6 +5,8 @@ import com.ctre.phoenix.led.CANdle.LEDStripType;
 import com.ctre.phoenix.led.CANdle.VBatOutputMode;
 import com.ctre.phoenix.led.CANdleConfiguration;
 import com.ctre.phoenix.led.RainbowAnimation;
+import com.ctre.phoenix.led.SingleFadeAnimation;
+import com.ctre.phoenix.led.StrobeAnimation;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.util.LoggedTunableNumber;
 import frc.robot.util.VirtualSubsystem;
@@ -21,14 +23,11 @@ public class Leds extends VirtualSubsystem {
   private final CANdle candle;
   private LoggedTunableNumber animationSpeed = new LoggedTunableNumber("LED/AnimationSpeed", 0.25);
   private DoubleSupplier animationBrightness = (() -> DriverStation.isEnabled() ? 0.6 : 0.9);
-  @Setter @Getter private boolean seenNote = false;
-  @Setter @Getter private boolean aligning = false;
-  @Setter @Getter private boolean notePickedUp = false;
-  @Setter @Getter private boolean noteInBot = false;
+  @Setter @Getter private boolean algaeInBot = false;
+  @Setter @Getter private boolean coralInBot = false;
   @Setter @Getter private boolean endGameWarning = false;
-  @Setter @Getter private boolean ampScore = false;
+  @Setter @Getter private boolean whenLinedUp = false;
   @Setter @Getter private boolean lowBattery = false;
-  @Setter @Getter private boolean objectDetectionCam = false;
   @Setter @Getter private Boolean[] aprilTagCams;
   private Boolean[] lastAprilTagCams = new Boolean[] {true, true, true, true};
   private boolean lastObjectDetectionCam = true;
@@ -61,77 +60,98 @@ public class Leds extends VirtualSubsystem {
     candle.animate(
         new RainbowAnimation(
             animationBrightness.getAsDouble(), animationSpeed.get(), LEDS_PER_STRIP, true, 0));
-    // for (int i = 0; i < aprilTagCams.length; i++) {
-    //   if (lastAprilTagCams[i] != aprilTagCams[i]) {
-    //     if (aprilTagCams[i].booleanValue()) {
-    //       if (i == 0) {
-    //         candle.setLEDs(0, 255, 0, 0, 0, 1);
-    //       } else if (i == 1) {
-    //         candle.setLEDs(0, 255, 0, 0, 3, 1);
-    //       } else if (i == 2) {
-    //         candle.setLEDs(0, 255, 0, 0, 7, 1);
-    //       } else {
-    //         candle.setLEDs(0, 255, 0, 0, 4, 1);
-    //       }
-    //     } else {
-    //       if (i == 0) {
-    //         candle.setLEDs(255, 0, 0, 0, 0, 1);
-    //       } else if (i == 1) {
-    //         candle.setLEDs(255, 0, 0, 0, 3, 1);
-    //       } else if (i == 2) {
-    //         candle.setLEDs(255, 0, 0, 0, 7, 1);
-    //       } else {
-    //         candle.setLEDs(255, 0, 0, 0, 4, 1);
-    //       }
-    //       // cams are disconnected
-    //     }
-    //     lastAprilTagCams[i] = aprilTagCams[i];
-    //   }
-    // }
-    // if (objectDetectionCam != lastObjectDetectionCam) {
-    //   if (objectDetectionCam) {
-    //     // cams are good to go
-    //     candle.setLEDs(0, 255, 0, 0, 5, 1);
-    //     candle.setLEDs(0, 255, 0, 0, 6, 1);
-    //   } else {
-    //     // cams are disconnected
-    //     candle.setLEDs(255, 0, 0, 0, 5, 1);
-    //     candle.setLEDs(255, 0, 0, 0, 6, 1);
-    //   }
-    //   lastObjectDetectionCam = objectDetectionCam;
-    // }
+    for (int i = 0; i < aprilTagCams.length; i++) {
+      if (lastAprilTagCams[i] != aprilTagCams[i]) {
+        if (aprilTagCams[i].booleanValue()) {
+          if (i == 0) {
+            candle.setLEDs(0, 255, 0, 0, 0, 1);
+          } else if (i == 1) {
+            candle.setLEDs(0, 255, 0, 0, 3, 1);
+          } else if (i == 2) {
+            candle.setLEDs(0, 255, 0, 0, 7, 1);
+          } else {
+            candle.setLEDs(0, 255, 0, 0, 4, 1);
+          }
+        } else {
+          if (i == 0) {
+            candle.setLEDs(255, 0, 0, 0, 0, 1);
+          } else if (i == 1) {
+            candle.setLEDs(255, 0, 0, 0, 3, 1);
+          } else if (i == 2) {
+            candle.setLEDs(255, 0, 0, 0, 7, 1);
+          } else {
+            candle.setLEDs(255, 0, 0, 0, 4, 1);
+          }
+          // cams are disconnected
+        }
+        lastAprilTagCams[i] = aprilTagCams[i];
+      }
+    }
 
-    // if (DriverStation.isEStopped()) {
-    //   // solid red
-    //   candle.setLEDs(255, 0, 0);
-    // } else if (lowBattery) {
-    //   for (int i = 0; i < NUM_LED_STRIPS; i++) {
-    //     // low battery, red fading
-    //     candle.animate(
-    //         new SingleFadeAnimation(
-    //             255,
-    //             0,
-    //             0,
-    //             0,
-    //             animationSpeed.get(),
-    //             LEDS_PER_STRIP,
-    //             LEDS_PER_STRIP * i + HARDWARE_LEDS),
-    //         i);
-    //   }
-    // } else if (endGameWarning) {
-    //   for (int i = 0; i < NUM_LED_STRIPS; i++) {
-    //     // flash red
-    //     candle.animate(
-    //         new StrobeAnimation(
-    //             255,
-    //             0,
-    //             255,
-    //             0,
-    //             animationSpeed.get(),
-    //             LEDS_PER_STRIP,
-    //             LEDS_PER_STRIP * i + HARDWARE_LEDS),
-    //         i);
-    //   }
+    if (DriverStation.isEStopped() && DriverStation.isTeleop()) {
+      // solid red
+      candle.setLEDs(255, 0, 0);
+    } else if (DriverStation.isAutonomous() && DriverStation.isEStopped()) {
+      if (DriverStation.isEStopped()) {
+        // solid yellow
+        candle.setLEDs(255, 255, 0);
+      }
+    } else if (lowBattery) {
+      for (int i = 0; i < NUM_LED_STRIPS; i++) {
+        // low battery, red fading
+        candle.animate(
+            new SingleFadeAnimation(
+                255,
+                0,
+                0,
+                0,
+                animationSpeed.get(),
+                LEDS_PER_STRIP,
+                LEDS_PER_STRIP * i + HARDWARE_LEDS),
+            i);
+      }
+    } else if (endGameWarning) {
+      for (int i = 0; i < NUM_LED_STRIPS; i++) {
+        // flash red
+        candle.animate(
+            new StrobeAnimation(
+                255,
+                0,
+                255,
+                0,
+                animationSpeed.get(),
+                LEDS_PER_STRIP,
+                LEDS_PER_STRIP * i + HARDWARE_LEDS),
+            i);
+      }
+    } else if (whenLinedUp) {
+      for (int i = 0; i < NUM_LED_STRIPS; i++) {
+        // Strobe Blue
+        candle.animate(
+            new StrobeAnimation(
+                0,
+                0,
+                255,
+                0,
+                animationSpeed.get(),
+                LEDS_PER_STRIP,
+                LEDS_PER_STRIP * i + HARDWARE_LEDS),
+            i);
+      }
+    } else if (coralInBot || algaeInBot) {
+      for (int i = 0; i < NUM_LED_STRIPS; i++) {
+        // Solid green
+        candle.animate(
+            new RainbowAnimation(
+                animationBrightness.getAsDouble(),
+                animationSpeed.get(),
+                LEDS_PER_STRIP,
+                false,
+                LEDS_PER_STRIP * i + HARDWARE_LEDS),
+            i);
+      }
+    }
+
     // } else if (ampScore) {
     //   for (int i = 0; i < NUM_LED_STRIPS; i++) {
     //     // amp score, blue chaser

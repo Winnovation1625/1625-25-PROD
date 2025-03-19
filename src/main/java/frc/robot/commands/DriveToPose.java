@@ -11,6 +11,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.subsystem.drive.Drive;
+import frc.robot.subsystem.leds.Leds;
 import frc.robot.util.GeomUtil;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.DoubleSupplier;
@@ -19,6 +20,7 @@ import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
 public class DriveToPose extends Command {
+  private Leds leds = Leds.getInstance();
   private static final LoggedTunableNumber drivekP = new LoggedTunableNumber("DriveToPose/DrivekP");
   private static final LoggedTunableNumber drivekD = new LoggedTunableNumber("DriveToPose/DrivekD");
   private static final LoggedTunableNumber thetakP = new LoggedTunableNumber("DriveToPose/ThetakP");
@@ -45,12 +47,12 @@ public class DriveToPose extends Command {
   static {
     drivekP.initDefault(1.5);
     drivekD.initDefault(0.0);
-    thetakP.initDefault(8.0);
+    thetakP.initDefault(4.0);
     thetakD.initDefault(0.0);
-    driveMaxVelocity.initDefault(3.8);
-    driveMaxAcceleration.initDefault(3.0);
+    driveMaxVelocity.initDefault(2);
+    driveMaxAcceleration.initDefault(1.0);
     thetaMaxVelocity.initDefault(Units.degreesToRadians(360.0));
-    thetaMaxAcceleration.initDefault(8.0);
+    thetaMaxAcceleration.initDefault(4.0);
     driveTolerance.initDefault(0.01);
     thetaTolerance.initDefault(Units.degreesToRadians(1.0));
     ffMinRadius.initDefault(0.05);
@@ -229,6 +231,9 @@ public class DriveToPose extends Command {
   @Override
   public void end(boolean interrupted) {
     drive.stop();
+    if (interrupted == false) {
+      leds.setWhenLinedUp(true);
+    }
     running = false;
     // Clear logs
     Logger.recordOutput("DriveToPose/Setpoint", new Pose2d[] {});

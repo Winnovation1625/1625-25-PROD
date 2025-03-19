@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import frc.robot.FieldConstants;
 import frc.robot.subsystem.apriltagvision.AprilTagVisionIO.PoseObservationType;
+import frc.robot.subsystem.leds.Leds;
 import frc.robot.util.GeomUtil;
 import frc.robot.util.VirtualSubsystem;
 import java.util.LinkedList;
@@ -44,6 +45,7 @@ public class AprilTagVision extends VirtualSubsystem {
   private final AprilTagVisionIOInputsAutoLogged[] inputs;
   private final Alert[] disconnectedAlerts;
   private final Supplier<Pose2d> poseSupplier;
+  private Leds leds = Leds.getInstance();
   // Initialize logging values
   List<Pose3d> allTagPoses = new LinkedList<>();
   List<Pose3d> allRobotPoses = new LinkedList<>();
@@ -92,10 +94,13 @@ public class AprilTagVision extends VirtualSubsystem {
       Logger.processInputs("Vision/" + CAMERA_CONFIGS.get(i).cameraName(), inputs[i]);
     }
 
+    Boolean[] cameras = new Boolean[io.length];
+
     // Loop over cameras
     for (int cameraIndex = 0; cameraIndex < io.length; cameraIndex++) {
       // Update disconnected alert
       disconnectedAlerts[cameraIndex].set(!inputs[cameraIndex].connected);
+      cameras[cameraIndex] = inputs[cameraIndex].connected;
 
       // Add tag poses
       for (int tagId : inputs[cameraIndex].tagIds) {
@@ -193,6 +198,8 @@ public class AprilTagVision extends VirtualSubsystem {
       robotPosesAccepted.clear();
       robotPosesRejected.clear();
     }
+
+    leds.setAprilTagCams(cameras);
 
     // Log summary data
     Logger.recordOutput(

@@ -15,8 +15,8 @@ public class AprilTagVisionConstants {
 
   // Standard deviation baselines, for 1 meter distance and 1 tag
   // (Adjusted automatically based on distance and # of tags)
-  public static final double LINEAR_STD_DEV_BASELINE = 0.02; // Meters
-  public static final double ANGULAR_STD_DEV_BASELINE = 0.06; // Radians
+  public static final double LINEAR_STD_DEV_BASELINE = 0.01; // Meters
+  public static final double ANGULAR_STD_DEV_BASELINE = 0.005; // Radians
 
   // public static final double ambiguityThreshold = 0.4;
   // public static final double targetLogTimeSecs = 0.1;
@@ -33,40 +33,38 @@ public class AprilTagVisionConstants {
       List.of(
           new CameraConfig(
               0,
-              "Front Right",
+              "Battery_Support_Camera_OV2311",
               new Transform3d(
-                  Units.inchesToMeters(10.340901),
-                  Units.inchesToMeters(-12.659099),
-                  Units.inchesToMeters(8),
-                  new Rotation3d(0, Units.degreesToRadians(-35), Units.degreesToRadians(-135))),
+                  Units.inchesToMeters(-0.35),
+                  Units.inchesToMeters(-12),
+                  Units.inchesToMeters(13.248),
+                  new Rotation3d(0, 0, Units.degreesToRadians(-125))),
               1.0),
           new CameraConfig(
               1,
-              "Back Right",
+              "Elevator_Support_OV2311",
               new Transform3d(
-                  Units.inchesToMeters(-10.340901),
-                  Units.inchesToMeters(-12.659099),
-                  Units.inchesToMeters(8),
-                  new Rotation3d(0, Units.degreesToRadians(-25), Units.degreesToRadians(-95))),
+                  Units.inchesToMeters(-12.724),
+                  Units.inchesToMeters(-10.813),
+                  Units.inchesToMeters(8.156),
+                  new Rotation3d(0, Units.degreesToRadians(-30), Units.degreesToRadians(-120))),
               1.0),
           new CameraConfig(
-              0,
-              "Back Left",
+              2,
+              "Top_Elevator_OV2311",
               new Transform3d(
-                  Units.inchesToMeters(-10.340901),
-                  Units.inchesToMeters(12.659099),
-                  Units.inchesToMeters(8),
-                  new Rotation3d(0, Units.degreesToRadians(-32), Units.degreesToRadians(85))),
+                  Units.inchesToMeters(-1.696),
+                  Units.inchesToMeters(0),
+                  Units.inchesToMeters(31.603),
+                  new Rotation3d(0, Units.degreesToRadians(-30), Units.degreesToRadians(0))),
               0.6),
           new CameraConfig(
-              0,
-              "Back Center",
+              3,
+              "Elevator_Cage_OV2311",
               new Transform3d(
-                  Units.inchesToMeters(0),
-                  Units.inchesToMeters(-0.375),
-                  Units.inchesToMeters(30.25),
-                  new Rotation3d(0, Units.degreesToRadians(-15), Units.degreesToRadians(180))),
+                  Units.inchesToMeters(-12.858),
+                  Units.inchesToMeters(10.798),
+                  Units.inchesToMeters(8.158),
+                  new Rotation3d(0, Units.degreesToRadians(-32), Units.degreesToRadians(85))),
               0.6));
-  // new CameraConfig(0, "front left", new Transform3d(Units.inchesToMeters(10.319),
-  // Units.inchesToMeters(-12.686), Units.inchesToMeters(8), new Rotation3d(0, 0, 0)), 1.0));
 }

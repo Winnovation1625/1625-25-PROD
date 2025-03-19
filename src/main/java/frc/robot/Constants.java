@@ -42,6 +42,20 @@ public final class Constants {
           .steerBackRight(10)
           .steerEncoderBackRight(11)
           .build();
+  public static final SuperstructureCANIds SUPERSTRUCTURE_CAN_IDS =
+      SuperstructureCANIds.builder()
+          .elevatorLeft(7)
+          .elevatorRight(6)
+          .armMotor(14)
+          .armEncoder(44)
+          .build();
+  public static final ManipulatorCANIds MANIPULATOR_CAN_IDS =
+      ManipulatorCANIds.builder()
+          .manipulatorMotor(15)
+          .algaeCANRange(42)
+          .coralBackCANRange(41)
+          .coralFrontCANRange(43)
+          .build();
 
   public static enum Mode {
     /** Running on a real robot. */
