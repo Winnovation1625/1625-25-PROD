@@ -142,6 +142,14 @@ public class RobotContainer {
                 new AprilTagVisionIOPhoton(
                     AprilTagVisionConstants.CAMERA_CONFIGS.get(1),
                     drive::getRotation,
+                    drive::getPose),
+                new AprilTagVisionIOPhoton(
+                    AprilTagVisionConstants.CAMERA_CONFIGS.get(2),
+                    drive::getRotation,
+                    drive::getPose),
+                new AprilTagVisionIOPhoton(
+                    AprilTagVisionConstants.CAMERA_CONFIGS.get(3),
+                    drive::getRotation,
                     drive::getPose));
         manipulator =
             new Manipulator(new ManipulatorIOKraken(), new ManipulatorSensorsIOCANrange());
