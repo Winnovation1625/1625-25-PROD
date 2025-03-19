@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import frc.robot.subsystem.leds.Leds;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -19,6 +20,7 @@ import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
 public class DriveToPose extends Command {
+  private Leds leds = Leds.getInstance();
   private static final LoggedTunableNumber drivekP = new LoggedTunableNumber("DriveToPose/DrivekP");
   private static final LoggedTunableNumber drivekD = new LoggedTunableNumber("DriveToPose/DrivekD");
   private static final LoggedTunableNumber thetakP = new LoggedTunableNumber("DriveToPose/ThetakP");
@@ -229,6 +231,9 @@ public class DriveToPose extends Command {
   @Override
   public void end(boolean interrupted) {
     drive.stop();
+    if(interrupted == false) {
+        leds.setWhenLinedUp(true);
+    }
     running = false;
     // Clear logs
     Logger.recordOutput("DriveToPose/Setpoint", new Pose2d[] {});

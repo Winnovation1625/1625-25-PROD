@@ -48,26 +48,25 @@ public class AprilTagVisionConstants {
                   Units.inchesToMeters(-10.813),
                   Units.inchesToMeters(8.156),
                   new Rotation3d(0, Units.degreesToRadians(-30), Units.degreesToRadians(-120))),
-              1.0));
-  //   new CameraConfig(
-  //       0,
-  //       "Back Left",
-  //       new Transform3d(
-  //           Units.inchesToMeters(-10.340901),
-  //           Units.inchesToMeters(12.659099),
-  //           Units.inchesToMeters(8),
-  //           new Rotation3d(0, Units.degreesToRadians(-32), Units.degreesToRadians(85))),
-  //       0.6),
-  //   new CameraConfig(
-  //       0,
-  //       "Back Center",
-  //       new Transform3d(
-  //           Units.inchesToMeters(0),
-  //           Units.inchesToMeters(-0.375),
-  //           Units.inchesToMeters(30.25),
-  //           new Rotation3d(0, Units.degreesToRadians(-15), Units.degreesToRadians(180))),
-  //       0.6)
-  ;
+              1.0),
+          new CameraConfig(
+              2,
+              "Top_Elevator_OV2311",
+              new Transform3d(
+                  Units.inchesToMeters(-1.696),
+                  Units.inchesToMeters(0),
+                  Units.inchesToMeters(31.603),
+                  new Rotation3d(0, Units.degreesToRadians(-30), Units.degreesToRadians(0))),
+              0.6),
+          new CameraConfig(
+              3,
+              "Elevator_Cage_OV2311",
+              new Transform3d(
+                  Units.inchesToMeters(-12.858),
+                  Units.inchesToMeters(-10.798),
+                  Units.inchesToMeters(-8.158),
+                  new Rotation3d(0, Units.degreesToRadians(-32), Units.degreesToRadians(85))),
+              0.6));
   // new CameraConfig(0, "front left", new Transform3d(Units.inchesToMeters(10.319),
   // Units.inchesToMeters(-12.686), Units.inchesToMeters(8), new Rotation3d(0, 0, 0)), 1.0));
 }
