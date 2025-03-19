@@ -91,14 +91,12 @@ public class Leds extends VirtualSubsystem {
     if (DriverStation.isEStopped() && DriverStation.isTeleop()) {
       // solid red
       candle.setLEDs(255, 0, 0);
-    } 
-    else if(DriverStation.isAutonomous() && DriverStation.isEStopped()){
+    } else if (DriverStation.isAutonomous() && DriverStation.isEStopped()) {
       if (DriverStation.isEStopped()) {
-      // solid yellow
-      candle.setLEDs(255, 255, 0);
+        // solid yellow
+        candle.setLEDs(255, 255, 0);
       }
-    }
-    else if (lowBattery) {
+    } else if (lowBattery) {
       for (int i = 0; i < NUM_LED_STRIPS; i++) {
         // low battery, red fading
         candle.animate(
@@ -126,12 +124,11 @@ public class Leds extends VirtualSubsystem {
                 LEDS_PER_STRIP * i + HARDWARE_LEDS),
             i);
       }
-    } 
-    else if(whenLinedUp){
+    } else if (whenLinedUp) {
       for (int i = 0; i < NUM_LED_STRIPS; i++) {
         // Strobe Blue
         candle.animate(
-          new StrobeAnimation(
+            new StrobeAnimation(
                 0,
                 0,
                 255,
@@ -141,8 +138,7 @@ public class Leds extends VirtualSubsystem {
                 LEDS_PER_STRIP * i + HARDWARE_LEDS),
             i);
       }
-    }
-    else if (coralInBot || algaeInBot) {
+    } else if (coralInBot || algaeInBot) {
       for (int i = 0; i < NUM_LED_STRIPS; i++) {
         // Solid green
         candle.animate(
@@ -155,7 +151,6 @@ public class Leds extends VirtualSubsystem {
             i);
       }
     }
-    
 
     // } else if (ampScore) {
     //   for (int i = 0; i < NUM_LED_STRIPS; i++) {

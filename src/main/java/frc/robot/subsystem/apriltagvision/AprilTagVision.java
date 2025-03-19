@@ -96,7 +96,6 @@ public class AprilTagVision extends VirtualSubsystem {
 
     Boolean[] cameras = new Boolean[io.length];
 
-
     // Loop over cameras
     for (int cameraIndex = 0; cameraIndex < io.length; cameraIndex++) {
       // Update disconnected alert
