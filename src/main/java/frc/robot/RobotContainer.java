@@ -41,6 +41,7 @@ import frc.robot.subsystem.climber.Climber;
 import frc.robot.subsystem.climber.ClimberIO;
 import frc.robot.subsystem.climber.ClimberIOServo;
 import frc.robot.subsystem.climber.ClimberIOSim;
+import frc.robot.subsystem.climber.Climber.ClimberState;
 import frc.robot.subsystem.drive.Drive;
 import frc.robot.subsystem.drive.DriveConstants;
 import frc.robot.subsystem.drive.GyroIO;
@@ -307,6 +308,17 @@ public class RobotContainer {
         }
       };
 
+    private Supplier<Boolean> AuxAllowsClimb =
+        () -> {
+           if(auxController.getRawButton(24)){
+            return true;
+           }
+           else{
+            return false;
+           }
+        
+        };
+
   private Supplier<SuperstructureStates> getAlgaeScore =
       () ->
           auxController.getRawButton(23)
@@ -530,12 +542,21 @@ public class RobotContainer {
                 .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
     controller
         .a()
+        .and(() -> superstructure.getSuperstructureGoal() != SuperstructureStates.STOW)
         .whileTrue(
             Commands.either(
                 manipulator.setManipulatorState(ManipulatorState.SHOOTING_ALGAE),
                 manipulator.setManipulatorState(ManipulatorState.SHOOTING_CORAL),
                 manipulator::hasAlgae));
     controller.a().onFalse(manipulator.setManipulatorState(ManipulatorState.IDLE));
+
+    controller
+        .b()
+        .and(() -> superstructure.atSuperStructureGoal())
+        .onTrue(
+            superstructure
+                .setSuperstructureCommand(() -> SuperstructureStates.STOW)
+                .alongWith(manipulator.setManipulatorState(ManipulatorState.IDLE)));
 
     controller
         .rightBumper()
@@ -588,6 +609,16 @@ public class RobotContainer {
                         .setSuperstructureCommand(() -> SuperstructureStates.STOW)
                         .alongWith(manipulator.setManipulatorState(ManipulatorState.IDLE))));
     controller.x().whileTrue(new DriveToReef(drive, getCoralObjective));
+
+    controller
+        .start()
+        .and(() -> AuxAllowsClimb.get())
+        .and(() -> superstructure.getSuperstructureGoal() == SuperstructureStates.STOW)
+        .onTrue(
+            superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)
+            .andThen(
+                climber.runClimber(ClimberState.RELEASE)
+            ));
     // controller
     //     .leftTrigger()
     //     .and(() -> manipulator.getGamepieceState() == Manipulator.GamepieceState.ALGAE_IN_CLAW)

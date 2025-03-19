@@ -60,38 +60,45 @@ public class Leds extends VirtualSubsystem {
     candle.animate(
         new RainbowAnimation(
             animationBrightness.getAsDouble(), animationSpeed.get(), LEDS_PER_STRIP, true, 0));
-    // for (int i = 0; i < aprilTagCams.length; i++) {
-    //   if (lastAprilTagCams[i] != aprilTagCams[i]) {
-    //     if (aprilTagCams[i].booleanValue()) {
-    //       if (i == 0) {
-    //         candle.setLEDs(0, 255, 0, 0, 0, 1);
-    //       } else if (i == 1) {
-    //         candle.setLEDs(0, 255, 0, 0, 3, 1);
-    //       } else if (i == 2) {
-    //         candle.setLEDs(0, 255, 0, 0, 7, 1);
-    //       } else {
-    //         candle.setLEDs(0, 255, 0, 0, 4, 1);
-    //       }
-    //     } else {
-    //       if (i == 0) {
-    //         candle.setLEDs(255, 0, 0, 0, 0, 1);
-    //       } else if (i == 1) {
-    //         candle.setLEDs(255, 0, 0, 0, 3, 1);
-    //       } else if (i == 2) {
-    //         candle.setLEDs(255, 0, 0, 0, 7, 1);
-    //       } else {
-    //         candle.setLEDs(255, 0, 0, 0, 4, 1);
-    //       }
-    //       // cams are disconnected
-    //     }
-    //     lastAprilTagCams[i] = aprilTagCams[i];
-    //   }
-    // }
+    for (int i = 0; i < aprilTagCams.length; i++) {
+      if (lastAprilTagCams[i] != aprilTagCams[i]) {
+        if (aprilTagCams[i].booleanValue()) {
+          if (i == 0) {
+            candle.setLEDs(0, 255, 0, 0, 0, 1);
+          } else if (i == 1) {
+            candle.setLEDs(0, 255, 0, 0, 3, 1);
+          } else if (i == 2) {
+            candle.setLEDs(0, 255, 0, 0, 7, 1);
+          } else {
+            candle.setLEDs(0, 255, 0, 0, 4, 1);
+          }
+        } else {
+          if (i == 0) {
+            candle.setLEDs(255, 0, 0, 0, 0, 1);
+          } else if (i == 1) {
+            candle.setLEDs(255, 0, 0, 0, 3, 1);
+          } else if (i == 2) {
+            candle.setLEDs(255, 0, 0, 0, 7, 1);
+          } else {
+            candle.setLEDs(255, 0, 0, 0, 4, 1);
+          }
+          // cams are disconnected
+        }
+        lastAprilTagCams[i] = aprilTagCams[i];
+      }
+    }
 
-    if (DriverStation.isEStopped()) {
+    if (DriverStation.isEStopped() && DriverStation.isTeleop()) {
       // solid red
       candle.setLEDs(255, 0, 0);
-    } else if (lowBattery) {
+    } 
+    else if(DriverStation.isAutonomous() && DriverStation.isEStopped()){
+      if (DriverStation.isEStopped()) {
+      // solid yellow
+      candle.setLEDs(255, 255, 0);
+      }
+    }
+    else if (lowBattery) {
       for (int i = 0; i < NUM_LED_STRIPS; i++) {
         // low battery, red fading
         candle.animate(
@@ -119,9 +126,25 @@ public class Leds extends VirtualSubsystem {
                 LEDS_PER_STRIP * i + HARDWARE_LEDS),
             i);
       }
-    } else if (coralInBot) {
+    } 
+    else if(whenLinedUp){
       for (int i = 0; i < NUM_LED_STRIPS; i++) {
-        // Solid Green
+        // Strobe Blue
+        candle.animate(
+          new StrobeAnimation(
+                0,
+                0,
+                255,
+                0,
+                animationSpeed.get(),
+                LEDS_PER_STRIP,
+                LEDS_PER_STRIP * i + HARDWARE_LEDS),
+            i);
+      }
+    }
+    else if (coralInBot || algaeInBot) {
+      for (int i = 0; i < NUM_LED_STRIPS; i++) {
+        // Solid green
         candle.animate(
             new RainbowAnimation(
                 animationBrightness.getAsDouble(),
@@ -132,6 +155,8 @@ public class Leds extends VirtualSubsystem {
             i);
       }
     }
+    
+
     // } else if (ampScore) {
     //   for (int i = 0; i < NUM_LED_STRIPS; i++) {
     //     // amp score, blue chaser
