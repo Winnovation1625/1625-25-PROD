@@ -11,7 +11,7 @@ public class ClimberIOServo implements ClimberIO {
   private Servo servo;
 
   public ClimberIOServo() {
-    servo = new Servo(0);
+    servo = new Servo(9);
   }
 
   @Override
@@ -22,7 +22,6 @@ public class ClimberIOServo implements ClimberIO {
   @Override
   public void setRelease(DoubleSupplier angle) {
 
-    servo.setAngle(Units.radiansToDegrees(hookReleaseHomeAngleRads));
-    servo.setAngle(Units.radiansToDegrees(hookReleaseHomeAngleRads));
+    servo.setAngle(Units.radiansToDegrees(angle.getAsDouble()));
   }
 }
