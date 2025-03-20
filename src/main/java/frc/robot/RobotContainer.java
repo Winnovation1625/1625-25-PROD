@@ -13,11 +13,11 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Seconds;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -71,6 +71,7 @@ import frc.robot.subsystem.superstructure.arm.ArmIOSim;
 import frc.robot.subsystem.superstructure.elevator.Elevator;
 import frc.robot.subsystem.superstructure.elevator.ElevatorIO;
 import frc.robot.subsystem.superstructure.elevator.ElevatorIOKraken;
+import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.AuxControllerUtil;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.List;
@@ -81,7 +82,6 @@ import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /**
@@ -191,11 +191,11 @@ public class RobotContainer {
                 new AprilTagVisionIOPhotonSim(
                     AprilTagVisionConstants.CAMERA_CONFIGS.get(2),
                     drive::getRotation,
-                    driveSimulation::getSimulatedDriveTrainPose),
-                new AprilTagVisionIOPhotonSim(
-                    AprilTagVisionConstants.CAMERA_CONFIGS.get(3),
-                    drive::getRotation,
                     driveSimulation::getSimulatedDriveTrainPose));
+        // new AprilTagVisionIOPhotonSim(
+        //     AprilTagVisionConstants.CAMERA_CONFIGS.get(3),
+        //     drive::getRotation,
+        //     driveSimulation::getSimulatedDriveTrainPose));
         manipulator = new Manipulator(new ManipulatorIOSim(), new ManipulatorSensorIOSim());
         climber = new Climber(new ClimberIOSim());
         break;
@@ -233,45 +233,46 @@ public class RobotContainer {
     superstructure = new Superstructure(arm, elevator, manipulator::hasAlgae);
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
-    NamedCommands.registerCommand("AutoScoreL1", AutoScoreCommands.autoScoreL1(superstructure, manipulator));
-    NamedCommands.registerCommand("DriveToReefFace4", new DriveToReef(drive, 4));
+    NamedCommands.registerCommand(
+        "AutoScoreL1", AutoScoreCommands.autoScoreL1(superstructure, manipulator));
+    NamedCommands.registerCommand("DriveToReefFace4", new DriveToReef(drive, 4, true));
     // Set up SysId routines
-    configureSysId();    
-    
-        // Configure the button bindings
-        configureButtonBindings();
-    
-        new Trigger(
-                () ->
-                    DriverStation.isTeleopEnabled()
-                        && DriverStation.getMatchTime() > 0
-                        && DriverStation.getMatchTime() <= Math.round(endgameAlert1.get()))
-            .onTrue(
-                controllerRumbleCommand()
-                    .withTimeout(0.5)
-                    .beforeStarting(() -> leds.setEndGameWarning(true))
-                    .finallyDo(() -> leds.setEndGameWarning(false)));
-    
-        new Trigger(
-                () ->
-                    DriverStation.isTeleopEnabled()
-                        && DriverStation.getMatchTime() > 0
-                        && DriverStation.getMatchTime() <= Math.round(endgameAlert2.get()))
-            .onTrue(
-                controllerRumbleCommand()
-                    .withTimeout(0.2)
-                    .andThen(Commands.waitSeconds(0.1))
-                    .repeatedly()
-                    .withTimeout(0.9) // Rumble three times
-                    .beforeStarting(() -> leds.setEndGameWarning(true))
-                    .finallyDo(() -> leds.setEndGameWarning(false)));
-    
-        pathOverride.addDefaultOption("off", pathingOverrideSupplier = () -> false);
-        pathOverride.addOption("on", pathingOverrideSupplier = () -> true);
-      }
-    
-    private void configureSysId() {
-        autoChooser.addOption(
+    configureSysId();
+
+    // Configure the button bindings
+    configureButtonBindings();
+
+    new Trigger(
+            () ->
+                DriverStation.isTeleopEnabled()
+                    && DriverStation.getMatchTime() > 0
+                    && DriverStation.getMatchTime() <= Math.round(endgameAlert1.get()))
+        .onTrue(
+            controllerRumbleCommand()
+                .withTimeout(0.5)
+                .beforeStarting(() -> leds.setEndGameWarning(true))
+                .finallyDo(() -> leds.setEndGameWarning(false)));
+
+    new Trigger(
+            () ->
+                DriverStation.isTeleopEnabled()
+                    && DriverStation.getMatchTime() > 0
+                    && DriverStation.getMatchTime() <= Math.round(endgameAlert2.get()))
+        .onTrue(
+            controllerRumbleCommand()
+                .withTimeout(0.2)
+                .andThen(Commands.waitSeconds(0.1))
+                .repeatedly()
+                .withTimeout(0.9) // Rumble three times
+                .beforeStarting(() -> leds.setEndGameWarning(true))
+                .finallyDo(() -> leds.setEndGameWarning(false)));
+
+    pathOverride.addDefaultOption("off", pathingOverrideSupplier = () -> false);
+    pathOverride.addOption("on", pathingOverrideSupplier = () -> true);
+  }
+
+  private void configureSysId() {
+    autoChooser.addOption(
         "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
     autoChooser.addOption(
         "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
@@ -285,9 +286,9 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-    }
-    
-    private Supplier<ReefPosition> getCoralObjective =
+  }
+
+  private Supplier<ReefPosition> getCoralObjective =
       () ->
           AuxControllerUtil.getCoralObjective(
                   List.of(
@@ -345,6 +346,22 @@ public class RobotContainer {
         }
       };
 
+  private Rotation2d getHumanPlayerAngle() {
+    if ((drive.getPose().getY() > FieldConstants.fieldWidth / 2 && AllianceFlipUtil.shouldFlip())
+        || (drive.getPose().getY() < FieldConstants.fieldWidth / 2
+            && !AllianceFlipUtil.shouldFlip())) {
+      return new Rotation2d(Degrees.of(-130));
+    } else if ((drive.getPose().getY() < FieldConstants.fieldWidth / 2
+            && AllianceFlipUtil.shouldFlip())
+        || (drive.getPose().getY() > FieldConstants.fieldWidth / 2
+            && !AllianceFlipUtil.shouldFlip())) {
+      return new Rotation2d(Degrees.of(125));
+    } else {
+      return new Rotation2d(Degrees.of(0));
+    }
+  }
+  ;
+
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
@@ -362,14 +379,14 @@ public class RobotContainer {
 
     // TODO: Reuse this method to lock onto the human player station
     // Lock to 0° when A button is held
-    // controller
-    //     .a()
-    //     .whileTrue(
-    //         DriveCommands.joystickDriveAtAngle(
-    //             drive,
-    //             () -> -controller.getLeftY(),
-    //             () -> -controller.getLeftX(),
-    //             () -> new Rotation2d()));
+    controller
+        .y()
+        .whileTrue(
+            DriveCommands.joystickDriveAtAngle(
+                drive,
+                () -> -controller.getLeftY(),
+                () -> -controller.getLeftX(),
+                this::getHumanPlayerAngle));
 
     // Reset gyro / odometry
     final Runnable resetGyro =

@@ -86,7 +86,7 @@ public class DriveToReef extends DriveToPose {
         });
   }
 
-  public DriveToReef(Drive drive, int reefFace) {
+  public DriveToReef(Drive drive, int reefFace, boolean isCoral) {
     super(
         drive,
         // goal supplier
@@ -96,7 +96,9 @@ public class DriveToReef extends DriveToPose {
                     new Transform2d(
                         reefPoseOffsetX.get(),
                         reefPoseOffsetY.get(),
-                        new Rotation2d(Degrees.of(90))))),
+                        isCoral
+                            ? new Rotation2d(Degrees.of(-90))
+                            : new Rotation2d(Degrees.of(90))))),
         // robot position supplier
         () -> {
           Optional<Pose2d> txPose =
@@ -123,7 +125,9 @@ public class DriveToReef extends DriveToPose {
                                               new Transform2d(
                                                   reefPoseOffsetX.get(),
                                                   reefPoseOffsetY.get(),
-                                                  new Rotation2d(Degrees.of(90)))))
+                                                  isCoral
+                                                      ? new Rotation2d(Degrees.of(-90))
+                                                      : new Rotation2d(Degrees.of(90)))))
                                       .getTranslation())
                           - minDistanceTagPoseBlend.get())
                       / (maxDistanceTagPoseBlend.get() - minDistanceTagPoseBlend.get()),

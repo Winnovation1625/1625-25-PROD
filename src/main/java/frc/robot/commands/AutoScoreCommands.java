@@ -62,11 +62,15 @@ public class AutoScoreCommands {
   }
 
   public static Command autoScoreL1(Superstructure superstructure, Manipulator manipulator) {
-    return superstructure.setSuperstructureCommand(() -> SuperstructureStates.TROUGH)
-    .andThen(Commands.waitUntil(superstructure::atSuperStructureGoal))
-    .andThen(manipulator.setManipulatorState(ManipulatorState.SHOOTING_CORAL))
-    .andThen(Commands.waitTime(Seconds.of(1.0)))
-    .andThen(manipulator.setManipulatorState(ManipulatorState.IDLE))
-    .alongWith(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW));
+    return superstructure
+        .setSuperstructureCommand(() -> SuperstructureStates.TROUGH)
+        .andThen(Commands.waitUntil(superstructure::atSuperStructureGoal))
+        .andThen(manipulator.setManipulatorState(ManipulatorState.SHOOTING_CORAL))
+        .andThen(Commands.waitTime(Seconds.of(1.0)))
+        .andThen(
+            manipulator
+                .setManipulatorState(ManipulatorState.IDLE)
+                .alongWith(
+                    superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
   }
 }

@@ -209,7 +209,7 @@ public class FieldConstants {
 
   public static final double aprilTagWidth = Units.inchesToMeters(6.50);
   public static final int aprilTagCount = 22;
-  public static final AprilTagLayoutType defaultAprilTagType = AprilTagLayoutType.RED_REEF;
+  public static final AprilTagLayoutType defaultAprilTagType = AprilTagLayoutType.NO_BARGE;
 
   @Getter
   public enum AprilTagLayoutType {

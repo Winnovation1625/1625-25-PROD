@@ -80,12 +80,16 @@ public class Manipulator extends SubsystemBase {
       if (prevManipulatorState == ManipulatorState.STAGING_CORAL) {
         manipulatorState = ManipulatorState.IDLE;
       }
-      Leds.getInstance().setCoralInBot(true);
-      Leds.getInstance().setAlgaeInBot(false);
+      if (sensorInputs.isFrontCoralDetected == true) {
+        Leds.getInstance().setAlgaeInBot(false);
+        Leds.getInstance().setCoralInBot(true);
+      }
     }
 
     if (!sensorInputs.isFrontCoralDetected && !sensorInputs.isBackCoralDetected) {
       gamepieceState = GamepieceState.NONE;
+      Leds.getInstance().setCoralInBot(false);
+      Leds.getInstance().setAlgaeInBot(false);
     }
 
     if (sensorInputs.isAlgaeDetected == true) {
@@ -93,8 +97,10 @@ public class Manipulator extends SubsystemBase {
       if (prevManipulatorState == ManipulatorState.INTAKING_ALGAE) {
         manipulatorState = ManipulatorState.IDLE;
       }
-      Leds.getInstance().setAlgaeInBot(true);
-      Leds.getInstance().setCoralInBot(false);
+      if (sensorInputs.isAlgaeDetected == true) {
+        Leds.getInstance().setAlgaeInBot(true);
+        Leds.getInstance().setCoralInBot(false);
+      }
     }
 
     if (DriverStation.isDisabled()) {
