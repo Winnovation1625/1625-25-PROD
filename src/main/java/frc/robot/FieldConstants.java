@@ -12,6 +12,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
+import frc.robot.subsystem.superstructure.Superstructure.SuperstructureStates;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -192,16 +193,18 @@ public class FieldConstants {
     @Getter private final Pose2d centerFace;
   }
 
+  @RequiredArgsConstructor
   public enum ReefLevel {
-    L1(Units.inchesToMeters(25.0), 0),
-    L2(Units.inchesToMeters(31.875 - Math.cos(Math.toRadians(35.0)) * 0.625), -35),
-    L3(Units.inchesToMeters(47.625 - Math.cos(Math.toRadians(35.0)) * 0.625), -35),
-    L4(Units.inchesToMeters(72), -90);
-
-    ReefLevel(double height, double pitch) {
-      this.height = height;
-      this.pitch = pitch; // Degrees
-    }
+    L1(Units.inchesToMeters(25.0), 0, SuperstructureStates.TROUGH),
+    L2(
+        Units.inchesToMeters(31.875 - Math.cos(Math.toRadians(35.0)) * 0.625),
+        -35,
+        SuperstructureStates.CLVL2),
+    L3(
+        Units.inchesToMeters(47.625 - Math.cos(Math.toRadians(35.0)) * 0.625),
+        -35,
+        SuperstructureStates.CLVL3),
+    L4(Units.inchesToMeters(72), -90, SuperstructureStates.CLVL4);
 
     public static ReefLevel fromLevel(int level) {
       return Arrays.stream(values())
@@ -212,6 +215,7 @@ public class FieldConstants {
 
     public final double height;
     public final double pitch;
+    public final SuperstructureStates state;
   }
 
   public static final double aprilTagWidth = Units.inchesToMeters(6.50);
@@ -224,7 +228,6 @@ public class FieldConstants {
     NO_BARGE("2025-no-barge"),
     BLUE_REEF("2025-blue-reef"),
     RED_REEF("2025-red-reef"),
-    REEFS_ONLY("2025-reefs-only"),
     FIELD_BORDER("2025-field-border");
 
     AprilTagLayoutType(String name) {

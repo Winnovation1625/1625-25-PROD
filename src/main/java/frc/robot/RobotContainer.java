@@ -20,6 +20,8 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
@@ -30,6 +32,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.FieldConstants.ReefLevel;
 import frc.robot.FieldConstants.ReefPosition;
 import frc.robot.commands.AutoScoreCommands;
 import frc.robot.commands.DriveCommands;
@@ -42,7 +45,6 @@ import frc.robot.subsystem.apriltagvision.AprilTagVisionIO;
 import frc.robot.subsystem.apriltagvision.AprilTagVisionIOPhoton;
 import frc.robot.subsystem.apriltagvision.AprilTagVisionIOPhotonSim;
 import frc.robot.subsystem.climber.Climber;
-import frc.robot.subsystem.climber.Climber.ClimberState;
 import frc.robot.subsystem.climber.ClimberIO;
 import frc.robot.subsystem.climber.ClimberIOServo;
 import frc.robot.subsystem.climber.ClimberIOSim;
@@ -118,6 +120,12 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+  private final Alert driverDisconnected =
+      new Alert("Driver controller disconnected (port 0).", AlertType.kWarning);
+  private final Alert auxDisconnected =
+      new Alert("Operator controller disconnected (port 1).", AlertType.kWarning);
+
+  private final Supplier<Rotation2d> getHumanPlayerAngle;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -235,7 +243,7 @@ public class RobotContainer {
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
     NamedCommands.registerCommand(
-        "AutoScoreL1", AutoScoreCommands.autoScoreL1(superstructure, manipulator));
+        "AutoScoreL1", AutoScoreCommands.autoScoreCoral(superstructure, manipulator, ReefLevel.L1));
     NamedCommands.registerCommand("DriveToReefFace4", new DriveToReef(drive, 4, true));
     NamedCommands.registerCommand("DriveToReefFace3", new DriveToReef(drive, 3, true));
     NamedCommands.registerCommand(
@@ -245,12 +253,23 @@ public class RobotContainer {
         "DriveToRightHumanPlayerStation",
         new DriveToHumanStation(drive, () -> FieldConstants.HumanStation.RIGHT));
     NamedCommands.registerCommand(
-        "CoralIntake", AutoScoreCommands.Coralintake(superstructure, manipulator));
+        "CoralIntake", AutoScoreCommands.coralIntake(superstructure, manipulator));
+    NamedCommands.registerCommand(
+        "AutoScoreL4", AutoScoreCommands.autoScoreCoral(superstructure, manipulator, ReefLevel.L4));
     // Set up SysId routines
     configureSysId();
 
     // Configure the button bindings
     configureButtonBindings();
+
+    getHumanPlayerAngle =
+        () ->
+            (drive.getPose().getY() > FieldConstants.fieldWidth / 2
+                        && !AllianceFlipUtil.shouldFlip())
+                    || (drive.getPose().getY() < FieldConstants.fieldWidth / 2
+                        && AllianceFlipUtil.shouldFlip())
+                ? AllianceFlipUtil.apply(new Rotation2d(Degrees.of(-54)))
+                : AllianceFlipUtil.apply(new Rotation2d(Degrees.of(54)));
 
     new Trigger(
             () ->
@@ -322,6 +341,7 @@ public class RobotContainer {
                       auxController.getRawButton(22) // L4
                       ))
               .position();
+
   private Supplier<SuperstructureStates> getCoralLevel =
       () -> {
         if (auxController.getRawButton(19)) {
@@ -356,22 +376,6 @@ public class RobotContainer {
         }
       };
 
-  private Rotation2d getHumanPlayerAngle() {
-    if ((drive.getPose().getY() > FieldConstants.fieldWidth / 2 && AllianceFlipUtil.shouldFlip())
-        || (drive.getPose().getY() < FieldConstants.fieldWidth / 2
-            && !AllianceFlipUtil.shouldFlip())) {
-      return new Rotation2d(Degrees.of(-130));
-    } else if ((drive.getPose().getY() < FieldConstants.fieldWidth / 2
-            && AllianceFlipUtil.shouldFlip())
-        || (drive.getPose().getY() > FieldConstants.fieldWidth / 2
-            && !AllianceFlipUtil.shouldFlip())) {
-      return new Rotation2d(Degrees.of(125));
-    } else {
-      return new Rotation2d(Degrees.of(0));
-    }
-  }
-  ;
-
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
@@ -387,8 +391,7 @@ public class RobotContainer {
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
 
-    // TODO: Reuse this method to lock onto the human player station
-    // Lock to 0° when A button is held
+    // Lock to Human Player Station when Y button is held
     controller
         .y()
         .whileTrue(
@@ -396,7 +399,7 @@ public class RobotContainer {
                 drive,
                 () -> -controller.getLeftY(),
                 () -> -controller.getLeftX(),
-                this::getHumanPlayerAngle));
+                getHumanPlayerAngle));
 
     // Reset gyro / odometry
     final Runnable resetGyro =
@@ -455,7 +458,8 @@ public class RobotContainer {
                         .setManipulatorState(ManipulatorState.IDLE)
                         .alongWith(
                             superstructure.setSuperstructureCommand(
-                                () -> SuperstructureStates.STOW))));
+                                () -> SuperstructureStates.STOW)))
+                .andThen(controllerRumbleCommand().withTimeout(Seconds.of(0.5))));
 
     // go to coral score position when having coral
     controller
@@ -542,7 +546,7 @@ public class RobotContainer {
         .onTrue(
             superstructure
                 .setSuperstructureCommand(() -> SuperstructureStates.STOW)
-                .andThen(climber.runClimber(ClimberState.RELEASE)));
+                .andThen(Commands.runOnce(() -> climber.setServoRelease(true))));
   }
 
   /**
@@ -581,5 +585,16 @@ public class RobotContainer {
         () -> {
           controller.getHID().setRumble(RumbleType.kBothRumble, 0.0);
         });
+  }
+
+  public void checkControllers() {
+    driverDisconnected.set(
+        !DriverStation.isJoystickConnected(controller.getHID().getPort())
+            || !DriverStation.getJoystickIsXbox(controller.getHID().getPort()));
+    auxDisconnected.set(!DriverStation.isJoystickConnected(auxController.getPort()));
+  }
+
+  public Pose2d getRobotPose() {
+    return drive.getPose();
   }
 }

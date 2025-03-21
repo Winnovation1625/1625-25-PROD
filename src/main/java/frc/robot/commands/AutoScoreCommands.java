@@ -61,9 +61,10 @@ public class AutoScoreCommands {
     return null;
   }
 
-  public static Command autoScoreL1(Superstructure superstructure, Manipulator manipulator) {
+  public static Command autoScoreCoral(
+      Superstructure superstructure, Manipulator manipulator, ReefLevel reefLevel) {
     return superstructure
-        .setSuperstructureCommand(() -> SuperstructureStates.TROUGH)
+        .setSuperstructureCommand(() -> reefLevel.state)
         .andThen(Commands.waitUntil(superstructure::atSuperStructureGoal))
         .andThen(manipulator.setManipulatorState(ManipulatorState.SHOOTING_CORAL))
         .andThen(Commands.waitUntil(() -> manipulator.getGamepieceState() != GamepieceState.NONE))
@@ -87,7 +88,7 @@ public class AutoScoreCommands {
                     superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
   }
 
-  public static Command Coralintake(Superstructure superstructure, Manipulator manipulator) {
+  public static Command coralIntake(Superstructure superstructure, Manipulator manipulator) {
     return superstructure
         .setSuperstructureCommand(() -> SuperstructureStates.CORAL_INTAKING)
         .alongWith(manipulator.setManipulatorState(ManipulatorState.INTAKING_CORAL))

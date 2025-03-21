@@ -4,24 +4,26 @@ import static frc.robot.subsystem.climber.ClimberConstants.*;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Servo;
-import java.util.function.DoubleSupplier;
 
 public class ClimberIOServo implements ClimberIO {
 
-  private Servo servo;
+  private final Servo climberReleaseServo;
 
   public ClimberIOServo() {
-    servo = new Servo(9);
+    climberReleaseServo = new Servo(9);
   }
 
   @Override
   public void updateInputs(ClimberIOInputs inputs) {
-    inputs.servoPositionRads = Units.degreesToRadians(servo.getAngle());
+    inputs.positionRads = Units.degreesToRadians(climberReleaseServo.getAngle());
   }
 
   @Override
-  public void setRelease(DoubleSupplier angle) {
-
-    servo.setAngle(angle.getAsDouble());
+  public void setRelease(boolean releaseState) {
+    if (releaseState) {
+      climberReleaseServo.setAngle(Units.radiansToDegrees(hookReleaseAngleRads));
+    } else {
+      climberReleaseServo.setAngle(Units.radiansToDegrees(hookHomeAngleRads));
+    }
   }
 }

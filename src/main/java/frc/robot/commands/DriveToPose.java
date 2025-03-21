@@ -53,7 +53,7 @@ public class DriveToPose extends Command {
     driveMaxAcceleration.initDefault(1.0);
     thetaMaxVelocity.initDefault(Units.degreesToRadians(360.0));
     thetaMaxAcceleration.initDefault(4.0);
-    driveTolerance.initDefault(0.01);
+    driveTolerance.initDefault(0.0254); // 1 inch
     thetaTolerance.initDefault(Units.degreesToRadians(1.0));
     ffMinRadius.initDefault(0.05);
     ffMaxRadius.initDefault(0.1);
@@ -126,6 +126,7 @@ public class DriveToPose extends Command {
     thetaController.reset(
         currentPose.getRotation().getRadians(), fieldVelocity.omegaRadiansPerSecond);
     lastSetpointTranslation = currentPose.getTranslation();
+    leds.setAutoLiningUp(true);
   }
 
   @Override
@@ -213,6 +214,11 @@ public class DriveToPose extends Command {
         ChassisSpeeds.fromFieldRelativeSpeeds(
             driveVelocity.getX(), driveVelocity.getY(), thetaVelocity, currentPose.getRotation()));
 
+    if (atGoal()) {
+      leds.setWhenLinedUp(true);
+    } else {
+      leds.setWhenLinedUp(false);
+    }
     // Log data
     Logger.recordOutput("DriveToPose/DistanceMeasured", currentDistance);
     Logger.recordOutput("DriveToPose/DistanceSetpoint", driveController.getSetpoint().position);
@@ -231,9 +237,8 @@ public class DriveToPose extends Command {
   @Override
   public void end(boolean interrupted) {
     drive.stop();
-    if (interrupted == false) {
-      leds.setWhenLinedUp(true);
-    }
+    leds.setAutoLiningUp(false);
+    leds.setWhenLinedUp(false);
     running = false;
     // Clear logs
     Logger.recordOutput("DriveToPose/Setpoint", new Pose2d[] {});

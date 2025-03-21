@@ -21,7 +21,6 @@ import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
@@ -60,7 +59,6 @@ import frc.robot.RobotState.TxTyPoseRecord;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystem.apriltagvision.AprilTagVision;
 import frc.robot.util.AllianceFlipUtil;
-import frc.robot.util.LocalADStarAK;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.HashMap;
 import java.util.Map;
@@ -192,7 +190,6 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
         PP_CONFIG,
         AllianceFlipUtil::shouldFlip,
         this);
-    Pathfinding.setPathfinder(new LocalADStarAK());
     PathPlannerLogging.setLogActivePathCallback(
         (activePath) -> {
           Logger.recordOutput(
