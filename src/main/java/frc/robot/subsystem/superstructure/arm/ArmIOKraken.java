@@ -5,6 +5,7 @@ import static frc.robot.subsystem.superstructure.arm.ArmConstants.*;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.NeutralOut;
@@ -15,6 +16,7 @@ import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
@@ -37,14 +39,20 @@ public class ArmIOKraken implements ArmIO {
   private final TalonFX armTalon;
   private final CANcoder armEncoder;
   private final TalonFXConfiguration armConfig;
+  private final CANcoderConfiguration armEncoderConfig;
   private final NeutralOut neutralOut = new NeutralOut();
 
   public ArmIOKraken() {
     armTalon = new TalonFX(Constants.SUPERSTRUCTURE_CAN_IDS.armMotor(), Constants.CANIVORE_NAME);
     armEncoder =
         new CANcoder(Constants.SUPERSTRUCTURE_CAN_IDS.armEncoder(), Constants.CANIVORE_NAME);
-    armConfig = new TalonFXConfiguration();
 
+    armEncoderConfig = new CANcoderConfiguration();
+    armEncoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
+    armEncoderConfig.MagnetSensor.MagnetOffset = ARM_ENCODER_OFFSET.in(Rotations);
+    armEncoder.getConfigurator().apply(armEncoderConfig);
+    
+    armConfig = new TalonFXConfiguration();
     armConfig.Slot0.kP = gains.kP();
     armConfig.Slot0.kI = gains.kI();
     armConfig.Slot0.kD = gains.kD();
@@ -57,7 +65,6 @@ public class ArmIOKraken implements ArmIO {
     armConfig.TorqueCurrent.PeakReverseTorqueCurrent = -80.0;
     armConfig.Feedback.FeedbackRemoteSensorID = Constants.SUPERSTRUCTURE_CAN_IDS.armEncoder();
     armConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
-    armConfig.Feedback.FeedbackRotorOffset = ARM_ENCODER_OFFSET.in(Rotations);
     armConfig.Feedback.RotorToSensorRatio =
         ARM_GEARING; // when using a real encoder this is ARM_GEARING
     armConfig.Feedback.SensorToMechanismRatio = 1.0; // when using a real encoder this is 1
