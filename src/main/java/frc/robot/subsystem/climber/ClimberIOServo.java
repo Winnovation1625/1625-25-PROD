@@ -22,6 +22,6 @@ public class ClimberIOServo implements ClimberIO {
   @Override
   public void setRelease(DoubleSupplier angle) {
 
-    servo.setAngle(Units.radiansToDegrees(angle.getAsDouble()));
+    servo.setAngle(angle.getAsDouble());
   }
 }

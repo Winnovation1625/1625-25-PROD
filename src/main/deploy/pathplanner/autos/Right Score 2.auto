@@ -1,0 +1,55 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Right Barge to Coral E2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "DriveToReefFace3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AutoScoreL4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Reef Face3D to Human"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "DriveToLeftHumanPlayerStation"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Coralintake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Left Human Player to D"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": true
+}

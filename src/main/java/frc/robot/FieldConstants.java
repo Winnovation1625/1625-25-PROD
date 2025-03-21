@@ -185,6 +185,13 @@ public class FieldConstants {
     }
   }
 
+  @RequiredArgsConstructor
+  public enum HumanStation {
+    LEFT(FieldConstants.CoralStation.leftCenterFace),
+    RIGHT(FieldConstants.CoralStation.rightCenterFace);
+    @Getter private final Pose2d centerFace;
+  }
+
   public enum ReefLevel {
     L1(Units.inchesToMeters(25.0), 0),
     L2(Units.inchesToMeters(31.875 - Math.cos(Math.toRadians(35.0)) * 0.625), -35),

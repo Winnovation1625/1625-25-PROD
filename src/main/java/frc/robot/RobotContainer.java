@@ -33,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.FieldConstants.ReefPosition;
 import frc.robot.commands.AutoScoreCommands;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.DriveToHumanStation;
 import frc.robot.commands.DriveToReef;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystem.apriltagvision.AprilTagVision;
@@ -236,6 +237,15 @@ public class RobotContainer {
     NamedCommands.registerCommand(
         "AutoScoreL1", AutoScoreCommands.autoScoreL1(superstructure, manipulator));
     NamedCommands.registerCommand("DriveToReefFace4", new DriveToReef(drive, 4, true));
+    NamedCommands.registerCommand("DriveToReefFace3", new DriveToReef(drive, 3, true));
+    NamedCommands.registerCommand(
+        "DriveToLeftHumanPlayerStation",
+        new DriveToHumanStation(drive, () -> FieldConstants.HumanStation.LEFT));
+    NamedCommands.registerCommand(
+        "DriveToRightHumanPlayerStation",
+        new DriveToHumanStation(drive, () -> FieldConstants.HumanStation.RIGHT));
+    NamedCommands.registerCommand(
+        "CoralIntake", AutoScoreCommands.Coralintake(superstructure, manipulator));
     // Set up SysId routines
     configureSysId();
 
