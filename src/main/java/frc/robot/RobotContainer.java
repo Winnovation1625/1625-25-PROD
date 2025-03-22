@@ -57,6 +57,7 @@ import frc.robot.subsystem.drive.ModuleIO;
 import frc.robot.subsystem.drive.ModuleIOTalonFX;
 import frc.robot.subsystem.leds.Leds;
 import frc.robot.subsystem.manipulator.Manipulator;
+import frc.robot.subsystem.manipulator.Manipulator.GamepieceState;
 import frc.robot.subsystem.manipulator.Manipulator.ManipulatorState;
 import frc.robot.subsystem.manipulator.ManipulatorIO;
 import frc.robot.subsystem.manipulator.ManipulatorIOKraken;
@@ -365,14 +366,14 @@ public class RobotContainer {
 
   private Supplier<SuperstructureStates> getAlgaeReefLevel =
       () -> {
-        if (auxController.getRawButton(11)
+        if (auxController.getRawButton(17)
             || auxController.getRawButton(13)
             || auxController.getRawButton(15)) {
-          return SuperstructureStates.ALVL3;
+          return SuperstructureStates.ALVL2;
         } else {
           // if(auxController.getRawButton(12) || auxController.getRawButton(14) ||
           // auxController.getRawButton(16))
-          return SuperstructureStates.ALVL2;
+          return SuperstructureStates.ALVL3;
         }
       };
 
@@ -392,14 +393,6 @@ public class RobotContainer {
             () -> -controller.getRightX()));
 
     // Lock to Human Player Station when Y button is held
-    controller
-        .y()
-        .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
-                getHumanPlayerAngle));
 
     // Reset gyro / odometry
     final Runnable resetGyro =
@@ -416,14 +409,14 @@ public class RobotContainer {
     controller.back().onTrue(Commands.runOnce(resetGyro, drive).ignoringDisable(true));
     // Algae and Coral Shared Commands
     // score command for coral and algae
-    controller
-        .a()
-        .and(() -> superstructure.getSuperstructureGoal() != SuperstructureStates.STOW)
-        .whileTrue(
-            Commands.either(
-                manipulator.setManipulatorState(ManipulatorState.SHOOTING_ALGAE),
-                manipulator.setManipulatorState(ManipulatorState.SHOOTING_CORAL),
-                manipulator::hasAlgae));
+    // controller
+    //     .a()
+    //     .and(() -> superstructure.getSuperstructureGoal() != SuperstructureStates.STOW)
+    //     .whileTrue(
+    //         Commands.either(
+    //             manipulator.setManipulatorState(ManipulatorState.SHOOTING_ALGAE),
+    //             manipulator.setManipulatorState(ManipulatorState.SHOOTING_CORAL),
+    //             manipulator::hasAlgae));
 
     controller.a().onFalse(manipulator.setManipulatorState(ManipulatorState.IDLE));
 
@@ -485,7 +478,7 @@ public class RobotContainer {
     // Algae Controls
     // score algae in barge or processor depending on aux button state
     controller
-        .rightBumper()
+        .leftTrigger()
         .and(() -> manipulator.getGamepieceState() == Manipulator.GamepieceState.ALGAE_IN_CLAW)
         .onTrue(
             superstructure
@@ -500,7 +493,7 @@ public class RobotContainer {
 
     // ground pickup algae
     controller
-        .leftTrigger()
+        .leftBumper()
         .and(() -> manipulator.getGamepieceState() == Manipulator.GamepieceState.NONE)
         .onTrue(
             superstructure
@@ -519,9 +512,10 @@ public class RobotContainer {
                 .andThen(Commands.waitUntil(() -> superstructure.atArmGoal()))
                 .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
 
-    // grab algae from reef height dependent on aux algae pos button
+    // When left trigger and no algae in bot, grab algae from reef height dependent on aux algae pos
+    // button
     controller
-        .leftBumper()
+        .leftTrigger()
         .and(() -> manipulator.getGamepieceState() == Manipulator.GamepieceState.NONE)
         .onTrue(
             superstructure
@@ -537,6 +531,52 @@ public class RobotContainer {
                     superstructure
                         .setSuperstructureCommand(() -> SuperstructureStates.STOW)
                         .alongWith(manipulator.setManipulatorState(ManipulatorState.IDLE))));
+    // Algae and Coral Shared Commands
+    // score command for coral and algae
+    // with left side button
+    controller
+        .a()
+        .and(() -> superstructure.getSuperstructureGoal() != SuperstructureStates.STOW)
+        .whileTrue(
+            Commands.either(
+                manipulator.setManipulatorState(ManipulatorState.SHOOTING_ALGAE),
+                manipulator.setManipulatorState(ManipulatorState.SHOOTING_CORAL),
+                manipulator::hasAlgae));
+
+    controller
+        .y()
+        .and(() -> superstructure.getSuperstructureGoal() != SuperstructureStates.STOW)
+        .and(() -> manipulator.getGamepieceState() == GamepieceState.CORAL_IN_MANIPULATOR)
+        .whileTrue(manipulator.setManipulatorState(ManipulatorState.RETURN_CORAL));
+
+    controller
+        .rightBumper()
+        .whileTrue(
+            DriveCommands.joystickDriveAtAngle(
+                drive,
+                () -> -controller.getLeftY(),
+                () -> -controller.getLeftX(),
+                () -> getHumanPlayerAngle.get()));
+
+    // controller
+    //     .leftBumper()
+    //     .and(() -> manipulator.getGamepieceState() == Manipulator.GamepieceState.NONE)
+    //     .onTrue(
+    //         superstructure
+    //             .setSuperstructureCommand(getAlgaeReefLevel)
+    //             .alongWith(manipulator.setManipulatorState(ManipulatorState.INTAKING_ALGAE))
+    //             .andThen(
+    //                 Commands.waitUntil(
+    //                     () ->
+    //                         superstructure.atSuperStructureGoal()
+    //                             && manipulator.getGamepieceState()
+    //                                     == Manipulator.GamepieceState.ALGAE_IN_CLAW))
+    //                             .andThen(
+    //                                 superstructure
+    //                                     .setSuperstructureCommand(() ->
+    // SuperstructureStates.STOW)
+    //
+    // .alongWith(manipulator.setManipulatorState(ManipulatorState.IDLE))));
 
     // Climb Commands
     controller

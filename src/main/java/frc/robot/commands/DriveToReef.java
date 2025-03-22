@@ -22,9 +22,9 @@ public class DriveToReef extends DriveToPose {
   private static final LoggedTunableNumber maxDistanceTagPoseBlend =
       new LoggedTunableNumber("DriveToReef/MaxDistanceTagPoseBlend", Units.inchesToMeters(36.0));
   private static final LoggedTunableNumber reefPoseOffsetX =
-      new LoggedTunableNumber("DriveToReef/ReefCoralScoreXOffset", Units.inchesToMeters(20));
+      new LoggedTunableNumber("DriveToReef/ReefCoralScoreXOffset", Units.inchesToMeters(15));
   private static final LoggedTunableNumber reefPoseOffsetY =
-      new LoggedTunableNumber("DriveToReef/ReefCoralScoreYOffset", Units.inchesToMeters(-10.9));
+      new LoggedTunableNumber("DriveToReef/ReefCoralScoreYOffset", Units.inchesToMeters(-11.5));
 
   static {
     minDistanceTagPoseBlend.initDefault(Units.inchesToMeters(24.0));

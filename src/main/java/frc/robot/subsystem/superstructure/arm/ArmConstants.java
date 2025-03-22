@@ -2,11 +2,12 @@ package frc.robot.subsystem.superstructure.arm;
 
 import static edu.wpi.first.units.Units.*;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import frc.robot.Constants;
 
 public class ArmConstants {
-  public static final double ARM_TOLERANCE = 0.02;
+  public static final double ARM_TOLERANCE = Units.degreesToRadians(2.3);
   public static final double ARM_KV = 0.125;
   public static final double ARM_KA = 0.125;
   public static final double ARM_GEARING = 75.0;

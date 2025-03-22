@@ -51,7 +51,7 @@ public class ArmIOKraken implements ArmIO {
     armEncoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
     armEncoderConfig.MagnetSensor.MagnetOffset = ARM_ENCODER_OFFSET.in(Rotations);
     armEncoder.getConfigurator().apply(armEncoderConfig);
-    
+
     armConfig = new TalonFXConfiguration();
     armConfig.Slot0.kP = gains.kP();
     armConfig.Slot0.kI = gains.kI();
