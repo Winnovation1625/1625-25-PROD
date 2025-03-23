@@ -594,7 +594,10 @@ public class RobotContainer {
     // .alongWith(manipulator.setManipulatorState(ManipulatorState.IDLE))));
 
     // Climb Commands
-    controller.start().onTrue(Commands.runOnce(() -> climber.setServoRelease(true)));
+    controller
+        .start()
+        .and(() -> auxController.getRawButton(24))
+        .onTrue(Commands.runOnce(() -> climber.setServoRelease(true)));
   }
 
   /**

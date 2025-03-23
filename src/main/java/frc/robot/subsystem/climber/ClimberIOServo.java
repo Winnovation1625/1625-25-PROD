@@ -2,7 +2,6 @@ package frc.robot.subsystem.climber;
 
 import static frc.robot.subsystem.climber.ClimberConstants.*;
 
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Servo;
 
 public class ClimberIOServo implements ClimberIO {
@@ -10,7 +9,7 @@ public class ClimberIOServo implements ClimberIO {
   private final Servo climberReleaseServo;
 
   public ClimberIOServo() {
-    climberReleaseServo = new Servo(9);
+    climberReleaseServo = new Servo(8);
   }
 
   @Override
@@ -23,13 +22,6 @@ public class ClimberIOServo implements ClimberIO {
     if (releaseState) {
       climberReleaseServo.setAngle(hookReleaseAngle);
     } else {
-      climberReleaseServo.setAngle(hookHomeAngle);
-    }
-  }
-
-  @Override
-  public void goToHome(boolean goToHome) {
-    if (goToHome) {
       climberReleaseServo.setAngle(hookHomeAngle);
     }
   }

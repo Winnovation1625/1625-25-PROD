@@ -9,9 +9,7 @@ public interface ClimberIO {
     public double positionRads = 0.0;
   }
 
-  default void updateInputs(ClimberIOInputs inputs) {}
+  public default void updateInputs(ClimberIOInputs inputs) {}
 
-  default void setRelease(boolean releaseState) {}
-
-  default void goToHome(boolean goToHome) {}
+  public default void setRelease(boolean releaseState) {}
 }
