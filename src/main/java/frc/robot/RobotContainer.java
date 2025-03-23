@@ -156,15 +156,15 @@ public class RobotContainer {
                 new AprilTagVisionIOPhoton(
                     AprilTagVisionConstants.CAMERA_CONFIGS.get(1),
                     drive::getRotation,
+                    drive::getPose),
+                new AprilTagVisionIOPhoton(
+                    AprilTagVisionConstants.CAMERA_CONFIGS.get(2),
+                    drive::getRotation,
+                    drive::getPose),
+                new AprilTagVisionIOPhoton(
+                    AprilTagVisionConstants.CAMERA_CONFIGS.get(2),
+                    drive::getRotation,
                     drive::getPose));
-        // new AprilTagVisionIOPhoton(
-        //     AprilTagVisionConstants.CAMERA_CONFIGS.get(2),
-        //     drive::getRotation,
-        //     drive::getPose),
-        // new AprilTagVisionIOPhoton(
-        //     AprilTagVisionConstants.CAMERA_CONFIGS.get(2),
-        //     drive::getRotation,
-        //     drive::getPose));
         manipulator =
             new Manipulator(new ManipulatorIOKraken(), new ManipulatorSensorsIOCANrange());
         climber = new Climber(new ClimberIOServo());
@@ -242,11 +242,18 @@ public class RobotContainer {
 
     superstructure = new Superstructure(arm, elevator, manipulator::hasAlgae);
     // Set up auto routines
-    autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
     NamedCommands.registerCommand(
-        "AutoScoreL1", AutoScoreCommands.autoScoreCoral(superstructure, manipulator, ReefLevel.L1));
+        "AutoScoreL1", AutoScoreCommands.autoScoreTrough(superstructure, manipulator));
+    NamedCommands.registerCommand(
+        "AutoScoreL2", AutoScoreCommands.autoScoreCoral(superstructure, manipulator, ReefLevel.L2));
     NamedCommands.registerCommand("DriveToReefFace4", new DriveToReef(drive, 4, true));
     NamedCommands.registerCommand("DriveToReefFace3", new DriveToReef(drive, 3, true));
+
+    for (var position : FieldConstants.ReefPosition.values()) {
+      NamedCommands.registerCommand(
+          "DriveToBranch" + position.name(), new DriveToReef(drive, () -> position));
+    }
+
     NamedCommands.registerCommand(
         "DriveToLeftHumanPlayerStation",
         new DriveToHumanStation(drive, () -> FieldConstants.HumanStation.LEFT));
@@ -258,6 +265,7 @@ public class RobotContainer {
     NamedCommands.registerCommand(
         "AutoScoreL4", AutoScoreCommands.autoScoreCoral(superstructure, manipulator, ReefLevel.L4));
     // Set up SysId routines
+    autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
     configureSysId();
 
     // Configure the button bindings
@@ -369,11 +377,11 @@ public class RobotContainer {
         if (auxController.getRawButton(17)
             || auxController.getRawButton(13)
             || auxController.getRawButton(15)) {
-          return SuperstructureStates.ALVL2;
+          return SuperstructureStates.ALVL3;
         } else {
           // if(auxController.getRawButton(12) || auxController.getRawButton(14) ||
           // auxController.getRawButton(16))
-          return SuperstructureStates.ALVL3;
+          return SuperstructureStates.ALVL2;
         }
       };
 

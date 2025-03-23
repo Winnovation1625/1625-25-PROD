@@ -60,7 +60,7 @@ public class Elevator {
     ALGAE_CLEARANCE(new LoggedTunableNumber("Superstructure/Elevator/ALGAE CLEARANCE", 0.48)),
     CLIMB(new LoggedTunableNumber("Superstructure/Elevator/CLIMB", Units.inchesToMeters(27.5591))),
     BARGE(new LoggedTunableNumber("Superstructure/Elevator/BARGE", 1.63)),
-    CLVL2(new LoggedTunableNumber("Superstructure/Elevator/CLVL2", 0.58)),
+    CLVL2(new LoggedTunableNumber("Superstructure/Elevator/CLVL2", 0.55)),
     TROUGH(new LoggedTunableNumber("Superstructure/Elevator/TROUGH", 0.26)),
     CLVL3(new LoggedTunableNumber("Superstructure/Elevator/CLVL3", 0.94)),
     CLVL4(new LoggedTunableNumber("Superstructure/Elevator/CLVL4", 1.75)),

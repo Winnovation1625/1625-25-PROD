@@ -148,11 +148,11 @@ public class Superstructure extends SubsystemBase {
         () -> hasAlgaeSupplier.get() ? ElevatorState.ALGAE_CLEARANCE : ElevatorState.STOW;
     BooleanSupplier comingFromCoralScore =
         () ->
-            superstructureGoal == SuperstructureStates.CLVL4
-                || superstructureGoal == SuperstructureStates.CLVL3
+            superstructureGoal == SuperstructureStates.CLVL3
                 || superstructureGoal == SuperstructureStates.CLVL2
                 || superstructureGoal == SuperstructureStates.ALVL2
                 || superstructureGoal == SuperstructureStates.ALVL3;
+    BooleanSupplier comingFromCoral4Score = () -> superstructureGoal == SuperstructureStates.CLVL4;
     return Commands.either(
         Commands.either( // true, true worst case
             runElevatorToState(intermediateState)
@@ -187,10 +187,21 @@ public class Superstructure extends SubsystemBase {
                             .andThen(runElevatorToState(toElevatorState)))
                     .andThen(() -> superstructureGoal = to.get(), this)
                     .andThen(Commands.print("Best Case Superstructure Run")),
-                runElevatorToState(toElevatorState)
-                    .alongWith(runArmToState(() -> to.get().armState))
-                    .andThen(() -> superstructureGoal = to.get())
-                    .andThen(Commands.print("Best Case Superstructure Run")),
+                Commands.either(
+                    runArmToState(() -> ArmState.CLVL3)
+                        .andThen(Commands.waitUntil(() -> arm.atGoal()))
+                        .andThen(
+                            runArmToState(() -> to.get().armState)
+                                .alongWith(
+                                    Commands.waitTime(Seconds.of(0.5))
+                                        .andThen(runElevatorToState(toElevatorState))))
+                        .andThen(() -> superstructureGoal = to.get(), this)
+                        .andThen(Commands.print("Best Case Superstructure Run")),
+                    runElevatorToState(toElevatorState)
+                        .alongWith(runArmToState(() -> to.get().armState))
+                        .andThen(() -> superstructureGoal = to.get())
+                        .andThen(Commands.print("Best Case Superstructure Run")),
+                    comingFromCoral4Score),
                 comingFromCoralScore),
             goingBelowThreshold),
         currentlyBelowThreshold);

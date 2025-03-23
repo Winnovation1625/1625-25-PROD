@@ -20,7 +20,7 @@ import lombok.Setter;
 public class Leds extends VirtualSubsystem {
 
   private final int HARDWARE_LEDS = 8;
-  private final int LEDS_PER_STRIP = 124 - HARDWARE_LEDS;
+  private final int LEDS_PER_STRIP = 126 - HARDWARE_LEDS;
   private static Leds instance;
 
   private final CANdle candle;
@@ -132,7 +132,7 @@ public class Leds extends VirtualSubsystem {
               HARDWARE_LEDS));
     } else if (gamepieceInBot || algaeInBot) {
       // purple
-      candle.setLEDs(255, 0, 255);
+      candle.setLEDs(255, 0, 255, 0, HARDWARE_LEDS, LEDS_PER_STRIP);
     } else {
       int redValue = AllianceFlipUtil.shouldFlip() ? 255 : 0;
       int blueValue = AllianceFlipUtil.shouldFlip() ? 0 : 255;

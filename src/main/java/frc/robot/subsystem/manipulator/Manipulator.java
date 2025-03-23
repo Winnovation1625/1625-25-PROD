@@ -27,6 +27,7 @@ public class Manipulator extends SubsystemBase {
     INTAKING_CORAL(new LoggedTunableNumber("Manipulator/CoralIntakeVoltage", -3)),
     INTAKING_ALGAE(new LoggedTunableNumber("Manipulator/AlgaeIntakeVoltage", 4)),
     STAGING_CORAL(new LoggedTunableNumber("Manipulator/CoralStagingVoltage", -1.5)),
+    TROUGH_CORAL(new LoggedTunableNumber("Manipulator/CoralTroughVoltage", -3)),
     SHOOTING_CORAL(new LoggedTunableNumber("Manipulator/CoralShootingVoltage", -6)),
     SHOOTING_ALGAE(new LoggedTunableNumber("Manipulator/AlgaeShootingVoltage", -12)),
     RETURN_CORAL(new LoggedTunableNumber("Manipulator/ReturnCoral", 3)),

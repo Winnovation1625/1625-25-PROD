@@ -11,15 +11,21 @@
           }
         },
         {
-          "type": "named",
+          "type": "wait",
           "data": {
-            "name": "DriveToReefFace3"
+            "waitTime": 0.25
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "AutoScoreL4"
+            "name": "DriveToBranchF"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AutoScoreL2"
           }
         },
         {
@@ -31,7 +37,7 @@
         {
           "type": "named",
           "data": {
-            "name": "DriveToLeftHumanPlayerStation"
+            "name": "DriveToRightHumanPlayerStation"
           }
         },
         {
@@ -43,7 +49,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Left Human Player to D"
+            "pathName": "Right Human Player to D"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "DriveToBranchC"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AutoScoreL2"
           }
         }
       ]

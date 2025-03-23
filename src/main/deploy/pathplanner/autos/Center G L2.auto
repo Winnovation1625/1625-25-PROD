@@ -13,13 +13,13 @@
         {
           "type": "named",
           "data": {
-            "name": "DriveToReefFace3"
+            "name": "DriveToBranchG"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "AutoScoreL1"
+            "name": "AutoScoreL2"
           }
         }
       ]

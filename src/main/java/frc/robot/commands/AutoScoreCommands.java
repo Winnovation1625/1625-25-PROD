@@ -67,7 +67,7 @@ public class AutoScoreCommands {
         .setSuperstructureCommand(() -> reefLevel.state)
         .andThen(Commands.waitUntil(superstructure::atSuperStructureGoal))
         .andThen(manipulator.setManipulatorState(ManipulatorState.SHOOTING_CORAL))
-        .andThen(Commands.waitUntil(() -> manipulator.getGamepieceState() != GamepieceState.NONE))
+        .andThen(Commands.waitUntil(() -> manipulator.getGamepieceState() == GamepieceState.NONE))
         .andThen(
             manipulator
                 .setManipulatorState(ManipulatorState.IDLE)
@@ -75,12 +75,12 @@ public class AutoScoreCommands {
                     superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
   }
 
-  public static Command autoScoreL4(Superstructure superstructure, Manipulator manipulator) {
+  public static Command autoScoreTrough(Superstructure superstructure, Manipulator manipulator) {
     return superstructure
-        .setSuperstructureCommand(() -> SuperstructureStates.CLVL4)
+        .setSuperstructureCommand(() -> SuperstructureStates.TROUGH)
         .andThen(Commands.waitUntil(superstructure::atSuperStructureGoal))
-        .andThen(manipulator.setManipulatorState(ManipulatorState.SHOOTING_CORAL))
-        .andThen(Commands.waitUntil(() -> manipulator.getGamepieceState() != GamepieceState.NONE))
+        .andThen(manipulator.setManipulatorState(ManipulatorState.TROUGH_CORAL))
+        .andThen(Commands.waitUntil(() -> manipulator.getGamepieceState() == GamepieceState.NONE))
         .andThen(
             manipulator
                 .setManipulatorState(ManipulatorState.IDLE)

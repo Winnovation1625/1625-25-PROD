@@ -18,18 +18,16 @@ public class DriveToHumanStation extends DriveToPose {
   private static final LoggedTunableNumber maxDistanceTagPoseBlend =
       new LoggedTunableNumber(
           "DriveToHumanStation/MaxDistanceTagPoseBlend", Units.inchesToMeters(36.0));
-  private static final LoggedTunableNumber reefPoseOffsetX =
-      new LoggedTunableNumber(
-          "DriveToHumanStation/ReefCoralScoreXOffset", Units.inchesToMeters(20));
-  private static final LoggedTunableNumber reefPoseOffsetY =
-      new LoggedTunableNumber(
-          "DriveToHumanStation/ReefCoralScoreYOffset", Units.inchesToMeters(-10.9));
+  private static final LoggedTunableNumber humanPlayerOffsetX =
+      new LoggedTunableNumber("DriveToHumanStation/HumanPlayerXOffset", Units.inchesToMeters(16.5));
+  private static final LoggedTunableNumber humanPlayerOffsetY =
+      new LoggedTunableNumber("DriveToHumanStation/HumanPlayerYOffset", Units.inchesToMeters(0.0));
 
   static {
     minDistanceTagPoseBlend.initDefault(Units.inchesToMeters(24.0));
     maxDistanceTagPoseBlend.initDefault(Units.inchesToMeters(36.0));
-    reefPoseOffsetX.initDefault(Units.inchesToMeters(20));
-    reefPoseOffsetY.initDefault(Units.inchesToMeters(-10.9));
+    humanPlayerOffsetX.initDefault(Units.inchesToMeters(16.5));
+    humanPlayerOffsetY.initDefault(Units.inchesToMeters(0.0));
   }
 
   public DriveToHumanStation(Drive drive, Supplier<HumanStation> humanStation) {
@@ -43,9 +41,9 @@ public class DriveToHumanStation extends DriveToPose {
                     .getCenterFace()
                     .transformBy(
                         new Transform2d(
-                            reefPoseOffsetX.get(),
-                            reefPoseOffsetY.get(),
-                            new Rotation2d(Degrees.of(180))))),
+                            humanPlayerOffsetX.get(),
+                            humanPlayerOffsetY.get(),
+                            new Rotation2d(Degrees.of(0))))),
         // robot position supplier
         drive::getPose);
   }
