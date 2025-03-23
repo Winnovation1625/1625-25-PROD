@@ -46,7 +46,7 @@ public class DriveToPose extends Command {
       new LoggedTunableNumber("DriveToPose/FFMaxRadius");
 
   static {
-    drivekP.initDefault(0.75);
+    drivekP.initDefault(1.5);
     drivekI.initDefault(0.0);
     drivekD.initDefault(0.0);
     thetakP.initDefault(3.0);
@@ -260,10 +260,10 @@ public class DriveToPose extends Command {
     Logger.recordOutput("DriveToPose/Goal", new Pose2d[] {});
   }
 
-  @Override
-  public boolean isFinished() {
-    return atGoal();
-  }
+  //   @Override
+  //   public boolean isFinished() {
+  //     return atGoal();
+  //   }
 
   /** Checks if the robot is stopped at the final pose. */
   public boolean atGoal() {

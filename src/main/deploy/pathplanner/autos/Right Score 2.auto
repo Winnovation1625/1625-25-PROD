@@ -19,7 +19,7 @@
         {
           "type": "named",
           "data": {
-            "name": "DriveToBranchF"
+            "name": "DriveToBranchE"
           }
         },
         {
@@ -35,15 +35,22 @@
           }
         },
         {
-          "type": "named",
+          "type": "race",
           "data": {
-            "name": "DriveToRightHumanPlayerStation"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "CoralIntake"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "DriveToRightHumanPlayerStation"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "CoralIntake"
+                }
+              }
+            ]
           }
         },
         {
