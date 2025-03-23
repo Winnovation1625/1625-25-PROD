@@ -12,12 +12,20 @@ public class Climber {
   private final ClimberIO io;
   private final ClimberIOInputsAutoLogged inputs = new ClimberIOInputsAutoLogged();
   @AutoLogOutput @Setter private boolean servoRelease = false;
+  private boolean goToHome = true;
 
   public void periodic() {
     io.updateInputs(inputs);
     if (DriverStation.isDisabled()) {
       io.setRelease(false);
     }
-    io.setRelease(servoRelease);
+    if (servoRelease == true) {
+      io.setRelease(true);
+    }
+
+    if (goToHome == true) {
+      io.goToHome(goToHome);
+      goToHome = false;
+    }
   }
 }

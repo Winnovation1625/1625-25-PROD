@@ -488,7 +488,7 @@ public class RobotContainer {
                 .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
 
     // auto path coral to reeef
-    controller.x().whileTrue(new DriveToReef(drive, getCoralObjective));
+    controller.leftBumper().whileTrue(new DriveToReef(drive, getCoralObjective));
 
     // Algae Controls
     // score algae in barge or processor depending on aux button state
@@ -508,7 +508,7 @@ public class RobotContainer {
 
     // ground pickup algae
     controller
-        .leftBumper()
+        .x()
         .and(() -> manipulator.getGamepieceState() == Manipulator.GamepieceState.NONE)
         .onTrue(
             superstructure
@@ -594,14 +594,7 @@ public class RobotContainer {
     // .alongWith(manipulator.setManipulatorState(ManipulatorState.IDLE))));
 
     // Climb Commands
-    controller
-        .start()
-        .and(() -> auxController.getRawButton(24))
-        .and(() -> superstructure.getSuperstructureGoal() == SuperstructureStates.STOW)
-        .onTrue(
-            superstructure
-                .setSuperstructureCommand(() -> SuperstructureStates.STOW)
-                .andThen(Commands.runOnce(() -> climber.setServoRelease(true))));
+    controller.start().onTrue(Commands.runOnce(() -> climber.setServoRelease(true)));
   }
 
   /**

@@ -14,9 +14,9 @@ public class ClimberIOSim implements ClimberIO {
   @Override
   public void setRelease(boolean releaseState) {
     if (releaseState) {
-      servoPosition = hookReleaseAngleRads;
+      servoPosition = hookReleaseAngle;
     } else {
-      servoPosition = hookHomeAngleRads;
+      servoPosition = hookHomeAngle;
     }
   }
 }

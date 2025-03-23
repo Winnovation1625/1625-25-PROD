@@ -15,15 +15,22 @@ public class ClimberIOServo implements ClimberIO {
 
   @Override
   public void updateInputs(ClimberIOInputs inputs) {
-    inputs.positionRads = Units.degreesToRadians(climberReleaseServo.getAngle());
+    inputs.positionRads = climberReleaseServo.getAngle();
   }
 
   @Override
   public void setRelease(boolean releaseState) {
     if (releaseState) {
-      climberReleaseServo.setAngle(Units.radiansToDegrees(hookReleaseAngleRads));
+      climberReleaseServo.setAngle(hookReleaseAngle);
     } else {
-      climberReleaseServo.setAngle(Units.radiansToDegrees(hookHomeAngleRads));
+      climberReleaseServo.setAngle(hookHomeAngle);
+    }
+  }
+
+  @Override
+  public void goToHome(boolean goToHome) {
+    if (goToHome) {
+      climberReleaseServo.setAngle(hookHomeAngle);
     }
   }
 }

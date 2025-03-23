@@ -42,7 +42,7 @@ public class Arm {
   @RequiredArgsConstructor
   public enum ArmState {
     ALGAE_INTAKING(new LoggedTunableNumber("Superstructure/Arm/INTAKING", -0.4)),
-    CORAL_INTAKING(new LoggedTunableNumber("Superstructure/Arm/CORAL_INTAKING", 0.295)),
+    CORAL_INTAKING(new LoggedTunableNumber("Superstructure/Arm/CORAL_INTAKING", 0)),
     STOW(new LoggedTunableNumber("Superstructure/Arm/STOW", Math.PI / 2)),
     CLIMB(new LoggedTunableNumber("Superstructure/Arm/CLIMB", Math.PI / 2)),
     BARGE(new LoggedTunableNumber("Superstructure/Arm/BARGE", 0.83)),

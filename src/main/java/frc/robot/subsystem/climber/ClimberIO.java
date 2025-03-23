@@ -12,4 +12,6 @@ public interface ClimberIO {
   default void updateInputs(ClimberIOInputs inputs) {}
 
   default void setRelease(boolean releaseState) {}
+
+  default void goToHome(boolean goToHome) {}
 }
