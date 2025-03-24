@@ -63,7 +63,7 @@ public class Elevator {
     CLVL2(new LoggedTunableNumber("Superstructure/Elevator/CLVL2", 0.55)),
     TROUGH(new LoggedTunableNumber("Superstructure/Elevator/TROUGH", 0.26)),
     CLVL3(new LoggedTunableNumber("Superstructure/Elevator/CLVL3", 0.94)),
-    CLVL4(new LoggedTunableNumber("Superstructure/Elevator/CLVL4", 1.791750036)),
+    CLVL4(new LoggedTunableNumber("Superstructure/Elevator/CLVL4", 1.755)),
     ALVL2(new LoggedTunableNumber("Superstructure/Elevator/ALVL2", 0.45)),
     ALVL3(new LoggedTunableNumber("Superstructure/Elevator/ALVL3", 0.71)),
     PROCESS(new LoggedTunableNumber("Superstructure/Elevator/PROCESS", 0.18)),

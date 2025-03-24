@@ -46,10 +46,10 @@ public class DriveToPose extends Command {
       new LoggedTunableNumber("DriveToPose/FFMaxRadius");
 
   static {
-    drivekP.initDefault(1.5);
+    drivekP.initDefault(2.35);
     drivekI.initDefault(0.0);
     drivekD.initDefault(0.0);
-    thetakP.initDefault(3.0);
+    thetakP.initDefault(3.5);
     thetakD.initDefault(0.2);
     driveMaxVelocity.initDefault(1.5);
     driveMaxAcceleration.initDefault(1.0);
@@ -57,8 +57,8 @@ public class DriveToPose extends Command {
     thetaMaxAcceleration.initDefault(4.0);
     driveTolerance.initDefault(0.0508); // 1 inch
     thetaTolerance.initDefault(Units.degreesToRadians(2.0));
-    ffMinRadius.initDefault(0.05);
-    ffMaxRadius.initDefault(0.1);
+    ffMinRadius.initDefault(0.00);
+    ffMaxRadius.initDefault(0.25);
   }
 
   private final Drive drive;
@@ -66,7 +66,7 @@ public class DriveToPose extends Command {
 
   private final ProfiledPIDController driveController =
       new ProfiledPIDController(
-          0.0, 0.0, 0.0, new TrapezoidProfile.Constraints(0.0, 0.0), Constants.LOOP_PERIOD_SECS);
+          0, 0.0, 0.0, new TrapezoidProfile.Constraints(0.0, 0.0), Constants.LOOP_PERIOD_SECS);
   private final ProfiledPIDController thetaController =
       new ProfiledPIDController(
           0.0, 0.0, 0.0, new TrapezoidProfile.Constraints(0.0, 0.0), Constants.LOOP_PERIOD_SECS);

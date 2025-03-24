@@ -10,8 +10,9 @@ public class ElevatorConstants {
   public static final double ELEVATOR_KG = 0.39;
   public static final double ELEVATOR_GEARING = 5.0;
   public static final double ELEVATOR_DRUM_RADIUS = Units.inchesToMeters(1);
+  //public static final double ELEVATOR_OFFSET_ROTATIONS =  
   public static final double ELEVATOR_MIN_HEIGHT_METERS = 0;
-  public static final double ELEVATOR_MAX_HEIGHT_METERS = 1.78;
+  public static final double ELEVATOR_MAX_HEIGHT_METERS = 1.76;
   public static final double ELEVATOR_MASS_KG = 12.42434899;
   public static final double ELEVATOR_MAX_VELOCITY = 28.812;
   public static final double ELEVATOR_MAX_ACCELERATION = 63.769;

@@ -144,7 +144,9 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
-        arm = new Arm(new ArmIOKraken());
+        manipulator =
+            new Manipulator(new ManipulatorIOKraken(), new ManipulatorSensorsIOCANrange());
+        arm = new Arm(new ArmIOKraken(), manipulator::getGamepieceState);
         elevator = new Elevator(new ElevatorIOKraken());
         aprilTagVision =
             new AprilTagVision(
@@ -158,16 +160,14 @@ public class RobotContainer {
                     AprilTagVisionConstants.CAMERA_CONFIGS.get(1),
                     drive::getRotation,
                     drive::getPose),
-                new AprilTagVisionIOPhoton(
-                    AprilTagVisionConstants.CAMERA_CONFIGS.get(2),
-                    drive::getRotation,
-                    drive::getPose),
+                // new AprilTagVisionIOPhoton(
+                //     AprilTagVisionConstants.CAMERA_CONFIGS.get(2),
+                //     drive::getRotation,
+                //     drive::getPose),
                 new AprilTagVisionIOPhoton(
                     AprilTagVisionConstants.CAMERA_CONFIGS.get(2),
                     drive::getRotation,
                     drive::getPose));
-        manipulator =
-            new Manipulator(new ManipulatorIOKraken(), new ManipulatorSensorsIOCANrange());
         climber = new Climber(new ClimberIOServo());
         break;
 
@@ -184,8 +184,8 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-
-        arm = new Arm(new ArmIOSim());
+        manipulator = new Manipulator(new ManipulatorIOSim(), new ManipulatorSensorIOSim());
+        arm = new Arm(new ArmIOSim(), manipulator::getGamepieceState);
         elevator = new Elevator(new ElevatorIO() {});
         aprilTagVision =
             new AprilTagVision(
@@ -207,7 +207,6 @@ public class RobotContainer {
         //     AprilTagVisionConstants.CAMERA_CONFIGS.get(3),
         //     drive::getRotation,
         //     driveSimulation::getSimulatedDriveTrainPose));
-        manipulator = new Manipulator(new ManipulatorIOSim(), new ManipulatorSensorIOSim());
         climber = new Climber(new ClimberIOSim());
         break;
 
@@ -220,7 +219,8 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-        arm = new Arm(new ArmIO() {});
+        manipulator = new Manipulator(new ManipulatorIO() {}, new ManipulatorSensorIO() {});
+        arm = new Arm(new ArmIO() {}, manipulator::getGamepieceState);
         elevator = new Elevator(new ElevatorIO() {});
         aprilTagVision =
             new AprilTagVision(
@@ -230,7 +230,6 @@ public class RobotContainer {
                 new AprilTagVisionIO() {},
                 new AprilTagVisionIO() {},
                 new AprilTagVisionIO() {});
-        manipulator = new Manipulator(new ManipulatorIO() {}, new ManipulatorSensorIO() {});
         climber = new Climber(new ClimberIO() {});
         break;
     }
@@ -311,6 +310,8 @@ public class RobotContainer {
                 .withTimeout(0.9) // Rumble three times
                 .beforeStarting(() -> leds.setEndGameWarning(true))
                 .finallyDo(() -> leds.setEndGameWarning(false)));
+
+    // new Trigger(() -> auxController.getRawButton(19)).onTrue(getAutonomousCommand());
 
     pathOverride.addDefaultOption("off", pathingOverrideSupplier = () -> false);
     pathOverride.addOption("on", pathingOverrideSupplier = () -> true);
@@ -433,12 +434,9 @@ public class RobotContainer {
     //             manipulator.setManipulatorState(ManipulatorState.SHOOTING_CORAL),
     //             manipulator::hasAlgae));
 
-    controller.a().onFalse(manipulator.setManipulatorState(ManipulatorState.IDLE));
-
     // cancel/stow command
     controller
         .b()
-        .and(() -> superstructure.atSuperStructureGoal())
         .onTrue(
             superstructure
                 .setSuperstructureCommand(() -> SuperstructureStates.STOW)
@@ -507,23 +505,36 @@ public class RobotContainer {
                 .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
 
     // ground pickup algae
+    // controller
+    //     .x()
+    //     .and(() -> manipulator.getGamepieceState() == Manipulator.GamepieceState.NONE)
+    //     .onTrue(
+    //         superstructure
+    //             .setSuperstructureCommand(() -> SuperstructureStates.ALGAE_INTAKING)
+    //             .alongWith(manipulator.setManipulatorState(ManipulatorState.INTAKING_ALGAE))
+    //             .andThen(
+    //                 Commands.waitUntil(
+    //                     () ->
+    //                         manipulator.getGamepieceState()
+    //                             == Manipulator.GamepieceState.ALGAE_IN_CLAW))
+    //             .andThen(manipulator.setManipulatorState(ManipulatorState.IDLE))
+    //             .andThen(Commands.waitUntil(() -> superstructure.atArmGoal()))
+    //             .andThen(superstructure.setSuperstructureCommand(() ->
+    // SuperstructureStates.STOW)));
+
     controller
         .x()
-        .and(() -> manipulator.getGamepieceState() == Manipulator.GamepieceState.NONE)
+        .and(() -> manipulator.getGamepieceState() == GamepieceState.NONE)
         .onTrue(
             superstructure
                 .setSuperstructureCommand(() -> SuperstructureStates.ALGAE_INTAKING)
                 .alongWith(manipulator.setManipulatorState(ManipulatorState.INTAKING_ALGAE))
                 .andThen(
                     Commands.waitUntil(
-                        () ->
-                            superstructure.atSuperStructureGoal()
-                                && manipulator.getGamepieceState()
-                                    == Manipulator.GamepieceState.ALGAE_IN_CLAW))
-                .andThen(
-                    superstructure
-                        .runArmToState(() -> ArmState.FLAT)
-                        .alongWith(manipulator.setManipulatorState(ManipulatorState.IDLE)))
+                        () -> manipulator.getGamepieceState() == GamepieceState.ALGAE_IN_CLAW))
+                .andThen(Commands.waitSeconds(0.25))
+                .andThen(manipulator.setManipulatorState(ManipulatorState.IDLE))
+                .andThen(superstructure.runArmToState(() -> ArmState.FLAT))
                 .andThen(Commands.waitUntil(() -> superstructure.atArmGoal()))
                 .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
 
@@ -551,7 +562,11 @@ public class RobotContainer {
     // with left side button
     controller
         .a()
-        .and(() -> superstructure.getSuperstructureGoal() != SuperstructureStates.STOW)
+        .and(
+            () ->
+                superstructure.getSuperstructureGoal() != SuperstructureStates.STOW
+                    && superstructure.getSuperstructureGoal()
+                        != SuperstructureStates.ALGAE_INTAKING)
         .whileTrue(
             Commands.either(
                 manipulator.setManipulatorState(ManipulatorState.SHOOTING_ALGAE),
@@ -559,10 +574,25 @@ public class RobotContainer {
                 manipulator::hasAlgae));
 
     controller
+        .a()
+        .and(
+            () ->
+                superstructure.getSuperstructureGoal() != SuperstructureStates.ALGAE_INTAKING
+                    || superstructure.getSuperstructureGoal()
+                        != SuperstructureStates.CORAL_INTAKING)
+        .onFalse(manipulator.setManipulatorState(ManipulatorState.IDLE));
+
+    controller
         .y()
         .and(() -> superstructure.getSuperstructureGoal() != SuperstructureStates.STOW)
         .and(() -> manipulator.getGamepieceState() == GamepieceState.CORAL_IN_MANIPULATOR)
         .whileTrue(manipulator.setManipulatorState(ManipulatorState.RETURN_CORAL));
+
+    controller
+        .y()
+        .and(() -> superstructure.getSuperstructureGoal() != SuperstructureStates.STOW)
+        .and(() -> manipulator.getGamepieceState() == GamepieceState.ALGAE_IN_CLAW)
+        .whileTrue(manipulator.setManipulatorState(ManipulatorState.RETURN_ALGAE));
 
     controller
         .rightBumper()
@@ -597,7 +627,10 @@ public class RobotContainer {
     controller
         .start()
         .and(() -> auxController.getRawButton(24))
-        .onTrue(Commands.runOnce(() -> climber.setServoRelease(true)));
+        .onTrue(
+            Commands.runOnce(() -> climber.setServoRelease(true))
+                .andThen(Commands.waitSeconds(3))
+                .andThen(Commands.runOnce(() -> climber.setServoRelease(false))));
   }
 
   /**

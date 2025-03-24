@@ -147,6 +147,12 @@ public class ArmIOKraken implements ArmIO {
   }
 
   @Override
+  public void changeKG(double kG) {
+    armConfig.Slot0.kG = kG;
+    armTalon.getConfigurator().apply(armConfig, 0.5);
+  }
+
+  @Override
   public void setInverted(boolean inverted) {
     armConfig.MotorOutput.Inverted =
         inverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;

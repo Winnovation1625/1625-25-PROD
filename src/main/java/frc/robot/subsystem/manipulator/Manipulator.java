@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystem.leds.Leds;
 import frc.robot.subsystem.manipulator.manipulatorSensors.ManipulatorSensorIO;
 import frc.robot.subsystem.manipulator.manipulatorSensors.ManipulatorSensorIOInputsAutoLogged;
+import frc.robot.subsystem.superstructure.arm.*;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.DoubleSupplier;
 import lombok.Getter;
@@ -31,6 +32,7 @@ public class Manipulator extends SubsystemBase {
     SHOOTING_CORAL(new LoggedTunableNumber("Manipulator/CoralShootingVoltage", -6)),
     SHOOTING_ALGAE(new LoggedTunableNumber("Manipulator/AlgaeShootingVoltage", -12)),
     RETURN_CORAL(new LoggedTunableNumber("Manipulator/ReturnCoral", 3)),
+    RETURN_ALGAE(new LoggedTunableNumber("Manipulator/ReturnAlgae", -3)),
     IDLE(() -> 0);
 
     private final DoubleSupplier voltageSupplier;
