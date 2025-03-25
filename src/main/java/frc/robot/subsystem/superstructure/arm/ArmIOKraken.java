@@ -25,6 +25,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants;
+import frc.robot.subsystem.manipulator.Manipulator.GamepieceState;
 import frc.robot.subsystem.superstructure.arm.ArmIO.ArmIOInputs;
 
 public class ArmIOKraken implements ArmIO {
@@ -35,7 +36,9 @@ public class ArmIOKraken implements ArmIO {
   private final StatusSignal<Current> supplyCurrentAmps;
   private final StatusSignal<Temperature> tempCelsius;
   private final TorqueCurrentFOC currentControl = new TorqueCurrentFOC(0.0);
-  private final MotionMagicTorqueCurrentFOC positionControl = new MotionMagicTorqueCurrentFOC(0.0);
+
+  private final MotionMagicTorqueCurrentFOC positionControl =
+      new MotionMagicTorqueCurrentFOC(0.0).withSlot(0);
   private final TalonFX armTalon;
   private final CANcoder armEncoder;
   private final TalonFXConfiguration armConfig;
@@ -61,6 +64,22 @@ public class ArmIOKraken implements ArmIO {
     armConfig.Slot0.kG = gains.ffkG();
     armConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
     armConfig.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseClosedLoopSign;
+    armConfig.Slot1.kP = gains.kP();
+    armConfig.Slot1.kI = gains.kI();
+    armConfig.Slot1.kD = gains.kD();
+    armConfig.Slot1.kS = gains.ffkS();
+    armConfig.Slot1.kV = gains.ffkV();
+    armConfig.Slot1.kG = gains.ffkG();
+    armConfig.Slot1.GravityType = GravityTypeValue.Arm_Cosine;
+    armConfig.Slot1.StaticFeedforwardSign = StaticFeedforwardSignValue.UseClosedLoopSign;
+    armConfig.Slot2.kP = gains.kP();
+    armConfig.Slot2.kI = gains.kI();
+    armConfig.Slot2.kD = gains.kD();
+    armConfig.Slot2.kS = gains.ffkS();
+    armConfig.Slot2.kV = gains.ffkV();
+    armConfig.Slot2.kG = gains.ffkG();
+    armConfig.Slot2.GravityType = GravityTypeValue.Arm_Cosine;
+    armConfig.Slot2.StaticFeedforwardSign = StaticFeedforwardSignValue.UseClosedLoopSign;
     armConfig.TorqueCurrent.PeakForwardTorqueCurrent = 80.0;
     armConfig.TorqueCurrent.PeakReverseTorqueCurrent = -80.0;
     armConfig.Feedback.FeedbackRemoteSensorID = Constants.SUPERSTRUCTURE_CAN_IDS.armEncoder();
@@ -101,11 +120,27 @@ public class ArmIOKraken implements ArmIO {
   }
 
   @Override
-  public void setArmPosition(double desiredPositionRad) {
-    armTalon.setControl(
-        positionControl
-            .withPosition(Units.radiansToRotations(desiredPositionRad))
-            .withUpdateFreqHz(100));
+  public void setArmPosition(double desiredPositionRad, GamepieceState gamepieceState) {
+    if (gamepieceState == GamepieceState.CORAL_IN_MANIPULATOR
+        || gamepieceState == GamepieceState.CORAL_STAGING) {
+      armTalon.setControl(
+          positionControl
+              .withPosition(Units.radiansToRotations(desiredPositionRad))
+              .withUpdateFreqHz(100)
+              .withSlot(1));
+    } else if (gamepieceState == GamepieceState.ALGAE_IN_CLAW) {
+      armTalon.setControl(
+          positionControl
+              .withPosition(Units.radiansToRotations(desiredPositionRad))
+              .withUpdateFreqHz(100)
+              .withSlot(2));
+    } else {
+      armTalon.setControl(
+          positionControl
+              .withPosition(Units.radiansToRotations(desiredPositionRad))
+              .withUpdateFreqHz(100)
+              .withSlot(0));
+    }
   }
 
   @Override
@@ -133,22 +168,38 @@ public class ArmIOKraken implements ArmIO {
       double kA,
       double kG,
       double cruiseA,
-      double cruiseV) {
-    armConfig.Slot0.kP = p;
-    armConfig.Slot0.kI = i;
-    armConfig.Slot0.kD = d;
-    armConfig.Slot0.kS = kS;
-    armConfig.Slot0.kV = kV;
-    armConfig.Slot0.kA = kA;
-    armConfig.Slot0.kG = kG;
+      double cruiseV,
+      int slot) {
+    switch (slot) {
+      case 0:
+        armConfig.Slot0.kP = p;
+        armConfig.Slot0.kI = i;
+        armConfig.Slot0.kD = d;
+        armConfig.Slot0.kS = kS;
+        armConfig.Slot0.kV = kV;
+        armConfig.Slot0.kA = kA;
+        armConfig.Slot0.kG = kG;
+        break;
+      case 1:
+        armConfig.Slot1.kP = p;
+        armConfig.Slot1.kI = i;
+        armConfig.Slot1.kD = d;
+        armConfig.Slot1.kS = kS;
+        armConfig.Slot1.kV = kV;
+        armConfig.Slot1.kA = kA;
+        armConfig.Slot1.kG = kG;
+        break;
+      default:
+        armConfig.Slot2.kP = p;
+        armConfig.Slot2.kI = i;
+        armConfig.Slot2.kD = d;
+        armConfig.Slot2.kS = kS;
+        armConfig.Slot2.kV = kV;
+        armConfig.Slot2.kA = kA;
+        armConfig.Slot2.kG = kG;
+    }
     armConfig.MotionMagic.MotionMagicCruiseVelocity = cruiseV;
     armConfig.MotionMagic.MotionMagicAcceleration = cruiseA;
-    armTalon.getConfigurator().apply(armConfig, 0.5);
-  }
-
-  @Override
-  public void changeKG(double kG) {
-    armConfig.Slot0.kG = kG;
     armTalon.getConfigurator().apply(armConfig, 0.5);
   }
 

@@ -175,4 +175,8 @@ public class Elevator {
   public double getElevatorHeight() {
     return convertRadiansToDistanceMeters(inputs.positionRad);
   }
+
+  public void setEncoderPosition(double encoderSetpoint) {
+    io.setEncoderPosition(encoderSetpoint);
+  }
 }

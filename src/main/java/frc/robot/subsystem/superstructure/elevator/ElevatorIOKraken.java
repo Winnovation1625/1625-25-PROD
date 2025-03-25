@@ -285,4 +285,10 @@ public class ElevatorIOKraken implements ElevatorIO {
             .withPosition(Units.radiansToRotations(positionSetpointRads))
             .withUpdateFreqHz(250));
   }
+
+  @Override
+  public void setEncoderPosition(double encoderPositionRotations) {
+    elevatorTalon.setPosition(encoderPositionRotations);
+    elevatorFollower.setPosition(encoderPositionRotations);
+  }
 }

@@ -48,4 +48,6 @@ public interface ElevatorIO {
   public default void stop() {}
 
   public default void setPosition(double positionSetpointRads) {}
+
+  public default void setEncoderPosition(double encoderPositionRotations) {}
 }

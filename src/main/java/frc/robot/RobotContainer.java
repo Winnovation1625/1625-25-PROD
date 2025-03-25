@@ -74,6 +74,7 @@ import frc.robot.subsystem.superstructure.arm.ArmIO;
 import frc.robot.subsystem.superstructure.arm.ArmIOKraken;
 import frc.robot.subsystem.superstructure.arm.ArmIOSim;
 import frc.robot.subsystem.superstructure.elevator.Elevator;
+import frc.robot.subsystem.superstructure.elevator.ElevatorConstants;
 import frc.robot.subsystem.superstructure.elevator.ElevatorIO;
 import frc.robot.subsystem.superstructure.elevator.ElevatorIOKraken;
 import frc.robot.util.AllianceFlipUtil;
@@ -160,12 +161,12 @@ public class RobotContainer {
                     AprilTagVisionConstants.CAMERA_CONFIGS.get(1),
                     drive::getRotation,
                     drive::getPose),
-                // new AprilTagVisionIOPhoton(
-                //     AprilTagVisionConstants.CAMERA_CONFIGS.get(2),
-                //     drive::getRotation,
-                //     drive::getPose),
                 new AprilTagVisionIOPhoton(
                     AprilTagVisionConstants.CAMERA_CONFIGS.get(2),
+                    drive::getRotation,
+                    drive::getPose),
+                new AprilTagVisionIOPhoton(
+                    AprilTagVisionConstants.CAMERA_CONFIGS.get(3),
                     drive::getRotation,
                     drive::getPose));
         climber = new Climber(new ClimberIOServo());
@@ -202,11 +203,11 @@ public class RobotContainer {
                 new AprilTagVisionIOPhotonSim(
                     AprilTagVisionConstants.CAMERA_CONFIGS.get(2),
                     drive::getRotation,
+                    driveSimulation::getSimulatedDriveTrainPose),
+                new AprilTagVisionIOPhotonSim(
+                    AprilTagVisionConstants.CAMERA_CONFIGS.get(3),
+                    drive::getRotation,
                     driveSimulation::getSimulatedDriveTrainPose));
-        // new AprilTagVisionIOPhotonSim(
-        //     AprilTagVisionConstants.CAMERA_CONFIGS.get(3),
-        //     drive::getRotation,
-        //     driveSimulation::getSimulatedDriveTrainPose));
         climber = new Climber(new ClimberIOSim());
         break;
 
@@ -248,7 +249,9 @@ public class RobotContainer {
         "AutoScoreL2", AutoScoreCommands.autoScoreCoral(superstructure, manipulator, ReefLevel.L2));
     NamedCommands.registerCommand("DriveToReefFace4", new DriveToReef(drive, 4, true));
     NamedCommands.registerCommand("DriveToReefFace3", new DriveToReef(drive, 3, true));
-
+    NamedCommands.registerCommand(
+        "LeaveStartConfigAutoScoreL2",
+        AutoScoreCommands.autoScoreCoral(superstructure, manipulator, ReefLevel.L2, true));
     for (var position : FieldConstants.ReefPosition.values()) {
       DriveToReef reefCommand = new DriveToReef(drive, () -> position);
       NamedCommands.registerCommand(
@@ -680,5 +683,9 @@ public class RobotContainer {
 
   public Pose2d getRobotPose() {
     return drive.getPose();
+  }
+
+  public void setElevatorEncoderPosition() {
+    superstructure.setElevatorEncoderPosition(ElevatorConstants.ELEVATOR_OFFSET_ROTATIONS);
   }
 }

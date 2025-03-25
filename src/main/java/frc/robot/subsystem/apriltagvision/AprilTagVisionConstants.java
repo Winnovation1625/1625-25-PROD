@@ -10,13 +10,13 @@ public class AprilTagVisionConstants {
       int cameraId, String cameraName, Transform3d robotToCamera, double stdDevFactor) {}
 
   // Basic filtering thresholds
-  public static final double MAX_AMBIGUITY = 0.3;
+  public static final double MAX_AMBIGUITY = 0.2;
   public static final double MAX_Z_ERROR = 0.75;
 
   // Standard deviation baselines, for 1 meter distance and 1 tag
   // (Adjusted automatically based on distance and # of tags)
-  public static final double LINEAR_STD_DEV_BASELINE = 0.01; // Meters
-  public static final double ANGULAR_STD_DEV_BASELINE = 0.005; // Radians
+  public static final double LINEAR_STD_DEV_BASELINE = 0.04; // Meters
+  public static final double ANGULAR_STD_DEV_BASELINE = 0.25; // Radians
 
   // public static final double ambiguityThreshold = 0.4;
   // public static final double targetLogTimeSecs = 0.1;
@@ -39,7 +39,7 @@ public class AprilTagVisionConstants {
                   Units.inchesToMeters(-12),
                   Units.inchesToMeters(13.248),
                   new Rotation3d(0, 0, Units.degreesToRadians(-125))),
-              0.6),
+              1.0),
           new CameraConfig(
               1,
               "Elevator_Support_OV2311",
@@ -48,16 +48,16 @@ public class AprilTagVisionConstants {
                   Units.inchesToMeters(-10.813),
                   Units.inchesToMeters(8.156),
                   new Rotation3d(0, Units.degreesToRadians(-30), Units.degreesToRadians(-120))),
-              0.6),
-          //   new CameraConfig(
-          //       2,
-          //       "Top_Elevator_OV2311",
-          //       new Transform3d(
-          //           Units.inchesToMeters(-1.696),
-          //           Units.inchesToMeters(0),
-          //           Units.inchesToMeters(31.603),
-          //           new Rotation3d(0, Units.degreesToRadians(-30), Units.degreesToRadians(180))),
-          //       1.0),
+              1.0),
+          new CameraConfig(
+              2,
+              "Top_Elevator_OV2311",
+              new Transform3d(
+                  Units.inchesToMeters(-1.696),
+                  Units.inchesToMeters(0),
+                  Units.inchesToMeters(31.603),
+                  new Rotation3d(0, Units.degreesToRadians(-30), Units.degreesToRadians(180))),
+              1.5),
           new CameraConfig(
               3,
               "Elevator_Cage_OV2311",
@@ -66,5 +66,5 @@ public class AprilTagVisionConstants {
                   Units.inchesToMeters(10.798),
                   Units.inchesToMeters(8.158),
                   new Rotation3d(0, Units.degreesToRadians(-32), Units.degreesToRadians(85))),
-              .6));
+              2.0));
 }

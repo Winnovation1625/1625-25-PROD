@@ -86,7 +86,7 @@ public class Arm {
         "Superstructure/Arm/SetpointAngleRads", positionSetpoint.getArmAngle().getAsDouble());
     LoggedTunableNumber.ifChanged(
         hashCode(),
-        pid -> io.setPID(pid[0], pid[1], pid[2], pid[3], pid[4], pid[5], pid[6], pid[7], pid[8]),
+        pid -> io.setPID(pid[0], pid[1], pid[2], pid[3], pid[4], pid[5], pid[6], pid[7], pid[8], 0),
         kP,
         kI,
         kD,
@@ -94,6 +94,30 @@ public class Arm {
         kV,
         kA,
         kG,
+        cruiseV,
+        cruiseA);
+    LoggedTunableNumber.ifChanged(
+        hashCode(),
+        pid -> io.setPID(pid[0], pid[1], pid[2], pid[3], pid[4], pid[5], pid[6], pid[7], pid[8], 1),
+        kP,
+        kI,
+        kD,
+        kS,
+        kV,
+        kA,
+        kG_Coral,
+        cruiseV,
+        cruiseA);
+    LoggedTunableNumber.ifChanged(
+        hashCode(),
+        pid -> io.setPID(pid[0], pid[1], pid[2], pid[3], pid[4], pid[5], pid[6], pid[7], pid[8], 2),
+        kP,
+        kI,
+        kD,
+        kS,
+        kV,
+        kA,
+        kG_Algae,
         cruiseV,
         cruiseA);
     // LoggedNetworkBoolean.ifChanged(hashCode(), brakeEnabled -> io.setBrakeMode(brakeModeEnabled),
@@ -104,18 +128,18 @@ public class Arm {
     //   io.setArmPosition(positionSetpoint);
     // }
 
-    if (gamepieceState == GamepieceState.NONE && kGCurrent != kG.get()) {
-      io.changeKG(kG.get());
-      kGCurrent = kG.get();
-    } else if ((gamepieceState == GamepieceState.CORAL_IN_MANIPULATOR
-            || gamepieceState == GamepieceState.CORAL_STAGING)
-        && kGCurrent != kG_Coral.get()) {
-      io.changeKG(kG_Coral.get());
-      kGCurrent = kG_Coral.get();
-    } else if (gamepieceState == GamepieceState.ALGAE_IN_CLAW && kGCurrent != kG_Algae.get()) {
-      io.changeKG(kG_Algae.get());
-      kGCurrent = kG_Algae.get();
-    }
+    // if (gamepieceState == GamepieceState.NONE && kGCurrent != kG.get()) {
+    //   io.changeKG(kG.get());
+    //   kGCurrent = kG.get();
+    // } else if ((gamepieceState == GamepieceState.CORAL_IN_MANIPULATOR
+    //         || gamepieceState == GamepieceState.CORAL_STAGING)
+    //     && kGCurrent != kG_Coral.get()) {
+    //   io.changeKG(kG_Coral.get());
+    //   kGCurrent = kG_Coral.get();
+    // } else if (gamepieceState == GamepieceState.ALGAE_IN_CLAW && kGCurrent != kG_Algae.get()) {
+    //   io.changeKG(kG_Algae.get());
+    //   kGCurrent = kG_Algae.get();
+    // }
   }
 
   @AutoLogOutput(key = "Superstructure/Arm/AtGoal")
@@ -157,7 +181,7 @@ public class Arm {
         "Set Command For Arm Ran to " + positionSetpoint.getArmAngle().getAsDouble());
     if (this.positionSetpoint != positionSetpoint) {
       this.positionSetpoint = positionSetpoint;
-      io.setArmPosition(positionSetpoint.getArmAngle().getAsDouble());
+      io.setArmPosition(positionSetpoint.getArmAngle().getAsDouble(), gamepieceStateSupplier.get());
     }
   }
 

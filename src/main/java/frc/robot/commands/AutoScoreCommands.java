@@ -63,8 +63,18 @@ public class AutoScoreCommands {
 
   public static Command autoScoreCoral(
       Superstructure superstructure, Manipulator manipulator, ReefLevel reefLevel) {
-    return superstructure
-        .setSuperstructureCommand(() -> reefLevel.state)
+    return autoScoreCoral(superstructure, manipulator, reefLevel, false);
+  }
+
+  public static Command autoScoreCoral(
+      Superstructure superstructure,
+      Manipulator manipulator,
+      ReefLevel reefLevel,
+      boolean fromStartConfig) {
+    return Commands.either(
+            superstructure.leaveStartConfigToGoal(reefLevel.state),
+            superstructure.setSuperstructureCommand(() -> reefLevel.state),
+            () -> fromStartConfig)
         .andThen(Commands.waitUntil(superstructure::atSuperStructureGoal))
         .andThen(manipulator.setManipulatorState(ManipulatorState.SHOOTING_CORAL))
         .andThen(Commands.waitUntil(() -> manipulator.getGamepieceState() == GamepieceState.NONE))
@@ -76,8 +86,15 @@ public class AutoScoreCommands {
   }
 
   public static Command autoScoreTrough(Superstructure superstructure, Manipulator manipulator) {
-    return superstructure
-        .setSuperstructureCommand(() -> SuperstructureStates.TROUGH)
+    return autoScoreTrough(superstructure, manipulator, false);
+  }
+
+  public static Command autoScoreTrough(
+      Superstructure superstructure, Manipulator manipulator, boolean fromStartConfig) {
+    return Commands.either(
+            superstructure.leaveStartConfigToGoal(SuperstructureStates.TROUGH),
+            superstructure.setSuperstructureCommand(() -> SuperstructureStates.TROUGH),
+            () -> fromStartConfig)
         .andThen(Commands.waitUntil(superstructure::atSuperStructureGoal))
         .andThen(manipulator.setManipulatorState(ManipulatorState.TROUGH_CORAL))
         .andThen(Commands.waitUntil(() -> manipulator.getGamepieceState() == GamepieceState.NONE))
