@@ -43,6 +43,7 @@ public class Manipulator extends SubsystemBase {
     ALGAE_IN_CLAW,
     CORAL_STAGING,
     CORAL_IN_MANIPULATOR,
+    CORAL_EXITING_BOT,
     NONE;
   }
 
@@ -77,13 +78,13 @@ public class Manipulator extends SubsystemBase {
       gamepieceState = GamepieceState.CORAL_STAGING;
     }
 
-    if (sensorInputs.isFrontCoralDetected == true
-        && (sensorInputs.isBackCoralDetected == true
-            || manipulatorState == ManipulatorState.SHOOTING_CORAL)) {
+    if (sensorInputs.isFrontCoralDetected == true && sensorInputs.isBackCoralDetected == true) {
       gamepieceState = GamepieceState.CORAL_IN_MANIPULATOR;
       if (prevManipulatorState == ManipulatorState.STAGING_CORAL) {
         manipulatorState = ManipulatorState.IDLE;
       }
+    } else if (sensorInputs.isFrontCoralDetected && !sensorInputs.isBackCoralDetected) {
+      gamepieceState = GamepieceState.CORAL_EXITING_BOT;
     }
 
     if (!sensorInputs.isFrontCoralDetected && !sensorInputs.isBackCoralDetected) {

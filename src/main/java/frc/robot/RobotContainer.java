@@ -271,7 +271,11 @@ public class RobotContainer {
         new DriveToHumanStation(drive, () -> FieldConstants.HumanStation.LEFT));
     NamedCommands.registerCommand(
         "DriveToRightHumanPlayerStation",
-        new DriveToHumanStation(drive, () -> FieldConstants.HumanStation.RIGHT));
+        new DriveToHumanStation(drive, () -> FieldConstants.HumanStation.RIGHT)
+            .until(
+                () ->
+                    manipulator.getGamepieceState() == GamepieceState.CORAL_STAGING
+                        || manipulator.getGamepieceState() == GamepieceState.CORAL_IN_MANIPULATOR));
     NamedCommands.registerCommand(
         "CoralIntake", AutoScoreCommands.coralIntake(superstructure, manipulator));
     NamedCommands.registerCommand(
