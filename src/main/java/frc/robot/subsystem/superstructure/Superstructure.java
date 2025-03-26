@@ -37,8 +37,6 @@ public class Superstructure extends SubsystemBase {
   @AutoLogOutput private ElevatorState elevatorState = ElevatorState.STOP;
   @AutoLogOutput private ArmState armState = ArmState.STOP;
 
-  // TODO: Make these hold the elevator and arm positions in this state, eliminate it in the arm and
-  // elevator classes
   @RequiredArgsConstructor
   public enum SuperstructureStates {
     ALGAE_INTAKING(ElevatorState.ALGAE_INTAKING, ArmState.ALGAE_INTAKING),
@@ -70,65 +68,10 @@ public class Superstructure extends SubsystemBase {
   public void periodic() {
     arm.periodic();
     elevator.periodic();
-    // switch (superstructureGoal) {
-    //   case INTAKING -> {
-    //     buildSuperStructureCommand(previousState, superstructureGoal);
-    //   }
-
-    //   case STOW -> {
-    //     buildSuperStructureCommand(superstructureGoal, previousState);
-    //   }
-
-    //   case CLIMB -> {
-    //     buildSuperStructureCommand(previousState, superstructureGoal);
-    //   }
-
-    //   case BARGE -> {
-    //     buildSuperStructureCommand(previousState, superstructureGoal);
-    //   }
-
-    //   case TROUGH -> {
-    //     buildSuperStructureCommand(previousState, superstructureGoal);
-    //   }
-
-    //   case CLVL2 -> {
-    //     buildSuperStructureCommand(previousState, superstructureGoal);
-    //     setHasAlgae(true);
-    //   }
-
-    //   case CLVL3 -> {
-    //     buildSuperStructureCommand(previousState, superstructureGoal);
-    //   }
-
-    //   case CLVL4 -> {
-    //     buildSuperStructureCommand(previousState, superstructureGoal);
-    //   }
-
-    //   case ALVL2 -> {
-    //     buildSuperStructureCommand(previousState, superstructureGoal);
-    //   }
-
-    //   case ALVL3 -> {
-    //     buildSuperStructureCommand(previousState, superstructureGoal);
-    //   }
-
-    //   case PROCESS -> {
-    //     buildSuperStructureCommand(previousState, superstructureGoal);
-    //   }
-    //   case STOP -> {
-    //     buildSuperStructureCommand(previousState, superstructureGoal);
-    //   }
-    // }
     setpointVisualizer.updateSuperstructurePose(
         elevatorState.getElevatorHeight().getAsDouble(), armState.getArmAngle().getAsDouble());
     measuredVisualizer.updateSuperstructurePose(elevator.getElevatorHeight(), arm.getArmPos());
   }
-
-  // public void setGoal(SuperstructureStates desiredState) {
-  //   if (desiredState != superstructureGoal) {
-  //     superstructureGoal = desiredState;
-  //   }
-  // }
 
   public Command setSuperstructureCommand(Supplier<SuperstructureStates> to) {
     Supplier<ElevatorState> toElevatorState =
@@ -148,11 +91,11 @@ public class Superstructure extends SubsystemBase {
         () -> hasAlgaeSupplier.get() ? ElevatorState.ALGAE_CLEARANCE : ElevatorState.STOW;
     BooleanSupplier comingFromCoralScore =
         () ->
-            superstructureGoal == SuperstructureStates.CLVL4
-                || superstructureGoal == SuperstructureStates.CLVL3
+            superstructureGoal == SuperstructureStates.CLVL3
                 || superstructureGoal == SuperstructureStates.CLVL2
                 || superstructureGoal == SuperstructureStates.ALVL2
                 || superstructureGoal == SuperstructureStates.ALVL3;
+    BooleanSupplier comingFromCoral4Score = () -> superstructureGoal == SuperstructureStates.CLVL4;
     return Commands.either(
         Commands.either( // true, true worst case
             runElevatorToState(intermediateState)
@@ -187,68 +130,55 @@ public class Superstructure extends SubsystemBase {
                             .andThen(runElevatorToState(toElevatorState)))
                     .andThen(() -> superstructureGoal = to.get(), this)
                     .andThen(Commands.print("Best Case Superstructure Run")),
-                runElevatorToState(toElevatorState)
-                    .alongWith(runArmToState(() -> to.get().armState))
-                    .andThen(() -> superstructureGoal = to.get())
-                    .andThen(Commands.print("Best Case Superstructure Run")),
+                Commands.either(
+                    runArmToState(() -> ArmState.CLVL3)
+                        .andThen(Commands.waitUntil(() -> arm.atGoal()))
+                        .andThen(
+                            runArmToState(() -> to.get().armState)
+                                .alongWith(
+                                    Commands.waitTime(Seconds.of(0.5))
+                                        .andThen(runElevatorToState(toElevatorState))))
+                        .andThen(() -> superstructureGoal = to.get(), this)
+                        .andThen(Commands.print("Best Case Superstructure Run")),
+                    runElevatorToState(toElevatorState)
+                        .alongWith(runArmToState(() -> to.get().armState))
+                        .andThen(() -> superstructureGoal = to.get())
+                        .andThen(Commands.print("Best Case Superstructure Run")),
+                    comingFromCoral4Score),
                 comingFromCoralScore),
             goingBelowThreshold),
         currentlyBelowThreshold);
+  }
 
-    // if (elevatorState.getElevatorHeight().getAsDouble() < threshold
-    //     && to.elevatorState.getElevatorHeight().getAsDouble() < threshold) {
-    //   System.out.println("Worst Case Scenario");
-    //   return runElevatorToState(intermediateState.getElevatorState())
-    //       .andThen(Commands.waitUntil(() -> atGoal()))
-    //       .andThen(runArmToState(to.getArmState()))
-    //       .andThen(Commands.waitUntil(() -> atGoal()))
-    //       .andThen(runElevatorToState(to.getElevatorState()))
-    //       .andThen(() -> superstructureGoal = to, this)
-    //       .withName("Worst Case Superstructure Run");
-    //   // add intermediate state
-    // } else if (elevatorState.getElevatorHeight().getAsDouble() < threshold
-    //     && to.elevatorState.getElevatorHeight().getAsDouble() > threshold) {
-    //   System.out.println("from below Case Scenario");
-    //   return runElevatorToState(intermediateState.getElevatorState())
-    //       .andThen(Commands.waitUntil(() -> atGoal()))
-    //       .andThen(runArmToState(to.getArmState()))
-    //       .alongWith(runElevatorToState(to.getElevatorState()))
-    //       .andThen(() -> superstructureGoal = to, this)
-    //       .withName("From Under Superstructure Run");
-    //   // add intermediate state
-    // } else if (elevatorState.getElevatorHeight().getAsDouble() > threshold
-    //     && to.elevatorState.getElevatorHeight().getAsDouble() < threshold) {
-    //   System.out.println("from above Case Scenario");
-    //   return runElevatorToState(intermediateState.getElevatorState())
-    //       .alongWith(runArmToState(to.getArmState()))
-    //       .andThen(Commands.waitUntil(() -> atGoal()))
-    //       .andThen(runElevatorToState(to.getElevatorState()))
-    //       .andThen(() -> superstructureGoal = to, this)
-    //       .withName("From Above Case Superstructure Run");
-    //   // add intermediate state
-    // } else {
-    //   System.out.println("Best Case Scenario");
-    //   return runElevatorToState(to.elevatorState)
-    //       .alongWith(runArmToState(to.armState))
-    //       .andThen(() -> superstructureGoal = to, this)
-    //       .withName("Best Case Superstructure Run"); // ends immediately,
-    //   // no intermediate state continue as nomal
-    // }
+  public Command leaveStartConfigToGoal(SuperstructureStates goal) {
+    return Commands.either(
+        runElevatorToState(() -> ElevatorState.ALGAE_CLEARANCE)
+            .andThen(Commands.waitUntil(() -> atGoal()))
+            .andThen(Commands.print("Elevator at algae Clearance, moving Arm"))
+            .andThen(runArmToState(() -> goal.getArmState()))
+            .andThen(Commands.waitUntil(() -> atGoal()))
+            .andThen(Commands.print("Arm at target, moving elevator"))
+            .andThen(runElevatorToState(() -> goal.getElevatorState()))
+            .andThen(() -> superstructureGoal = goal)
+            .andThen(Commands.print("Worst Case Superstructure Run From Start Config")),
+        runElevatorToState(() -> ElevatorState.ALGAE_CLEARANCE)
+            .andThen(Commands.waitUntil(() -> atGoal()))
+            .andThen(
+                runArmToState(() -> goal.getArmState())
+                    .alongWith(runElevatorToState(() -> goal.getElevatorState())))
+            .andThen(() -> superstructureGoal = goal)
+            .andThen(Commands.print("From Under Superstructure Run From Start Config")),
+        () -> goal == SuperstructureStates.TROUGH);
   }
 
   public Command runArmToState(Supplier<ArmState> armState) {
-    return Commands.runOnce(() -> arm.setPosition(armState.get()))
-        .alongWith(Commands.runOnce(() -> this.armState = armState.get()));
+    return Commands.runOnce(() -> this.armState = armState.get())
+        .alongWith(Commands.runOnce(() -> arm.setPosition(armState.get())));
   }
 
-  // public Command setGoalCommand(SuperstructureStates goal) {
-  //   return startEnd(() -> setGoal(goal), () -> setGoal(SuperstructureStates.STOW))
-  //       .withName("Superstructure " + goal);
-  // }
-
   public Command runElevatorToState(Supplier<ElevatorState> state) {
-    return Commands.runOnce(() -> elevator.setPosition(state.get()))
-        .alongWith(Commands.runOnce(() -> elevatorState = state.get()));
+    return Commands.runOnce(() -> elevatorState = state.get())
+        .alongWith(Commands.runOnce(() -> elevator.setPosition(state.get())));
   }
 
   public boolean atGoal() {
@@ -273,5 +203,9 @@ public class Superstructure extends SubsystemBase {
 
   public boolean atArmGoal() {
     return arm.atGoal();
+  }
+
+  public void setElevatorEncoderPosition(double encoderSetpoint) {
+    elevator.setEncoderPosition(encoderSetpoint);
   }
 }

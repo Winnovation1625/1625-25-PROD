@@ -17,7 +17,10 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerMotorArrangement;
 import com.pathplanner.lib.commands.FollowPathCommand;
+import com.pathplanner.lib.pathfinding.Pathfinding;
 import edu.wpi.first.hal.AllianceStationID;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Threads;
@@ -28,10 +31,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystem.leds.Leds;
-import frc.robot.util.Alert;
-import frc.robot.util.Alert.AlertType;
+import frc.robot.util.CanivoreReader;
 import frc.robot.util.Elastic;
+import frc.robot.util.LocalADStarAK;
 import frc.robot.util.VirtualSubsystem;
 import java.util.HashMap;
 import java.util.Map;
@@ -54,14 +56,26 @@ public class Robot extends LoggedRobot {
   private RobotContainer robotContainer;
   private static final double lowBatteryVoltage = 11.8;
   private static final double lowBatteryDisabledTime = 1.5;
+  private static final double canErrorTimeThreshold = 0.5; // Seconds to disable alert
+  private static final double canivoreErrorTimeThreshold = 0.5;
   private final Timer disabledTimer = new Timer();
-  private boolean isBotAuto = false;
+  private final Timer canInitialErrorTimer = new Timer();
+  private final Timer canErrorTimer = new Timer();
+  private final Timer canivoreErrorTimer = new Timer();
   private Field2d dashboardField = new Field2d();
+  private double autoStart;
+  private boolean autoMessagePrinted;
+  private final CanivoreReader canivoreReader = new CanivoreReader("*");
 
   private final Alert lowBatteryAlert =
       new Alert(
           "Battery voltage is very low, consider turning off the robot or replacing the battery.",
-          AlertType.WARNING);
+          AlertType.kWarning);
+
+  private final Alert canivoreErrorAlert =
+      new Alert("CANivore errors detected, robot may not be controllable.", AlertType.kError);
+  private final Alert canErrorAlert =
+      new Alert("CAN errors detected, robot may not be controllable.", AlertType.kError);
 
   public Robot() {
     // Record metadata
@@ -145,6 +159,9 @@ public class Robot extends LoggedRobot {
       DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
       DriverStationSim.notifyNewData();
     }
+    RobotController.setBrownoutVoltage(6.0);
+    // Rely on our custom alerts for disconnected controllers
+    DriverStation.silenceJoystickConnectionWarning(true);
 
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
@@ -156,7 +173,13 @@ public class Robot extends LoggedRobot {
   @Override
   public void robotInit() {
 
+    if (DriverStation.isFMSAttached() == true) {
+      robotContainer.setElevatorEncoderPosition();
+    }
+
+    Pathfinding.setPathfinder(new LocalADStarAK());
     FollowPathCommand.warmupCommand().schedule();
+    Elastic.selectTab("Auton");
   }
 
   /** This function is called periodically during all modes. */
@@ -164,14 +187,6 @@ public class Robot extends LoggedRobot {
   public void robotPeriodic() {
 
     VirtualSubsystem.periodicAll();
-
-    if (DriverStation.isTeleop() && isBotAuto == true) {
-      Elastic.selectTab("Teleop");
-      isBotAuto = false;
-    } else if (DriverStation.isAutonomous() && isBotAuto == false) {
-      Elastic.selectTab("Auton");
-      isBotAuto = true;
-    }
 
     // dashboardField.setRobotPose(RobotState.getInstance().getEstimatedPose());
 
@@ -181,6 +196,49 @@ public class Robot extends LoggedRobot {
     // This must be called from the robot's periodic block in order for anything in
     // the Command-based framework to work.
     CommandScheduler.getInstance().run();
+
+    if (autonomousCommand != null) {
+      if (!autonomousCommand.isScheduled() && !autoMessagePrinted) {
+        if (DriverStation.isAutonomousEnabled()) {
+          System.out.printf(
+              "*** Auto finished in %.2f secs ***%n", Timer.getTimestamp() - autoStart);
+        } else {
+          System.out.printf(
+              "*** Auto cancelled in %.2f secs ***%n", Timer.getTimestamp() - autoStart);
+        }
+        autoMessagePrinted = true;
+      }
+    }
+
+    robotContainer.checkControllers();
+    dashboardField.setRobotPose(robotContainer.getRobotPose());
+    var canStatus = RobotController.getCANStatus();
+    if (canStatus.transmitErrorCount > 0 || canStatus.receiveErrorCount > 0) {
+      canErrorTimer.restart();
+    }
+    canErrorAlert.set(
+        !canErrorTimer.hasElapsed(canErrorTimeThreshold)
+            && !canInitialErrorTimer.hasElapsed(canErrorTimeThreshold));
+
+    if (Constants.CURRENT_MODE == Constants.Mode.REAL) {
+      var canivoreStatus = canivoreReader.getStatus();
+      if (canivoreStatus.isPresent()) {
+        Logger.recordOutput("CANivoreStatus/Status", canivoreStatus.get().Status.getName());
+        Logger.recordOutput("CANivoreStatus/Utilization", canivoreStatus.get().BusUtilization);
+        Logger.recordOutput("CANivoreStatus/OffCount", canivoreStatus.get().BusOffCount);
+        Logger.recordOutput("CANivoreStatus/TxFullCount", canivoreStatus.get().TxFullCount);
+        Logger.recordOutput("CANivoreStatus/ReceiveErrorCount", canivoreStatus.get().REC);
+        Logger.recordOutput("CANivoreStatus/TransmitErrorCount", canivoreStatus.get().TEC);
+        if (!canivoreStatus.get().Status.isOK()
+            || canStatus.transmitErrorCount > 0
+            || canStatus.receiveErrorCount > 0) {
+          canivoreErrorTimer.restart();
+        }
+      }
+      canivoreErrorAlert.set(
+          !canivoreErrorTimer.hasElapsed(canivoreErrorTimeThreshold)
+              && !canInitialErrorTimer.hasElapsed(canErrorTimeThreshold));
+    }
   }
 
   /** This function is called once when the robot is disabled. */
@@ -196,17 +254,12 @@ public class Robot extends LoggedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
+    robotContainer.setElevatorEncoderPosition();
     autonomousCommand = robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
     if (autonomousCommand != null) {
       autonomousCommand.schedule();
-    }
-
-    if (RobotController.getBatteryVoltage() <= lowBatteryVoltage
-        && disabledTimer.hasElapsed(lowBatteryDisabledTime)) {
-      lowBatteryAlert.set(true);
-      Leds.getInstance().setLowBattery(true);
     }
   }
   /** This function is called periodically during autonomous. */
@@ -223,6 +276,7 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
+    Elastic.selectTab("Teleop");
   }
 
   /** This function is called periodically during operator control. */

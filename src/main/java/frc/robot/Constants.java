@@ -24,7 +24,7 @@ import lombok.Builder;
 public final class Constants {
   public static final double LOOP_PERIOD_SECS = 0.02;
   public static final boolean TUNING_MODE = true;
-  public static final Mode SIM_MODE = Mode.REAL;
+  public static final Mode SIM_MODE = Mode.SIM;
   public static final Mode CURRENT_MODE = RobotBase.isReal() ? Mode.REAL : SIM_MODE;
   public static final String CANIVORE_NAME = "canivore";
   public static final DriveCANIds DRIVE_CAN_IDS =

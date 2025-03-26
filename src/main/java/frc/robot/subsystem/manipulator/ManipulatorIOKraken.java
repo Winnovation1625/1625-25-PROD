@@ -8,6 +8,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -39,7 +40,10 @@ public class ManipulatorIOKraken implements ManipulatorIO {
     // config.Slot0.kS = gains.ffkS();
     // config.Slot0.kV = gains.ffkV();
     // config.Slot0.kG = gains.ffkG();
-
+    config.CurrentLimits.StatorCurrentLimitEnable = true;
+    config.CurrentLimits.StatorCurrentLimit = 60;
+    config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    motor.getConfigurator().apply(config);
     position = motor.getPosition();
     velocity = motor.getVelocity();
     supplyCurrent = motor.getSupplyCurrent();

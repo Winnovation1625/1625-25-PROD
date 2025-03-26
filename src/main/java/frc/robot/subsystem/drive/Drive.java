@@ -21,7 +21,6 @@ import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
@@ -48,7 +47,6 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -60,7 +58,7 @@ import frc.robot.RobotState.OdometryObservation;
 import frc.robot.RobotState.TxTyPoseRecord;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystem.apriltagvision.AprilTagVision;
-import frc.robot.util.LocalADStarAK;
+import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.HashMap;
 import java.util.Map;
@@ -86,9 +84,9 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
               Math.hypot(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)));
 
   // PathPlanner config constants
-  private static final double ROBOT_MASS_KG = 74.088;
-  private static final double ROBOT_MOI = 6.883;
-  private static final double WHEEL_COF = 1.2;
+  private static final double ROBOT_MASS_KG = 62.9994443;
+  private static final double ROBOT_MOI = 6.283;
+  private static final double WHEEL_COF = 1.5;
   private static final RobotConfig PP_CONFIG =
       new RobotConfig(
           ROBOT_MASS_KG,
@@ -188,11 +186,10 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
         this::getChassisSpeeds,
         this::runVelocity,
         new PPHolonomicDriveController(
-            new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
+            new PIDConstants(1.5, 0.0, 0), new PIDConstants(1.5, 0.0, 0)),
         PP_CONFIG,
-        () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
+        AllianceFlipUtil::shouldFlip,
         this);
-    Pathfinding.setPathfinder(new LocalADStarAK());
     PathPlannerLogging.setLogActivePathCallback(
         (activePath) -> {
           Logger.recordOutput(

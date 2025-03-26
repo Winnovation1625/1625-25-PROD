@@ -5,10 +5,12 @@ import static frc.robot.subsystem.superstructure.arm.ArmConstants.*;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj.DriverStation;
+import frc.robot.subsystem.manipulator.Manipulator.GamepieceState;
 import frc.robot.util.EqualsUtil;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -24,6 +26,7 @@ public class Arm {
       new LoggedTunableNumber("Arm/Tolerance", ARM_TOLERANCE);
   private boolean brakeModeEnabled;
   private BooleanSupplier disableSupplier = DriverStation::isDisabled;
+  private Supplier<GamepieceState> gamepieceStateSupplier;
 
   @AutoLogOutput(key = "Superstructure/Arm/Position")
   private ArmState positionSetpoint = ArmState.STOP;
@@ -34,22 +37,27 @@ public class Arm {
   private static final LoggedTunableNumber kV = new LoggedTunableNumber("Arm/kV", gains.ffkV());
   private static final LoggedTunableNumber kA = new LoggedTunableNumber("Arm/kA", gains.ffkA());
   private static final LoggedTunableNumber kG = new LoggedTunableNumber("Arm/kG", gains.ffkG());
+  private static final LoggedTunableNumber kG_Algae =
+      new LoggedTunableNumber("Arm/kG_Algae", gains.ffkG_Algae());
+  private static final LoggedTunableNumber kG_Coral =
+      new LoggedTunableNumber("Arm/kG_Coral", gains.ffkG_Coral());
   private static final LoggedTunableNumber cruiseV =
       new LoggedTunableNumber("Arm/cruiseV", gains.cruiseVelocity());
   private static final LoggedTunableNumber cruiseA =
       new LoggedTunableNumber("Arm/cruiseA", gains.cruiseAcceleration());
+  @AutoLogOutput private double kGCurrent = kG.get();
 
   @RequiredArgsConstructor
   public enum ArmState {
-    ALGAE_INTAKING(new LoggedTunableNumber("Superstructure/Arm/INTAKING", -0.427)),
-    CORAL_INTAKING(new LoggedTunableNumber("Superstructure/Arm/CORAL_INTAKING", 0.295)),
+    ALGAE_INTAKING(new LoggedTunableNumber("Superstructure/Arm/INTAKING", -0.5)),
+    CORAL_INTAKING(new LoggedTunableNumber("Superstructure/Arm/CORAL_INTAKING", 0)),
     STOW(new LoggedTunableNumber("Superstructure/Arm/STOW", Math.PI / 2)),
     CLIMB(new LoggedTunableNumber("Superstructure/Arm/CLIMB", Math.PI / 2)),
     BARGE(new LoggedTunableNumber("Superstructure/Arm/BARGE", 0.83)),
     CLVL2(new LoggedTunableNumber("Superstructure/Arm/CLVL2", 0.32)),
     TROUGH(new LoggedTunableNumber("Superstructure/Arm/TROUGH", 0)),
     CLVL3(new LoggedTunableNumber("Superstructure/Arm/CLVL3", 0.32)),
-    CLVL4(new LoggedTunableNumber("Superstructure/Arm/CLVL4", 0.7)),
+    CLVL4(new LoggedTunableNumber("Superstructure/Arm/CLVL4", 0.69)),
     ALVL2(new LoggedTunableNumber("Superstructure/Arm/ALVL2", 0.38)),
     ALVL3(new LoggedTunableNumber("Superstructure/Arm/ALVL3", 0.51)),
     PROCESS(new LoggedTunableNumber("Superstructure/Arm/PROCESS", 0.05)),
@@ -58,14 +66,16 @@ public class Arm {
     @Getter private final DoubleSupplier armAngle;
   }
 
-  public Arm(ArmIO io) {
+  public Arm(ArmIO io, Supplier<GamepieceState> gamepieceStateSupplier) {
     this.io = io;
     io.setBrakeMode(true);
     io.setInverted(ARM_INVERTED);
+    this.gamepieceStateSupplier = gamepieceStateSupplier;
   }
 
   public void periodic() {
     io.updateInputs(inputs);
+    GamepieceState gamepieceState = gamepieceStateSupplier.get();
 
     Logger.processInputs("Superstructure/Arm", inputs);
     if (disableSupplier.getAsBoolean()) {
@@ -76,7 +86,7 @@ public class Arm {
         "Superstructure/Arm/SetpointAngleRads", positionSetpoint.getArmAngle().getAsDouble());
     LoggedTunableNumber.ifChanged(
         hashCode(),
-        pid -> io.setPID(pid[0], pid[1], pid[2], pid[3], pid[4], pid[5], pid[6], pid[7], pid[8]),
+        pid -> io.setPID(pid[0], pid[1], pid[2], pid[3], pid[4], pid[5], pid[6], pid[7], pid[8], 0),
         kP,
         kI,
         kD,
@@ -86,12 +96,49 @@ public class Arm {
         kG,
         cruiseV,
         cruiseA);
+    LoggedTunableNumber.ifChanged(
+        hashCode(),
+        pid -> io.setPID(pid[0], pid[1], pid[2], pid[3], pid[4], pid[5], pid[6], pid[7], pid[8], 1),
+        kP,
+        kI,
+        kD,
+        kS,
+        kV,
+        kA,
+        kG_Coral,
+        cruiseV,
+        cruiseA);
+    LoggedTunableNumber.ifChanged(
+        hashCode(),
+        pid -> io.setPID(pid[0], pid[1], pid[2], pid[3], pid[4], pid[5], pid[6], pid[7], pid[8], 2),
+        kP,
+        kI,
+        kD,
+        kS,
+        kV,
+        kA,
+        kG_Algae,
+        cruiseV,
+        cruiseA);
     // LoggedNetworkBoolean.ifChanged(hashCode(), brakeEnabled -> io.setBrakeMode(brakeModeEnabled),
     // brakeEnabled);
     // io.setBrakeMode(!coastSupplier.getAsBoolean() || armState == ArmState.STOW);
 
     // if (!disableSupplier.getAsBoolean()) {
     //   io.setArmPosition(positionSetpoint);
+    // }
+
+    // if (gamepieceState == GamepieceState.NONE && kGCurrent != kG.get()) {
+    //   io.changeKG(kG.get());
+    //   kGCurrent = kG.get();
+    // } else if ((gamepieceState == GamepieceState.CORAL_IN_MANIPULATOR
+    //         || gamepieceState == GamepieceState.CORAL_STAGING)
+    //     && kGCurrent != kG_Coral.get()) {
+    //   io.changeKG(kG_Coral.get());
+    //   kGCurrent = kG_Coral.get();
+    // } else if (gamepieceState == GamepieceState.ALGAE_IN_CLAW && kGCurrent != kG_Algae.get()) {
+    //   io.changeKG(kG_Algae.get());
+    //   kGCurrent = kG_Algae.get();
     // }
   }
 
@@ -132,10 +179,9 @@ public class Arm {
   public void setPosition(ArmState positionSetpoint) {
     System.out.println(
         "Set Command For Arm Ran to " + positionSetpoint.getArmAngle().getAsDouble());
-    if (this.positionSetpoint.getArmAngle().getAsDouble()
-        != positionSetpoint.getArmAngle().getAsDouble()) {
+    if (this.positionSetpoint != positionSetpoint) {
       this.positionSetpoint = positionSetpoint;
-      io.setArmPosition(positionSetpoint.getArmAngle().getAsDouble());
+      io.setArmPosition(positionSetpoint.getArmAngle().getAsDouble(), gamepieceStateSupplier.get());
     }
   }
 

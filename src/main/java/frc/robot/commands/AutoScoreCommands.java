@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -13,10 +14,17 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.FieldConstants;
 import frc.robot.FieldConstants.CoralObjective;
 import frc.robot.FieldConstants.ReefLevel;
 import frc.robot.subsystem.drive.Drive;
+import frc.robot.subsystem.manipulator.Manipulator;
+import frc.robot.subsystem.manipulator.Manipulator.GamepieceState;
+import frc.robot.subsystem.manipulator.Manipulator.ManipulatorState;
+import frc.robot.subsystem.superstructure.Superstructure;
+import frc.robot.subsystem.superstructure.Superstructure.SuperstructureStates;
+import frc.robot.subsystem.superstructure.arm.Arm.ArmState;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.Map;
 
@@ -53,5 +61,89 @@ public class AutoScoreCommands {
                 Rotation2d.kZero));
     Command driveCommand = AutoBuilder.pathfindToPose(desiredRobotPose, PATH_CONSTRAINTS);
     return null;
+  }
+
+  public static Command autoScoreCoral(
+      Superstructure superstructure, Manipulator manipulator, ReefLevel reefLevel) {
+    return autoScoreCoral(superstructure, manipulator, reefLevel, false);
+  }
+
+  public static Command autoScoreCoral(
+      Superstructure superstructure,
+      Manipulator manipulator,
+      ReefLevel reefLevel,
+      boolean fromStartConfig) {
+    return Commands.either(
+        Commands.either(
+                superstructure.leaveStartConfigToGoal(reefLevel.state),
+                superstructure.setSuperstructureCommand(() -> reefLevel.state),
+                () -> fromStartConfig)
+            .andThen(Commands.waitUntil(superstructure::atSuperStructureGoal))
+            .andThen(manipulator.setManipulatorState(ManipulatorState.SHOOTING_CORAL))
+            .andThen(
+                Commands.waitUntil(
+                    () -> manipulator.getGamepieceState() == GamepieceState.CORAL_EXITING_BOT))
+            .andThen(Commands.waitTime(Seconds.of(0.1)))
+            .andThen(superstructure.runArmToState(() -> ArmState.CLVL3))
+            .andThen(
+                Commands.waitUntil(() -> manipulator.getGamepieceState() == GamepieceState.NONE))
+            .andThen(
+                manipulator
+                    .setManipulatorState(ManipulatorState.IDLE)
+                    .alongWith(
+                        superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW))),
+        Commands.either(
+                superstructure.leaveStartConfigToGoal(reefLevel.state),
+                superstructure.setSuperstructureCommand(() -> reefLevel.state),
+                () -> fromStartConfig)
+            .andThen(Commands.waitUntil(superstructure::atSuperStructureGoal))
+            .andThen(manipulator.setManipulatorState(ManipulatorState.SHOOTING_CORAL))
+            .andThen(
+                Commands.waitUntil(() -> manipulator.getGamepieceState() == GamepieceState.NONE))
+            .andThen(
+                manipulator
+                    .setManipulatorState(ManipulatorState.IDLE)
+                    .alongWith(
+                        superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW))),
+        () -> reefLevel == ReefLevel.L4);
+  }
+
+  public static Command autoScoreTrough(Superstructure superstructure, Manipulator manipulator) {
+    return autoScoreTrough(superstructure, manipulator, false);
+  }
+
+  public static Command autoScoreTrough(
+      Superstructure superstructure, Manipulator manipulator, boolean fromStartConfig) {
+    return Commands.either(
+            superstructure.leaveStartConfigToGoal(SuperstructureStates.TROUGH),
+            superstructure.setSuperstructureCommand(() -> SuperstructureStates.TROUGH),
+            () -> fromStartConfig)
+        .andThen(Commands.waitUntil(superstructure::atSuperStructureGoal))
+        .andThen(manipulator.setManipulatorState(ManipulatorState.TROUGH_CORAL))
+        .andThen(Commands.waitUntil(() -> manipulator.getGamepieceState() == GamepieceState.NONE))
+        .andThen(
+            manipulator
+                .setManipulatorState(ManipulatorState.IDLE)
+                .alongWith(
+                    superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
+  }
+
+  public static Command coralIntake(Superstructure superstructure, Manipulator manipulator) {
+    return superstructure
+        .setSuperstructureCommand(() -> SuperstructureStates.CORAL_INTAKING)
+        .alongWith(manipulator.setManipulatorState(ManipulatorState.INTAKING_CORAL))
+        .andThen(
+            Commands.waitUntil(
+                () ->
+                    superstructure.atSuperStructureGoal()
+                        && (manipulator.getGamepieceState()
+                                == Manipulator.GamepieceState.CORAL_STAGING
+                            || manipulator.getGamepieceState()
+                                == Manipulator.GamepieceState.CORAL_IN_MANIPULATOR)))
+        .andThen(
+            manipulator
+                .setManipulatorState(ManipulatorState.IDLE)
+                .alongWith(
+                    superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
   }
 }

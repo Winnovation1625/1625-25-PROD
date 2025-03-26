@@ -1,5 +1,6 @@
 package frc.robot.subsystem.superstructure.arm;
 
+import frc.robot.subsystem.manipulator.Manipulator.GamepieceState;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface ArmIO {
@@ -16,7 +17,7 @@ public interface ArmIO {
 
   public default void updateInputs(ArmIOInputs inputs) {}
 
-  public default void setArmPosition(double desiredPosition) {}
+  public default void setArmPosition(double desiredPosition, GamepieceState gamepieceState) {}
 
   public default void setBrakeMode(boolean enabled) {}
 
@@ -29,7 +30,8 @@ public interface ArmIO {
       double kA,
       double kG,
       double cruiseA,
-      double cruiseV) {}
+      double cruiseV,
+      int slot) {}
 
   public default void setInverted(boolean inverted) {}
 
@@ -38,4 +40,8 @@ public interface ArmIO {
   public default void stop() {}
 
   public default void runVolts(double volts) {}
+
+  public default double getKg() {
+    return 0;
+  }
 }

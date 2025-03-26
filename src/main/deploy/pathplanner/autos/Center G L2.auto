@@ -1,0 +1,31 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Center Auto Path"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "DriveToBranchG"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "LeaveStartConfigAutoScoreL4"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": true
+}

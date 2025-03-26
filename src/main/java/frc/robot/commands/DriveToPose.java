@@ -22,6 +22,7 @@ import org.littletonrobotics.junction.Logger;
 public class DriveToPose extends Command {
   private Leds leds = Leds.getInstance();
   private static final LoggedTunableNumber drivekP = new LoggedTunableNumber("DriveToPose/DrivekP");
+  private static final LoggedTunableNumber drivekI = new LoggedTunableNumber("DriveToPose/DrivekI");
   private static final LoggedTunableNumber drivekD = new LoggedTunableNumber("DriveToPose/DrivekD");
   private static final LoggedTunableNumber thetakP = new LoggedTunableNumber("DriveToPose/ThetakP");
   private static final LoggedTunableNumber thetakD = new LoggedTunableNumber("DriveToPose/ThetakD");
@@ -45,18 +46,19 @@ public class DriveToPose extends Command {
       new LoggedTunableNumber("DriveToPose/FFMaxRadius");
 
   static {
-    drivekP.initDefault(1.5);
+    drivekP.initDefault(2.35);
+    drivekI.initDefault(0.0);
     drivekD.initDefault(0.0);
-    thetakP.initDefault(4.0);
-    thetakD.initDefault(0.0);
-    driveMaxVelocity.initDefault(2);
+    thetakP.initDefault(3.5);
+    thetakD.initDefault(0.2);
+    driveMaxVelocity.initDefault(1.5);
     driveMaxAcceleration.initDefault(1.0);
-    thetaMaxVelocity.initDefault(Units.degreesToRadians(360.0));
+    thetaMaxVelocity.initDefault(Units.degreesToRadians(270.0));
     thetaMaxAcceleration.initDefault(4.0);
-    driveTolerance.initDefault(0.01);
-    thetaTolerance.initDefault(Units.degreesToRadians(1.0));
-    ffMinRadius.initDefault(0.05);
-    ffMaxRadius.initDefault(0.1);
+    driveTolerance.initDefault(0.0508); // 1 inch
+    thetaTolerance.initDefault(Units.degreesToRadians(2.0));
+    ffMinRadius.initDefault(0.00);
+    ffMaxRadius.initDefault(0.25);
   }
 
   private final Drive drive;
@@ -64,7 +66,7 @@ public class DriveToPose extends Command {
 
   private final ProfiledPIDController driveController =
       new ProfiledPIDController(
-          0.0, 0.0, 0.0, new TrapezoidProfile.Constraints(0.0, 0.0), Constants.LOOP_PERIOD_SECS);
+          0, 0.0, 0.0, new TrapezoidProfile.Constraints(0.0, 0.0), Constants.LOOP_PERIOD_SECS);
   private final ProfiledPIDController thetaController =
       new ProfiledPIDController(
           0.0, 0.0, 0.0, new TrapezoidProfile.Constraints(0.0, 0.0), Constants.LOOP_PERIOD_SECS);
@@ -126,6 +128,18 @@ public class DriveToPose extends Command {
     thetaController.reset(
         currentPose.getRotation().getRadians(), fieldVelocity.omegaRadiansPerSecond);
     lastSetpointTranslation = currentPose.getTranslation();
+    driveController.setP(drivekP.get());
+    driveController.setI(drivekI.get());
+    driveController.setD(drivekD.get());
+    driveController.setConstraints(
+        new TrapezoidProfile.Constraints(driveMaxVelocity.get(), driveMaxAcceleration.get()));
+    driveController.setTolerance(driveTolerance.get());
+    thetaController.setP(thetakP.get());
+    thetaController.setD(thetakD.get());
+    thetaController.setConstraints(
+        new TrapezoidProfile.Constraints(thetaMaxVelocity.get(), thetaMaxAcceleration.get()));
+    thetaController.setTolerance(thetaTolerance.get());
+    leds.setAutoLiningUp(true);
   }
 
   @Override
@@ -141,10 +155,12 @@ public class DriveToPose extends Command {
         || thetaMaxAcceleration.hasChanged(hashCode())
         || thetaTolerance.hasChanged(hashCode())
         || drivekP.hasChanged(hashCode())
+        || drivekI.hasChanged(hashCode())
         || drivekD.hasChanged(hashCode())
         || thetakP.hasChanged(hashCode())
         || thetakD.hasChanged(hashCode())) {
       driveController.setP(drivekP.get());
+      driveController.setI(drivekI.get());
       driveController.setD(drivekD.get());
       driveController.setConstraints(
           new TrapezoidProfile.Constraints(driveMaxVelocity.get(), driveMaxAcceleration.get()));
@@ -213,6 +229,11 @@ public class DriveToPose extends Command {
         ChassisSpeeds.fromFieldRelativeSpeeds(
             driveVelocity.getX(), driveVelocity.getY(), thetaVelocity, currentPose.getRotation()));
 
+    if (atGoal()) {
+      leds.setWhenLinedUp(true);
+    } else {
+      leds.setWhenLinedUp(false);
+    }
     // Log data
     Logger.recordOutput("DriveToPose/DistanceMeasured", currentDistance);
     Logger.recordOutput("DriveToPose/DistanceSetpoint", driveController.getSetpoint().position);
@@ -231,14 +252,18 @@ public class DriveToPose extends Command {
   @Override
   public void end(boolean interrupted) {
     drive.stop();
-    if (interrupted == false) {
-      leds.setWhenLinedUp(true);
-    }
+    leds.setAutoLiningUp(false);
+    leds.setWhenLinedUp(false);
     running = false;
     // Clear logs
     Logger.recordOutput("DriveToPose/Setpoint", new Pose2d[] {});
     Logger.recordOutput("DriveToPose/Goal", new Pose2d[] {});
   }
+
+  //   @Override
+  //   public boolean isFinished() {
+  //     return atGoal();
+  //   }
 
   /** Checks if the robot is stopped at the final pose. */
   public boolean atGoal() {

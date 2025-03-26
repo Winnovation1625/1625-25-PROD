@@ -1,0 +1,61 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Right Barge to Coral E2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "DriveToBranchE"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "LeaveStartConfigAutoScoreL4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Reef Face3D to Human"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "DriveToRightHumanPlayerStation"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Right Human Player to D"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "DriveToBranchC"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AutoScoreL4"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": true
+}

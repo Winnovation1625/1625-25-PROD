@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystem.leds.Leds;
 import frc.robot.subsystem.manipulator.manipulatorSensors.ManipulatorSensorIO;
 import frc.robot.subsystem.manipulator.manipulatorSensors.ManipulatorSensorIOInputsAutoLogged;
+import frc.robot.subsystem.superstructure.arm.*;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.DoubleSupplier;
 import lombok.Getter;
@@ -27,8 +28,11 @@ public class Manipulator extends SubsystemBase {
     INTAKING_CORAL(new LoggedTunableNumber("Manipulator/CoralIntakeVoltage", -3)),
     INTAKING_ALGAE(new LoggedTunableNumber("Manipulator/AlgaeIntakeVoltage", 4)),
     STAGING_CORAL(new LoggedTunableNumber("Manipulator/CoralStagingVoltage", -1.5)),
+    TROUGH_CORAL(new LoggedTunableNumber("Manipulator/CoralTroughVoltage", -3)),
     SHOOTING_CORAL(new LoggedTunableNumber("Manipulator/CoralShootingVoltage", -6)),
     SHOOTING_ALGAE(new LoggedTunableNumber("Manipulator/AlgaeShootingVoltage", -12)),
+    RETURN_CORAL(new LoggedTunableNumber("Manipulator/ReturnCoral", 3)),
+    RETURN_ALGAE(new LoggedTunableNumber("Manipulator/ReturnAlgae", -3)),
     IDLE(() -> 0);
 
     private final DoubleSupplier voltageSupplier;
@@ -39,6 +43,7 @@ public class Manipulator extends SubsystemBase {
     ALGAE_IN_CLAW,
     CORAL_STAGING,
     CORAL_IN_MANIPULATOR,
+    CORAL_EXITING_BOT,
     NONE;
   }
 
@@ -73,15 +78,13 @@ public class Manipulator extends SubsystemBase {
       gamepieceState = GamepieceState.CORAL_STAGING;
     }
 
-    if (sensorInputs.isFrontCoralDetected == true
-        && (sensorInputs.isBackCoralDetected == true
-            || manipulatorState == ManipulatorState.SHOOTING_CORAL)) {
+    if (sensorInputs.isFrontCoralDetected == true && sensorInputs.isBackCoralDetected == true) {
       gamepieceState = GamepieceState.CORAL_IN_MANIPULATOR;
       if (prevManipulatorState == ManipulatorState.STAGING_CORAL) {
         manipulatorState = ManipulatorState.IDLE;
       }
-      Leds.getInstance().setCoralInBot(true);
-      Leds.getInstance().setAlgaeInBot(false);
+    } else if (sensorInputs.isFrontCoralDetected && !sensorInputs.isBackCoralDetected) {
+      gamepieceState = GamepieceState.CORAL_EXITING_BOT;
     }
 
     if (!sensorInputs.isFrontCoralDetected && !sensorInputs.isBackCoralDetected) {
@@ -93,10 +96,12 @@ public class Manipulator extends SubsystemBase {
       if (prevManipulatorState == ManipulatorState.INTAKING_ALGAE) {
         manipulatorState = ManipulatorState.IDLE;
       }
-      Leds.getInstance().setAlgaeInBot(true);
-      Leds.getInstance().setCoralInBot(false);
     }
-
+    if (gamepieceState != GamepieceState.NONE) {
+      Leds.getInstance().setGamepieceInBot(true);
+    } else {
+      Leds.getInstance().setGamepieceInBot(false);
+    }
     if (DriverStation.isDisabled()) {
       manipulatorState = ManipulatorState.IDLE;
     }

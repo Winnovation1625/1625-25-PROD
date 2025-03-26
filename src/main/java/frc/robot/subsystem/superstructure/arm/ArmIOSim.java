@@ -13,6 +13,7 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import frc.robot.subsystem.manipulator.Manipulator.GamepieceState;
 
 public class ArmIOSim implements ArmIO {
   private DCMotor armMotorSim = DCMotor.getKrakenX60Foc(1);
@@ -64,7 +65,7 @@ public class ArmIOSim implements ArmIO {
   }
 
   @Override
-  public void setArmPosition(double positionSetpoint) {
+  public void setArmPosition(double positionSetpoint, GamepieceState gamepieceState) {
     pidController.setGoal(positionSetpoint);
   }
 }
