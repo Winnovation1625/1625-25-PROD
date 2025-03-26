@@ -2,7 +2,6 @@ package frc.robot.subsystem.manipulator;
 
 import static frc.robot.subsystem.manipulator.ManipulatorConstants.*;
 
-import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -10,7 +9,6 @@ import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
