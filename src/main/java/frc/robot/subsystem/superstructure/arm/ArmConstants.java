@@ -24,7 +24,7 @@ public class ArmConstants {
   public static Gains gains =
       switch (Constants.CURRENT_MODE) {
         case SIM -> new Gains(4.0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 200.0, 400.0);
-        case REAL, REPLAY -> new Gains(220, 100.0, 140.0, 6.0, 2.0, 1.0, 3.5, 12, -4, 1, 4);
+        case REAL, REPLAY -> new Gains(220, 100.0, 140.0, 6.0, 2.0, 1.0, 3.5, 12, 3, 1, 4);
       };
 
   public record Gains(

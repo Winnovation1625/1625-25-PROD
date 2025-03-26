@@ -154,8 +154,10 @@ public class Superstructure extends SubsystemBase {
     return Commands.either(
         runElevatorToState(() -> ElevatorState.ALGAE_CLEARANCE)
             .andThen(Commands.waitUntil(() -> atGoal()))
+            .andThen(Commands.print("Elevator at algae Clearance, moving Arm"))
             .andThen(runArmToState(() -> goal.getArmState()))
             .andThen(Commands.waitUntil(() -> atGoal()))
+            .andThen(Commands.print("Arm at target, moving elevator"))
             .andThen(runElevatorToState(() -> goal.getElevatorState()))
             .andThen(() -> superstructureGoal = goal)
             .andThen(Commands.print("Worst Case Superstructure Run From Start Config")),
@@ -170,13 +172,13 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command runArmToState(Supplier<ArmState> armState) {
-    return Commands.runOnce(() -> arm.setPosition(armState.get()))
-        .alongWith(Commands.runOnce(() -> this.armState = armState.get()));
+    return Commands.runOnce(() -> this.armState = armState.get())
+        .alongWith(Commands.runOnce(() -> arm.setPosition(armState.get())));
   }
 
   public Command runElevatorToState(Supplier<ElevatorState> state) {
-    return Commands.runOnce(() -> elevator.setPosition(state.get()))
-        .alongWith(Commands.runOnce(() -> elevatorState = state.get()));
+    return Commands.runOnce(() -> elevatorState = state.get())
+        .alongWith(Commands.runOnce(() -> elevator.setPosition(state.get())));
   }
 
   public boolean atGoal() {

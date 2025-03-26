@@ -11,12 +11,6 @@
           }
         },
         {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.25
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "DriveToBranchE"
@@ -25,7 +19,7 @@
         {
           "type": "named",
           "data": {
-            "name": "AutoScoreL4"
+            "name": "LeaveStartConfigAutoScoreL4"
           }
         },
         {

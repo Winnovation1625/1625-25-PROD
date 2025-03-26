@@ -172,6 +172,11 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void robotInit() {
+
+    if (DriverStation.isFMSAttached() == true) {
+      robotContainer.setElevatorEncoderPosition();
+    }
+
     Pathfinding.setPathfinder(new LocalADStarAK());
     FollowPathCommand.warmupCommand().schedule();
     Elastic.selectTab("Auton");
@@ -249,9 +254,7 @@ public class Robot extends LoggedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    if (DriverStation.isFMSAttached() == true) {
-      robotContainer.setElevatorEncoderPosition();
-    }
+    robotContainer.setElevatorEncoderPosition();
     autonomousCommand = robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)

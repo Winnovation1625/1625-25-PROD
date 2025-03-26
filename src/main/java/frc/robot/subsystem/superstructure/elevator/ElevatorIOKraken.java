@@ -85,6 +85,7 @@ public class ElevatorIOKraken implements ElevatorIO {
     config.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseClosedLoopSign;
     config.TorqueCurrent.PeakForwardTorqueCurrent = 80.0;
     config.TorqueCurrent.PeakReverseTorqueCurrent = -80.0;
+    config.Feedback.FeedbackRotorOffset = 0.45;
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
     config.Feedback.SensorToMechanismRatio = 5.0;

@@ -40,4 +40,8 @@ public interface ArmIO {
   public default void stop() {}
 
   public default void runVolts(double volts) {}
+
+  public default double getKg() {
+    return 0;
+  }
 }

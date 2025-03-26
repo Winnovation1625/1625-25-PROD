@@ -164,11 +164,11 @@ public class RobotContainer {
                 new AprilTagVisionIOPhoton(
                     AprilTagVisionConstants.CAMERA_CONFIGS.get(2),
                     drive::getRotation,
-                    drive::getPose),
-                new AprilTagVisionIOPhoton(
-                    AprilTagVisionConstants.CAMERA_CONFIGS.get(3),
-                    drive::getRotation,
                     drive::getPose));
+        // new AprilTagVisionIOPhoton(
+        //     AprilTagVisionConstants.CAMERA_CONFIGS.get(3),
+        //     drive::getRotation,
+        //     drive::getPose));
         climber = new Climber(new ClimberIOServo());
         break;
 
@@ -249,6 +249,9 @@ public class RobotContainer {
         "AutoScoreL2", AutoScoreCommands.autoScoreCoral(superstructure, manipulator, ReefLevel.L2));
     NamedCommands.registerCommand("DriveToReefFace4", new DriveToReef(drive, 4, true));
     NamedCommands.registerCommand("DriveToReefFace3", new DriveToReef(drive, 3, true));
+    NamedCommands.registerCommand(
+        "LeaveStartConfigAutoScoreL4",
+        AutoScoreCommands.autoScoreCoral(superstructure, manipulator, ReefLevel.L4, true));
     NamedCommands.registerCommand(
         "LeaveStartConfigAutoScoreL2",
         AutoScoreCommands.autoScoreCoral(superstructure, manipulator, ReefLevel.L2, true));
@@ -485,11 +488,12 @@ public class RobotContainer {
                             superstructure.atSuperStructureGoal()
                                 && manipulator.getGamepieceState()
                                     == Manipulator.GamepieceState.NONE))
-                .andThen(Commands.waitTime(Seconds.of(0.5)))
                 .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
 
     // auto path coral to reeef
     controller.leftBumper().whileTrue(new DriveToReef(drive, getCoralObjective));
+
+    // controller.povDown()
 
     // Algae Controls
     // score algae in barge or processor depending on aux button state
@@ -540,6 +544,8 @@ public class RobotContainer {
                 .andThen(superstructure.runArmToState(() -> ArmState.FLAT))
                 .andThen(Commands.waitUntil(() -> superstructure.atArmGoal()))
                 .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
+
+    // controller.povDown().onTrue(superstructure.leaveStartConfigToGoal(SuperstructureStates.STOW));
 
     // When left trigger and no algae in bot, grab algae from reef height dependent on aux algae pos
     // button
