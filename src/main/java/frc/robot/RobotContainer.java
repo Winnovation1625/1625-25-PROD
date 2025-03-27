@@ -484,15 +484,33 @@ public class RobotContainer {
             () ->
                 manipulator.getGamepieceState() == Manipulator.GamepieceState.CORAL_IN_MANIPULATOR)
         .onTrue(
-            superstructure
-                .setSuperstructureCommand(getCoralLevel)
-                .andThen(
-                    Commands.waitUntil(
-                        () ->
-                            superstructure.atSuperStructureGoal()
-                                && manipulator.getGamepieceState()
-                                    == Manipulator.GamepieceState.NONE))
-                .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
+            Commands.either(
+                superstructure
+                    .setSuperstructureCommand(getCoralLevel)
+                    .andThen(Commands.waitUntil(superstructure::atSuperStructureGoal))
+                    .andThen(
+                        Commands.waitUntil(
+                            () ->
+                                manipulator.getGamepieceState()
+                                    == GamepieceState.CORAL_EXITING_BOT))
+                    .andThen(Commands.waitTime(Seconds.of(0.1)))
+                    .andThen(superstructure.runArmToState(() -> ArmState.CLVL3))
+                    .andThen(
+                        Commands.waitUntil(
+                            () -> manipulator.getGamepieceState() == GamepieceState.NONE))
+                    .andThen(
+                        superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)),
+                superstructure
+                    .setSuperstructureCommand(getCoralLevel)
+                    .andThen(
+                        Commands.waitUntil(
+                            () ->
+                                superstructure.atSuperStructureGoal()
+                                    && manipulator.getGamepieceState()
+                                        == Manipulator.GamepieceState.NONE))
+                    .andThen(
+                        superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)),
+                () -> getCoralLevel.get() == SuperstructureStates.CLVL4));
 
     // auto path coral to reeef
     controller.leftBumper().whileTrue(new DriveToReef(drive, getCoralObjective));

@@ -223,7 +223,8 @@ public class Robot extends LoggedRobot {
         }
       }
       canivoreErrorAlert.set(
-          canivoreErrorTimer.hasElapsed(canivoreErrorTimeThreshold) && canInitialErrorTimer.hasElapsed(30));
+          canivoreErrorTimer.hasElapsed(canivoreErrorTimeThreshold)
+              && canInitialErrorTimer.hasElapsed(30));
     }
   }
 
