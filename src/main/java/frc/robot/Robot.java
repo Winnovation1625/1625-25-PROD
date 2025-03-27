@@ -56,11 +56,9 @@ public class Robot extends LoggedRobot {
   private RobotContainer robotContainer;
   private static final double lowBatteryVoltage = 11.8;
   private static final double lowBatteryDisabledTime = 1.5;
-  private static final double canErrorTimeThreshold = 0.5; // Seconds to disable alert
   private static final double canivoreErrorTimeThreshold = 0.5;
   private final Timer disabledTimer = new Timer();
   private final Timer canInitialErrorTimer = new Timer();
-  private final Timer canErrorTimer = new Timer();
   private final Timer canivoreErrorTimer = new Timer();
   private Field2d dashboardField = new Field2d();
   private double autoStart;
@@ -172,14 +170,10 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void robotInit() {
-
-    if (DriverStation.isFMSAttached() == true) {
-      robotContainer.setElevatorEncoderPosition();
-    }
-
     Pathfinding.setPathfinder(new LocalADStarAK());
     FollowPathCommand.warmupCommand().schedule();
     Elastic.selectTab("Auton");
+    canInitialErrorTimer.start();
   }
 
   /** This function is called periodically during all modes. */
@@ -212,13 +206,6 @@ public class Robot extends LoggedRobot {
 
     robotContainer.checkControllers();
     dashboardField.setRobotPose(robotContainer.getRobotPose());
-    var canStatus = RobotController.getCANStatus();
-    if (canStatus.transmitErrorCount > 0 || canStatus.receiveErrorCount > 0) {
-      canErrorTimer.restart();
-    }
-    canErrorAlert.set(
-        !canErrorTimer.hasElapsed(canErrorTimeThreshold)
-            && !canInitialErrorTimer.hasElapsed(canErrorTimeThreshold));
 
     if (Constants.CURRENT_MODE == Constants.Mode.REAL) {
       var canivoreStatus = canivoreReader.getStatus();
@@ -230,14 +217,13 @@ public class Robot extends LoggedRobot {
         Logger.recordOutput("CANivoreStatus/ReceiveErrorCount", canivoreStatus.get().REC);
         Logger.recordOutput("CANivoreStatus/TransmitErrorCount", canivoreStatus.get().TEC);
         if (!canivoreStatus.get().Status.isOK()
-            || canStatus.transmitErrorCount > 0
-            || canStatus.receiveErrorCount > 0) {
+            || canivoreStatus.get().TEC > 0
+            || canivoreStatus.get().REC > 0) {
           canivoreErrorTimer.restart();
         }
       }
       canivoreErrorAlert.set(
-          !canivoreErrorTimer.hasElapsed(canivoreErrorTimeThreshold)
-              && !canInitialErrorTimer.hasElapsed(canErrorTimeThreshold));
+          canivoreErrorTimer.hasElapsed(canivoreErrorTimeThreshold) && canInitialErrorTimer.hasElapsed(30));
     }
   }
 
