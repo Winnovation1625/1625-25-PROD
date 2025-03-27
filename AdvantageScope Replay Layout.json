@@ -1,0 +1,604 @@
+{
+  "hubs": [
+    {
+      "x": 0,
+      "y": 25,
+      "width": 1680,
+      "height": 962,
+      "state": {
+        "sidebar": {
+          "width": 348,
+          "expanded": [
+            "/RealOutputs",
+            "/RealOutputs/Odometry",
+            "/Drive",
+            "/Drive/Gyro",
+            "/RealOutputs/Superstructure",
+            "/RealOutputs/Manipulator",
+            "/Superstructure",
+            "/Superstructure/Arm",
+            "/RealOutputs/Vision",
+            "/RealOutputs/Vision/Summary",
+            "/RealOutputs/Vision/Elevator_Cage_OV2311",
+            "/RealOutputs/Vision/Battery_Support_Camera_OV2311",
+            "/RealOutputs/DriveToPose",
+            "/RealOutputs/SwerveStates",
+            "/RealOutputs/SwerveChassisSpeeds",
+            "/RealOutputs/LoggedRobot",
+            "/RealOutputs/Logger",
+            "/SystemStats",
+            "/SystemStats/CANBus",
+            "/RealOutputs/CANivoreStatus",
+            "/Vision"
+          ]
+        },
+        "tabs": {
+          "selected": 2,
+          "tabs": [
+            {
+              "type": 0,
+              "title": "",
+              "controller": null,
+              "controllerUUID": "u0zm4a5r5itrt7pcg4eef7usfzgqmi94",
+              "renderer": "#/whats-new/",
+              "controlsHeight": 0
+            },
+            {
+              "type": 3,
+              "title": "Trajectory Tracking",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "robot",
+                    "logKey": "/RealOutputs/Odometry/Robot",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "model": "1625-25-A-0000"
+                    }
+                  },
+                  {
+                    "type": "swerveStates",
+                    "logKey": "/RealOutputs/SwerveStates/SetpointsOptimized",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff0000",
+                      "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
+                    "type": "swerveStates",
+                    "logKey": "/RealOutputs/SwerveStates/Measured",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#0000ff",
+                      "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
+                    "type": "trajectory",
+                    "logKey": "/RealOutputs/Odometry/Trajectory",
+                    "logType": "Pose2d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "/RealOutputs/Odometry/TrajectorySetpoint",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "model": "1625-25-A-0000",
+                      "color": "#00ff00"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "/RealOutputs/DriveToPose/Goal",
+                    "logType": "Pose2d[]",
+                    "visible": true,
+                    "options": {
+                      "model": "1625-25-A-0000",
+                      "color": "#ff0000"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "/RealOutputs/DriveToPose/Setpoint",
+                    "logType": "Pose2d[]",
+                    "visible": true,
+                    "options": {
+                      "model": "1625-25-A-0000",
+                      "color": "#00ffff"
+                    }
+                  }
+                ],
+                "game": "2025 Field (Welded)",
+                "origin": "blue"
+              },
+              "controllerUUID": "8qlivp01y9mxw9yg4ntan8d8sxbawrtd",
+              "renderer": {
+                "cameraIndex": -1,
+                "orbitFov": 50,
+                "cameraPosition": [
+                  6.290735639869029,
+                  8.754483726554904,
+                  -16.916658894330496
+                ],
+                "cameraTarget": [
+                  0,
+                  0.5,
+                  0
+                ]
+              },
+              "controlsHeight": 200
+            },
+            {
+              "type": 1,
+              "title": "Superstructure Tracking",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "/RealOutputs/Superstructure/Arm/SetpointAngleRads",
+                    "logType": "Number",
+                    "visible": false,
+                    "options": {
+                      "color": "#858584",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "/Superstructure/Arm/PositionRad",
+                    "logType": "Number",
+                    "visible": false,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "/RealOutputs/Superstructure/Elevator/LeftElevatorPositionMeters",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#3b875a",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "/RealOutputs/Superstructure/Elevator/RightElevatorPositionMeters",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#d993aa",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "/RealOutputs/Superstructure/Elevator/SetpointHeightMeters",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#5f4528",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "discreteSources": [
+                  {
+                    "type": "stripes",
+                    "logKey": "/RealOutputs/Superstructure/SuperstructureGoal",
+                    "logType": "String",
+                    "visible": true,
+                    "options": {
+                      "color": "#d993aa"
+                    }
+                  },
+                  {
+                    "type": "stripes",
+                    "logKey": "/RealOutputs/Superstructure/ElevatorState",
+                    "logType": "String",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437"
+                    }
+                  },
+                  {
+                    "type": "stripes",
+                    "logKey": "/RealOutputs/Superstructure/Elevator/AtGoal",
+                    "logType": "Boolean",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437"
+                    }
+                  },
+                  {
+                    "type": "stripes",
+                    "logKey": "/RealOutputs/Superstructure/ArmState",
+                    "logType": "String",
+                    "visible": true,
+                    "options": {
+                      "color": "#e48b32"
+                    }
+                  },
+                  {
+                    "type": "stripes",
+                    "logKey": "/RealOutputs/Superstructure/Arm/AtGoal",
+                    "logType": "Boolean",
+                    "visible": true,
+                    "options": {
+                      "color": "#e48b32"
+                    }
+                  },
+                  {
+                    "type": "stripes",
+                    "logKey": "/RealOutputs/Manipulator/ManipulatorState",
+                    "logType": "String",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b"
+                    }
+                  },
+                  {
+                    "type": "stripes",
+                    "logKey": "/RealOutputs/Manipulator/GamepieceState",
+                    "logType": "String",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2"
+                    }
+                  }
+                ],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "rightUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "fowmyztd9f3tjkuoyof9t6j29lq3n1tf",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 3,
+              "title": "Vision Results",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "ghost",
+                    "logKey": "/RealOutputs/Vision/Summary/RobotPosesAccepted",
+                    "logType": "Pose3d[]",
+                    "visible": false,
+                    "options": {
+                      "model": "1625-25-A-0000",
+                      "color": "#00ff00"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "/RealOutputs/Vision/Elevator_Support_OV2311/RobotPosesAccepted",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "model": "1625-25-A-0000",
+                      "color": "#ff0000"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "/RealOutputs/Vision/Elevator_Cage_OV2311/RobotPosesAccepted",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "model": "1625-25-A-0000",
+                      "color": "#ff8c00"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "/RealOutputs/Vision/Battery_Support_Camera_OV2311/RobotPosesAccepted",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "model": "1625-25-A-0000",
+                      "color": "#ffff00"
+                    }
+                  },
+                  {
+                    "type": "robot",
+                    "logKey": "/RealOutputs/Odometry/Robot",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "model": "1625-25-A-0000"
+                    }
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "/RealOutputs/Vision/Summary/TagPoses",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "game": "2025 Field (Welded)",
+                "origin": "blue"
+              },
+              "controllerUUID": "5ms4v435anhfgmdofwnvxqvtc2jxsjj6",
+              "renderer": {
+                "cameraIndex": -1,
+                "orbitFov": 50,
+                "cameraPosition": [
+                  10.292286858527747,
+                  7.704402068329257,
+                  -4.051595001925803
+                ],
+                "cameraTarget": [
+                  0,
+                  0.5,
+                  0
+                ]
+              },
+              "controlsHeight": 268
+            },
+            {
+              "type": 9,
+              "title": "Swerve",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "chassisSpeeds",
+                    "logKey": "/RealOutputs/SwerveChassisSpeeds/Measured",
+                    "logType": "ChassisSpeeds",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff0000"
+                    }
+                  },
+                  {
+                    "type": "chassisSpeeds",
+                    "logKey": "/RealOutputs/SwerveChassisSpeeds/Setpoints",
+                    "logType": "ChassisSpeeds",
+                    "visible": true,
+                    "options": {
+                      "color": "#0000ff"
+                    }
+                  },
+                  {
+                    "type": "states",
+                    "logKey": "/RealOutputs/SwerveStates/Measured",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff0000",
+                      "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
+                    "type": "states",
+                    "logKey": "/RealOutputs/SwerveStates/SetpointsOptimized",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#0000ff",
+                      "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
+                    "type": "rotation",
+                    "logKey": "/Drive/Gyro/YawPosition",
+                    "logType": "Rotation2d",
+                    "visible": true,
+                    "options": {}
+                  }
+                ],
+                "maxSpeed": 4,
+                "sizeX": 0.762,
+                "sizeY": 0.66,
+                "orientation": 1
+              },
+              "controllerUUID": "32zxhd7ifvr1ndxyqjytpbfclh1ihbmy",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 8,
+              "title": "Joysticks",
+              "controller": [
+                "Xbox Controller (White)",
+                "1625-25-CRUSH",
+                "None",
+                "None",
+                "None",
+                "None"
+              ],
+              "controllerUUID": "fgm1gbfy6k0z2bki3woq17j9v3if0y6e",
+              "renderer": null,
+              "controlsHeight": 85
+            },
+            {
+              "type": 5,
+              "title": "Console",
+              "controller": "/RealOutputs/Console",
+              "controllerUUID": "q06c7c43t0nn80rqy9iev30jibax2lc7",
+              "renderer": {
+                "highlight": false
+              },
+              "controlsHeight": 0
+            },
+            {
+              "type": 6,
+              "title": "Loop Timing",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "independent",
+                    "logKey": "/RealOutputs/LoggedRobot/FullCycleMS",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2"
+                    }
+                  },
+                  {
+                    "type": "independent",
+                    "logKey": "/RealOutputs/LoggedRobot/LogPeriodicMS",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b"
+                    }
+                  },
+                  {
+                    "type": "independent",
+                    "logKey": "/RealOutputs/LoggedRobot/UserCodeMS",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2"
+                    }
+                  }
+                ],
+                "timeRange": "visible",
+                "rangeMin": 0,
+                "rangeMax": 10,
+                "stepSize": 1
+              },
+              "controllerUUID": "o7nt42fy0qgvn02g70aghlika28b3dij",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 1,
+              "title": "Canivore Stats",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "/RealOutputs/CANivoreStatus/Utilization",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "/RealOutputs/CANivoreStatus/ReceiveErrorCount",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "/RealOutputs/CANivoreStatus/TransmitErrorCount",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#80588e",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "/RealOutputs/CANivoreStatus/TxFullCount",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e48b32",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "/RealOutputs/CANivoreStatus/OffCount",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#c0b487",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "discreteSources": [
+                  {
+                    "type": "stripes",
+                    "logKey": "/RealOutputs/CANivoreStatus/Status",
+                    "logType": "String",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b"
+                    }
+                  },
+                  {
+                    "type": "stripes",
+                    "logKey": "/SystemStats/BrownedOut",
+                    "logType": "Boolean",
+                    "visible": true,
+                    "options": {
+                      "color": "#858584"
+                    }
+                  },
+                  {
+                    "type": "graph",
+                    "logKey": "/SystemStats/BatteryVoltage",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2"
+                    }
+                  }
+                ],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "rightUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "97jgkj1gin9x3td1s9aflei0ght13muy",
+              "renderer": null,
+              "controlsHeight": 200
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "satellites": [],
+  "version": "4.1.5"
+}

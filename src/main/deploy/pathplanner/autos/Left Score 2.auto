@@ -7,13 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Right Barge to Coral E2"
+            "pathName": "Left Barge to Coral I"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "DriveToBranchE"
+            "name": "DriveToBranchI"
           }
         },
         {
@@ -25,25 +25,25 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Reef Face 3 to Human"
+            "pathName": "Reef Face 5 to Human"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "DriveToRightHumanPlayerStation"
+            "name": "CoralIntake"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Right Human Player to D"
+            "pathName": "Left Human Player to K"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "DriveToBranchC"
+            "name": "DriveToBranchK"
           }
         },
         {

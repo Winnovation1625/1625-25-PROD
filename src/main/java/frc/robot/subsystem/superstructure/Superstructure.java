@@ -171,6 +171,18 @@ public class Superstructure extends SubsystemBase {
         () -> goal == SuperstructureStates.TROUGH);
   }
 
+  public Command leaveStartConfigToStow() {
+    return runElevatorToState(() -> ElevatorState.ALGAE_CLEARANCE)
+        .andThen(Commands.waitUntil(() -> atGoal()))
+        .andThen(Commands.print("Elevator at algae Clearance, moving Arm"))
+        .andThen(runArmToState(() -> SuperstructureStates.STOW.getArmState()))
+        .andThen(Commands.waitUntil(() -> atGoal()))
+        .andThen(Commands.print("Arm at target, moving elevator"))
+        .andThen(runElevatorToState(() -> SuperstructureStates.STOW.getElevatorState()))
+        .andThen(() -> superstructureGoal = SuperstructureStates.STOW)
+        .andThen(Commands.print("Going to Stow From Start Config"));
+  }
+
   public Command runArmToState(Supplier<ArmState> armState) {
     return Commands.runOnce(() -> this.armState = armState.get())
         .alongWith(Commands.runOnce(() -> arm.setPosition(armState.get())));
