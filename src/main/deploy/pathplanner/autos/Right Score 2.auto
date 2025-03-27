@@ -11,9 +11,22 @@
           }
         },
         {
-          "type": "named",
+          "type": "race",
           "data": {
-            "name": "DriveToBranchE"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "DriveToBranchE"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 5.0
+                }
+              }
+            ]
           }
         },
         {
