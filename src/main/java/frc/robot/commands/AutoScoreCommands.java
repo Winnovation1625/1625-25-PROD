@@ -132,11 +132,11 @@ public class AutoScoreCommands {
     return superstructure
         .setSuperstructureCommand(() -> SuperstructureStates.CORAL_INTAKING)
         .alongWith(manipulator.setManipulatorState(ManipulatorState.INTAKING_CORAL))
-        .until(
-            () ->
+        .andThen(
+            Commands.waitUntil(() ->
                 (manipulator.getGamepieceState() == Manipulator.GamepieceState.CORAL_STAGING
                     || manipulator.getGamepieceState()
-                        == Manipulator.GamepieceState.CORAL_IN_MANIPULATOR))
+                        == Manipulator.GamepieceState.CORAL_IN_MANIPULATOR)))
         .andThen(
             manipulator
                 .setManipulatorState(ManipulatorState.IDLE)
