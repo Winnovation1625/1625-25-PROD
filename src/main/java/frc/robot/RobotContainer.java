@@ -664,7 +664,10 @@ public class RobotContainer {
                 .andThen(Commands.runOnce(() -> climber.setServoRelease(false))));
 
     controller.povUp().onTrue(superstructure.leaveStartConfigToStow());
-    controller.povLeft().and(()-> auxController.getRawButton(24)).onTrue(Commands.runOnce(() -> setElevatorEncoderPosition()));
+    controller
+        .povLeft()
+        .and(() -> auxController.getRawButton(24))
+        .onTrue(Commands.runOnce(() -> setElevatorEncoderPosition()));
   }
 
   /**

@@ -184,13 +184,11 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command runArmToState(Supplier<ArmState> armState) {
-    return Commands.runOnce(() -> this.armState = armState.get())
-        .alongWith(Commands.runOnce(() -> arm.setPosition(armState.get())));
+    return Commands.runOnce(() -> arm.setPosition(armState.get())).andThen(Commands.runOnce(() -> this.armState = armState.get()));
   }
 
   public Command runElevatorToState(Supplier<ElevatorState> state) {
-    return Commands.runOnce(() -> elevatorState = state.get())
-        .alongWith(Commands.runOnce(() -> elevator.setPosition(state.get())));
+    return Commands.runOnce(() -> elevator.setPosition(state.get())).andThen(Commands.runOnce(() -> elevatorState = state.get()));
   }
 
   public boolean atGoal() {
