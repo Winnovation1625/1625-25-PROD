@@ -165,10 +165,6 @@ public class RobotContainer {
                     AprilTagVisionConstants.CAMERA_CONFIGS.get(2),
                     drive::getRotation,
                     drive::getPose));
-        // new AprilTagVisionIOPhoton(
-        //     AprilTagVisionConstants.CAMERA_CONFIGS.get(3),
-        //     drive::getRotation,
-        //     drive::getPose));
         climber = new Climber(new ClimberIOServo());
         break;
 
@@ -397,8 +393,6 @@ public class RobotContainer {
             || auxController.getRawButton(15)) {
           return SuperstructureStates.ALVL3;
         } else {
-          // if(auxController.getRawButton(12) || auxController.getRawButton(14) ||
-          // auxController.getRawButton(16))
           return SuperstructureStates.ALVL2;
         }
       };
@@ -433,16 +427,6 @@ public class RobotContainer {
                     new Pose2d(drive.getPose().getTranslation(), new Rotation2d())); // zero gyro
 
     controller.back().onTrue(Commands.runOnce(resetGyro, drive).ignoringDisable(true));
-    // Algae and Coral Shared Commands
-    // score command for coral and algae
-    // controller
-    //     .a()
-    //     .and(() -> superstructure.getSuperstructureGoal() != SuperstructureStates.STOW)
-    //     .whileTrue(
-    //         Commands.either(
-    //             manipulator.setManipulatorState(ManipulatorState.SHOOTING_ALGAE),
-    //             manipulator.setManipulatorState(ManipulatorState.SHOOTING_CORAL),
-    //             manipulator::hasAlgae));
 
     // cancel/stow command
     controller
@@ -513,9 +497,14 @@ public class RobotContainer {
                 () -> getCoralLevel.get() == SuperstructureStates.CLVL4));
 
     // auto path coral to reeef
-    controller.leftBumper().whileTrue(new DriveToReef(drive, getCoralObjective));
-
-    // controller.povDown()
+    DriveToReef reefPathCommand = new DriveToReef(drive, getCoralObjective);
+    Trigger pathLinedUp =
+        new Trigger(
+            () ->
+                reefPathCommand.withinTolerance(
+                    Units.inchesToMeters(2.5), new Rotation2d(Degrees.of(2))));
+    controller.leftBumper().whileTrue(reefPathCommand);
+    controller.leftBumper().and(pathLinedUp).whileTrue(controllerRumbleCommand());
 
     // Algae Controls
     // score algae in barge or processor depending on aux button state
@@ -534,23 +523,6 @@ public class RobotContainer {
                 .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
 
     // ground pickup algae
-    // controller
-    //     .x()
-    //     .and(() -> manipulator.getGamepieceState() == Manipulator.GamepieceState.NONE)
-    //     .onTrue(
-    //         superstructure
-    //             .setSuperstructureCommand(() -> SuperstructureStates.ALGAE_INTAKING)
-    //             .alongWith(manipulator.setManipulatorState(ManipulatorState.INTAKING_ALGAE))
-    //             .andThen(
-    //                 Commands.waitUntil(
-    //                     () ->
-    //                         manipulator.getGamepieceState()
-    //                             == Manipulator.GamepieceState.ALGAE_IN_CLAW))
-    //             .andThen(manipulator.setManipulatorState(ManipulatorState.IDLE))
-    //             .andThen(Commands.waitUntil(() -> superstructure.atArmGoal()))
-    //             .andThen(superstructure.setSuperstructureCommand(() ->
-    // SuperstructureStates.STOW)));
-
     controller
         .x()
         .and(() -> manipulator.getGamepieceState() == GamepieceState.NONE)
@@ -566,8 +538,6 @@ public class RobotContainer {
                 .andThen(superstructure.runArmToState(() -> ArmState.FLAT))
                 .andThen(Commands.waitUntil(() -> superstructure.atArmGoal()))
                 .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
-
-    // controller.povDown().onTrue(superstructure.leaveStartConfigToGoal(SuperstructureStates.STOW));
 
     // When left trigger and no algae in bot, grab algae from reef height dependent on aux algae pos
     // button
@@ -633,26 +603,6 @@ public class RobotContainer {
                 () -> -controller.getLeftY(),
                 () -> -controller.getLeftX(),
                 () -> getHumanPlayerAngle.get()));
-
-    // controller
-    //     .leftBumper()
-    //     .and(() -> manipulator.getGamepieceState() == Manipulator.GamepieceState.NONE)
-    //     .onTrue(
-    //         superstructure
-    //             .setSuperstructureCommand(getAlgaeReefLevel)
-    //             .alongWith(manipulator.setManipulatorState(ManipulatorState.INTAKING_ALGAE))
-    //             .andThen(
-    //                 Commands.waitUntil(
-    //                     () ->
-    //                         superstructure.atSuperStructureGoal()
-    //                             && manipulator.getGamepieceState()
-    //                                     == Manipulator.GamepieceState.ALGAE_IN_CLAW))
-    //                             .andThen(
-    //                                 superstructure
-    //                                     .setSuperstructureCommand(() ->
-    // SuperstructureStates.STOW)
-    //
-    // .alongWith(manipulator.setManipulatorState(ManipulatorState.IDLE))));
 
     // Climb Commands
     controller
