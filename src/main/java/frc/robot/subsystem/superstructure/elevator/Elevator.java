@@ -55,7 +55,7 @@ public class Elevator {
   public enum ElevatorState {
     ALGAE_INTAKING(new LoggedTunableNumber("Superstructure/Elevator/ALGAE_INTAKING", 0.21)),
     CORAL_INTAKING(new LoggedTunableNumber("Superstructure/Elevator/CORAL_INTAKING", 0.295)),
-    STOW(new LoggedTunableNumber("Superstructure/Elevator/STOW", 0.26)),
+    STOW(new LoggedTunableNumber("Superstructure/Elevator/STOW", 0.285)),
     ALGAE_STOW(new LoggedTunableNumber("Superstructure/Elevator/ALGAE STOW", 0.3)),
     ALGAE_CLEARANCE(new LoggedTunableNumber("Superstructure/Elevator/ALGAE CLEARANCE", 0.6)),
     CLIMB(new LoggedTunableNumber("Superstructure/Elevator/CLIMB", Units.inchesToMeters(27.5591))),
