@@ -128,5 +128,6 @@
     {"t":2.69811, "x":1.16452, "y":0.95096, "heading":0.94248, "vx":0.0, "vy":0.0, "omega":0.0, "ax":0.0, "ay":0.0, "alpha":0.0, "fx":[0.0,0.0,0.0,0.0], "fy":[0.0,0.0,0.0,0.0]}],
   "splits":[0]
  },
- "events":[]
+ "events":[
+   {"name":"Start Intaking", "from":{"target":2, "targetTimestamp":0.95829, "offset":{"exp":"0 s", "val":0.0}}, "event":{"type":"named", "data":{"name":"CoralIntake"}}}]
 }
