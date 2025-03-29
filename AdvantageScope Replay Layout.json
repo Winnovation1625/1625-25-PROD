@@ -1,21 +1,18 @@
 {
   "hubs": [
     {
-      "x": 0,
-      "y": 25,
-      "width": 1680,
-      "height": 962,
+      "x": -8,
+      "y": -8,
+      "width": 1552,
+      "height": 840,
       "state": {
         "sidebar": {
-          "width": 348,
+          "width": 377,
           "expanded": [
             "/RealOutputs",
             "/RealOutputs/Odometry",
-            "/Drive",
-            "/Drive/Gyro",
             "/RealOutputs/Superstructure",
             "/RealOutputs/Manipulator",
-            "/Superstructure",
             "/Superstructure/Arm",
             "/RealOutputs/Vision",
             "/RealOutputs/Vision/Summary",
@@ -29,18 +26,25 @@
             "/SystemStats",
             "/SystemStats/CANBus",
             "/RealOutputs/CANivoreStatus",
-            "/Vision"
+            "/Vision",
+            "/RealOutputs/SuperstructureVisualizer",
+            "/RealOutputs/SuperstructureVisualizer/measured",
+            "/Vision/Battery_Support_Camera_OV2311",
+            "/Vision/Elevator_Cage_OV2311",
+            "/Vision/Elevator_Support_OV2311",
+            "/RealOutputs/PathPlanner",
+            "/RealOutputs/Alerts"
           ]
         },
         "tabs": {
-          "selected": 2,
+          "selected": 4,
           "tabs": [
             {
               "type": 0,
               "title": "",
               "controller": null,
               "controllerUUID": "u0zm4a5r5itrt7pcg4eef7usfzgqmi94",
-              "renderer": "#/whats-new/",
+              "renderer": "#/",
               "controlsHeight": 0
             },
             {
@@ -76,6 +80,34 @@
                       "color": "#0000ff",
                       "arrangement": "0,1,2,3"
                     }
+                  },
+                  {
+                    "type": "component",
+                    "logKey": "/RealOutputs/SuperstructureVisualizer/measured/elevatorStage1",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "component",
+                    "logKey": "/RealOutputs/SuperstructureVisualizer/measured/elevatorStage2",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "component",
+                    "logKey": "/RealOutputs/SuperstructureVisualizer/measured/elevatorCarriage",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "component",
+                    "logKey": "/RealOutputs/SuperstructureVisualizer/measured/arm",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {}
                   },
                   {
                     "type": "trajectory",
@@ -123,17 +155,17 @@
               },
               "controllerUUID": "8qlivp01y9mxw9yg4ntan8d8sxbawrtd",
               "renderer": {
-                "cameraIndex": -1,
+                "cameraIndex": -2,
                 "orbitFov": 50,
                 "cameraPosition": [
-                  6.290735639869029,
-                  8.754483726554904,
-                  -16.916658894330496
+                  0.2662870070827338,
+                  2.5634289055881117,
+                  -1.2607678217430176
                 ],
                 "cameraTarget": [
-                  0,
-                  0.5,
-                  0
+                  0.1366409333909711,
+                  0.4790949125097139,
+                  -0.09573435147868684
                 ]
               },
               "controlsHeight": 200
@@ -147,7 +179,7 @@
                     "type": "stepped",
                     "logKey": "/RealOutputs/Superstructure/Arm/SetpointAngleRads",
                     "logType": "Number",
-                    "visible": false,
+                    "visible": true,
                     "options": {
                       "color": "#858584",
                       "size": "normal"
@@ -157,7 +189,7 @@
                     "type": "stepped",
                     "logKey": "/Superstructure/Arm/PositionRad",
                     "logType": "Number",
-                    "visible": false,
+                    "visible": true,
                     "options": {
                       "color": "#2b66a2",
                       "size": "normal"
@@ -348,12 +380,12 @@
               },
               "controllerUUID": "5ms4v435anhfgmdofwnvxqvtc2jxsjj6",
               "renderer": {
-                "cameraIndex": -1,
+                "cameraIndex": -2,
                 "orbitFov": 50,
                 "cameraPosition": [
-                  10.292286858527747,
-                  7.704402068329257,
-                  -4.051595001925803
+                  0.26122538806525236,
+                  2.669353210318205,
+                  0.6896868459759514
                 ],
                 "cameraTarget": [
                   0,
@@ -362,6 +394,14 @@
                 ]
               },
               "controlsHeight": 268
+            },
+            {
+              "type": 7,
+              "title": "Video",
+              "controller": null,
+              "controllerUUID": "gl1ov431c2to0i9ehzeivqe1wkx4dijy",
+              "renderer": null,
+              "controlsHeight": 85
             },
             {
               "type": 9,
