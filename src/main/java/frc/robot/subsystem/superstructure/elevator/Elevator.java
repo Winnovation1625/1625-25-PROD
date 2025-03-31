@@ -55,17 +55,17 @@ public class Elevator {
   public enum ElevatorState {
     ALGAE_INTAKING(new LoggedTunableNumber("Superstructure/Elevator/ALGAE_INTAKING", 0.21)),
     CORAL_INTAKING(new LoggedTunableNumber("Superstructure/Elevator/CORAL_INTAKING", 0.295)),
-    STOW(new LoggedTunableNumber("Superstructure/Elevator/STOW", 0.26)),
+    STOW(new LoggedTunableNumber("Superstructure/Elevator/STOW", 0.285)),
     ALGAE_STOW(new LoggedTunableNumber("Superstructure/Elevator/ALGAE STOW", 0.3)),
-    ALGAE_CLEARANCE(new LoggedTunableNumber("Superstructure/Elevator/ALGAE CLEARANCE", 0.)),
+    ALGAE_CLEARANCE(new LoggedTunableNumber("Superstructure/Elevator/ALGAE CLEARANCE", 0.6)),
     CLIMB(new LoggedTunableNumber("Superstructure/Elevator/CLIMB", Units.inchesToMeters(27.5591))),
     BARGE(new LoggedTunableNumber("Superstructure/Elevator/BARGE", 1.63)),
     CLVL2(new LoggedTunableNumber("Superstructure/Elevator/CLVL2", 0.55)),
     TROUGH(new LoggedTunableNumber("Superstructure/Elevator/TROUGH", 0.26)),
     CLVL3(new LoggedTunableNumber("Superstructure/Elevator/CLVL3", 0.94)),
     CLVL4(new LoggedTunableNumber("Superstructure/Elevator/CLVL4", 1.755)),
-    ALVL2(new LoggedTunableNumber("Superstructure/Elevator/ALVL2", 0.45)),
-    ALVL3(new LoggedTunableNumber("Superstructure/Elevator/ALVL3", 0.71)),
+    ALVL2(new LoggedTunableNumber("Superstructure/Elevator/ALVL2", 0.41)),
+    ALVL3(new LoggedTunableNumber("Superstructure/Elevator/ALVL3", 0.67)),
     PROCESS(new LoggedTunableNumber("Superstructure/Elevator/PROCESS", 0.18)),
     STOP(() -> 0);
     @Getter private final DoubleSupplier elevatorHeight;

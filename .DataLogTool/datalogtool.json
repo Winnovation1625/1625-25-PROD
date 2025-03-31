@@ -1,0 +1,10 @@
+{
+  "download": {
+    "localDir": "C:\\Users\\team1\\Desktop\\1625-25-PROD\\tmp",
+    "remoteDir": "/U/logs",
+    "serverTeam": "1625"
+  },
+  "output": {
+    "outputFolder": "C:\\Users\\team1\\Desktop\\1625-25-PROD\\tmp"
+  }
+}

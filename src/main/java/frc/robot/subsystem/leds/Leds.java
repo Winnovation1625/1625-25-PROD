@@ -120,14 +120,14 @@ public class Leds extends VirtualSubsystem {
       // Solid Green
       candle.setLEDs(0, 255, 0, 0, HARDWARE_LEDS, LEDS_PER_STRIP);
 
-    } else if (autoLiningUp) {
+    } else if (autoLiningUp) { // this is a hidden message from seth. hey cutie.
       candle.animate(
           new FireAnimation(
               animationBrightness.getAsDouble(),
               animationSpeed.get(),
               LEDS_PER_STRIP,
               1.0,
-              0.3,
+              1.0,
               false,
               HARDWARE_LEDS));
     } else if (gamepieceInBot || algaeInBot) {

@@ -56,6 +56,8 @@ public class Manipulator extends SubsystemBase {
   @Getter
   private GamepieceState gamepieceState = GamepieceState.NONE;
 
+  private GamepieceState prevGamepieceState = GamepieceState.NONE;
+
   @AutoLogOutput(key = "Manipulator/ManipulatorState")
   @Getter
   private ManipulatorState manipulatorState = ManipulatorState.IDLE;
@@ -97,6 +99,14 @@ public class Manipulator extends SubsystemBase {
         manipulatorState = ManipulatorState.IDLE;
       }
     }
+
+    if (manipulatorState == ManipulatorState.IDLE
+        && prevGamepieceState == GamepieceState.ALGAE_IN_CLAW
+        && gamepieceState == GamepieceState.NONE
+        && prevManipulatorState != ManipulatorState.SHOOTING_ALGAE) {
+      manipulatorState = ManipulatorState.INTAKING_ALGAE;
+    }
+
     if (gamepieceState != GamepieceState.NONE) {
       Leds.getInstance().setGamepieceInBot(true);
     } else {
@@ -106,6 +116,7 @@ public class Manipulator extends SubsystemBase {
       manipulatorState = ManipulatorState.IDLE;
     }
     prevManipulatorState = manipulatorState;
+    prevGamepieceState = gamepieceState;
     io.setVoltage(manipulatorState.voltageSupplier);
   }
 

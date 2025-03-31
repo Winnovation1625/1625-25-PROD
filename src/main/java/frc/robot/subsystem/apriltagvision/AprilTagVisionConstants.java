@@ -66,5 +66,5 @@ public class AprilTagVisionConstants {
                   Units.inchesToMeters(10.798),
                   Units.inchesToMeters(8.158),
                   new Rotation3d(0, Units.degreesToRadians(-32), Units.degreesToRadians(85))),
-              2.5));
+              3.5));
 }

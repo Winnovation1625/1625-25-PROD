@@ -135,11 +135,9 @@ public class AutoScoreCommands {
         .andThen(
             Commands.waitUntil(
                 () ->
-                    superstructure.atSuperStructureGoal()
-                        && (manipulator.getGamepieceState()
-                                == Manipulator.GamepieceState.CORAL_STAGING
-                            || manipulator.getGamepieceState()
-                                == Manipulator.GamepieceState.CORAL_IN_MANIPULATOR)))
+                    (manipulator.getGamepieceState() == Manipulator.GamepieceState.CORAL_STAGING
+                        || manipulator.getGamepieceState()
+                            == Manipulator.GamepieceState.CORAL_IN_MANIPULATOR)))
         .andThen(
             manipulator
                 .setManipulatorState(ManipulatorState.IDLE)

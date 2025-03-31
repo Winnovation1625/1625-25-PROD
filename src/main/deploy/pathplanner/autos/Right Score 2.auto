@@ -11,9 +11,22 @@
           }
         },
         {
-          "type": "named",
+          "type": "race",
           "data": {
-            "name": "DriveToBranchE"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "DriveToBranchE"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 5.0
+                }
+              }
+            ]
           }
         },
         {
@@ -25,13 +38,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Reef Face3D to Human"
+            "pathName": "Reef Face 3 to Human"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "DriveToRightHumanPlayerStation"
+            "name": "CoralIntake"
           }
         },
         {
