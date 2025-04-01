@@ -136,7 +136,7 @@ public class RobotContainer {
       new Alert("Operator controller disconnected (port 1).", AlertType.kWarning);
 
   private final Supplier<Rotation2d> getHumanPlayerAngle;
-  @AutoLogOutput private final Supplier<Translation2d> getHumanPlayerTranslation;
+  private final Supplier<Translation2d> getHumanPlayerTranslation;
   @AutoLogOutput private final DoubleSupplier getHumanPlayerDistance;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -308,9 +308,9 @@ public class RobotContainer {
                     || (drive.getPose().getY() < FieldConstants.fieldWidth / 2
                         && AllianceFlipUtil.shouldFlip())
                 ? AllianceFlipUtil.apply(
-                    FieldConstants.CoralStation.rightCenterFace.getTranslation())
+                    FieldConstants.CoralStation.leftCenterFace.getTranslation())
                 : AllianceFlipUtil.apply(
-                    FieldConstants.CoralStation.leftCenterFace.getTranslation());
+                    FieldConstants.CoralStation.rightCenterFace.getTranslation());
 
     getHumanPlayerDistance =
         () -> getHumanPlayerTranslation.get().getDistance(drive.getPose().getTranslation());
