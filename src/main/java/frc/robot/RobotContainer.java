@@ -55,6 +55,7 @@ import frc.robot.subsystem.drive.GyroIO;
 import frc.robot.subsystem.drive.GyroIOPigeon2;
 import frc.robot.subsystem.drive.GyroIOSim;
 import frc.robot.subsystem.drive.ModuleIO;
+import frc.robot.subsystem.drive.ModuleIOSim;
 import frc.robot.subsystem.drive.ModuleIOTalonFX;
 import frc.robot.subsystem.leds.Leds;
 import frc.robot.subsystem.manipulator.Manipulator;
@@ -144,7 +145,8 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontLeft),
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
-                new ModuleIOTalonFX(TunerConstants.BackRight));
+                new ModuleIOTalonFX(TunerConstants.BackRight),
+                (robotPose) -> {});
         manipulator =
             new Manipulator(new ManipulatorIOKraken(), new ManipulatorSensorsIOCANrange());
         arm = new Arm(new ArmIOKraken(), manipulator::getGamepieceState);
@@ -177,10 +179,11 @@ public class RobotContainer {
         drive =
             new Drive(
                 new GyroIOSim(driveSimulation.getGyroSimulation()),
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {});
+                new ModuleIOSim(driveSimulation.getModules()[0]),
+                new ModuleIOSim(driveSimulation.getModules()[1]),
+                new ModuleIOSim(driveSimulation.getModules()[2]),
+                new ModuleIOSim(driveSimulation.getModules()[3]),
+                driveSimulation::setSimulationWorldPose);
         manipulator = new Manipulator(new ManipulatorIOSim(), new ManipulatorSensorIOSim());
         arm = new Arm(new ArmIOSim(), manipulator::getGamepieceState);
         elevator = new Elevator(new ElevatorIO() {});
@@ -199,10 +202,6 @@ public class RobotContainer {
                 new AprilTagVisionIOPhotonSim(
                     AprilTagVisionConstants.CAMERA_CONFIGS.get(2),
                     drive::getRotation,
-                    driveSimulation::getSimulatedDriveTrainPose),
-                new AprilTagVisionIOPhotonSim(
-                    AprilTagVisionConstants.CAMERA_CONFIGS.get(3),
-                    drive::getRotation,
                     driveSimulation::getSimulatedDriveTrainPose));
         climber = new Climber(new ClimberIOSim());
         break;
@@ -215,7 +214,8 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {},
-                new ModuleIO() {});
+                new ModuleIO() {},
+                (robotPose) -> {});
         manipulator = new Manipulator(new ManipulatorIO() {}, new ManipulatorSensorIO() {});
         arm = new Arm(new ArmIO() {}, manipulator::getGamepieceState);
         elevator = new Elevator(new ElevatorIO() {});
