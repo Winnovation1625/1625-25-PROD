@@ -79,6 +79,7 @@ import frc.robot.subsystem.superstructure.elevator.Elevator;
 import frc.robot.subsystem.superstructure.elevator.ElevatorConstants;
 import frc.robot.subsystem.superstructure.elevator.ElevatorIO;
 import frc.robot.subsystem.superstructure.elevator.ElevatorIOKraken;
+import frc.robot.subsystem.superstructure.elevator.ElevatorIOSim;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.AuxControllerUtil;
 import frc.robot.util.LoggedTunableNumber;
@@ -91,6 +92,7 @@ import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /**
@@ -113,6 +115,7 @@ public class RobotContainer {
   private final LoggedNetworkNumber endgameAlert2 =
       new LoggedNetworkNumber("Endgame Alert #2", 15.0);
   private final LoggedDashboardChooser<BooleanSupplier> pathOverride;
+  private final LoggedNetworkBoolean autoMoveSuperstructure;
   @Setter BooleanSupplier pathingOverrideSupplier;
 
   @SuppressWarnings("unused")
@@ -133,7 +136,9 @@ public class RobotContainer {
   private final LoggedTunableNumber coralStationThreshold =
       new LoggedTunableNumber("CoralStationDistanceThreshold", 1);
   private final LoggedTunableNumber BargeRumbleThreshold =
-      new LoggedTunableNumber("BargeRumbleDistanceThreshold", 1.85);
+      new LoggedTunableNumber("BargeRumbleDistanceThreshold", 5);
+  private final LoggedTunableNumber reefGoalThreshold =
+      new LoggedTunableNumber("ReefGoalDistanceThreshold", Units.inchesToMeters(12));
 
   private final Supplier<Rotation2d> getHumanPlayerAngle;
   private final DoubleSupplier getHumanPlayerDistance;
@@ -144,7 +149,8 @@ public class RobotContainer {
   public RobotContainer() {
 
     pathOverride = new LoggedDashboardChooser<>("Pathing Override");
-
+    autoMoveSuperstructure = new LoggedNetworkBoolean("Auto Move Superstructure");
+    autoMoveSuperstructure.setDefault(true);
     switch (Constants.CURRENT_MODE) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
@@ -195,7 +201,7 @@ public class RobotContainer {
                 driveSimulation::setSimulationWorldPose);
         manipulator = new Manipulator(new ManipulatorIOSim(), new ManipulatorSensorIOSim());
         arm = new Arm(new ArmIOSim(), manipulator::getGamepieceState);
-        elevator = new Elevator(new ElevatorIO() {});
+        elevator = new Elevator(new ElevatorIOSim());
         aprilTagVision =
             new AprilTagVision(
                 drive::accept,
@@ -530,7 +536,18 @@ public class RobotContainer {
             () ->
                 reefPathCommand.withinTolerance(
                     Units.inchesToMeters(2.5), new Rotation2d(Degrees.of(2))));
+    Trigger within12Inches =
+        new Trigger(
+            () ->
+                reefPathCommand.withinTolerance(
+                    reefGoalThreshold.get(), new Rotation2d(Degrees.of(90))));
     controller.leftBumper().whileTrue(reefPathCommand);
+    controller
+        .leftBumper()
+        .and(within12Inches)
+        .and(() -> manipulator.getGamepieceState() == GamepieceState.CORAL_IN_MANIPULATOR)
+        .and(() -> autoMoveSuperstructure.get())
+        .onTrue(superstructure.setSuperstructureCommand(getCoralLevel));
     controller.leftBumper().and(pathLinedUp).whileTrue(controllerRumbleCommand());
 
     // Algae Controls
@@ -600,6 +617,34 @@ public class RobotContainer {
                 manipulator.setManipulatorState(ManipulatorState.SHOOTING_ALGAE),
                 manipulator.setManipulatorState(ManipulatorState.SHOOTING_CORAL),
                 manipulator::hasAlgae));
+    controller
+        .a()
+        .and(() -> manipulator.getGamepieceState() == GamepieceState.CORAL_IN_MANIPULATOR)
+        .and(() -> getCoralLevel.get() == SuperstructureStates.CLVL4)
+        .onTrue(
+            Commands.waitUntil(superstructure::atSuperStructureGoal)
+                .andThen(
+                    Commands.waitUntil(
+                        () ->
+                            manipulator.getGamepieceState() == GamepieceState.CORAL_EXITING_BOT
+                                || manipulator.getGamepieceState() == GamepieceState.NONE))
+                .andThen(Commands.waitTime(Seconds.of(0.1)))
+                .andThen(superstructure.runArmToState(() -> ArmState.CLVL3))
+                .andThen(
+                    Commands.waitUntil(
+                        () -> manipulator.getGamepieceState() == GamepieceState.NONE))
+                .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
+
+    controller
+        .a()
+        .and(() -> manipulator.getGamepieceState() == GamepieceState.CORAL_IN_MANIPULATOR)
+        .and(() -> getCoralLevel.get() != SuperstructureStates.CLVL4)
+        .onTrue(
+            Commands.waitUntil(
+                    () ->
+                        superstructure.atSuperStructureGoal()
+                            && manipulator.getGamepieceState() == Manipulator.GamepieceState.NONE)
+                .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
 
     controller
         .a()

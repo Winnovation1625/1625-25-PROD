@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.util.Units;
 import frc.robot.subsystem.superstructure.elevator.ElevatorConstants;
 import frc.robot.util.GeomUtil;
 import lombok.experimental.ExtensionMethod;
@@ -25,8 +26,7 @@ public class SuperstructureVisualizer {
   private Pose3d armPose;
 
   public void updateElevatorPose(double distanceFromGround) {
-    double carriageDistanceFromGround =
-        distanceFromGround - ElevatorConstants.ELEVATOR_MIN_HEIGHT_METERS;
+    double carriageDistanceFromGround = distanceFromGround - Units.inchesToMeters(0);
     double stage2DistanceFromGround =
         carriageDistanceFromGround - ElevatorConstants.ELEVATOR_CARRIAGE_TRAVEL_DISTANCE;
     double stage1DistanceFromGround =
@@ -58,7 +58,7 @@ public class SuperstructureVisualizer {
         carriagePose.rotateAround(
             carriagePose
                 .getTranslation()
-                .plus(new Translation3d(0, 0, ElevatorConstants.ELEVATOR_MIN_HEIGHT_METERS)),
+                .plus(new Translation3d(0, 0, Units.inchesToMeters(11.75))),
             new Rotation3d(armAngleRad, 0, 0));
     Logger.recordOutput("SuperstructureVisualizer/" + name + "/arm", armPose);
   }

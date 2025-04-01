@@ -27,7 +27,7 @@ public class ElevatorConstants {
   //     };
   public static Gains positionGains =
       switch (Constants.CURRENT_MODE) {
-        case SIM -> new Gains(0.5, 0.0, 0.0, 40.0, 3.0, 0.0, 4.0, 0.1, 0.5, 0.0);
+        case SIM -> new Gains(1, 0.0, 0.0, 40.0, 3.0, 0.0, 4.0, 0.1, 0.5, 0.0);
         case REAL, REPLAY -> new Gains(180, 25.0, 60.0, 10.0, 9.0, 2.2, 15.0, 18.0, 35.0, 0.0);
       };
 
