@@ -133,7 +133,7 @@ public class RobotContainer {
   private final LoggedTunableNumber coralStationThreshold =
       new LoggedTunableNumber("CoralStationDistanceThreshold", 1);
   private final LoggedTunableNumber BargeRumbleThreshold =
-      new LoggedTunableNumber("BargeRumbleDistanceThreshold", 5);
+      new LoggedTunableNumber("BargeRumbleDistanceThreshold", 1.85);
 
   private final Supplier<Rotation2d> getHumanPlayerAngle;
   private final DoubleSupplier getHumanPlayerDistance;
@@ -242,8 +242,9 @@ public class RobotContainer {
 
     nearBargeSupplier =
         () ->
-            AllianceFlipUtil.apply(drive.getPose()).getX()
-                    - AllianceFlipUtil.apply(FieldConstants.Barge.middleCage).getX()
+            Math.abs(
+                    drive.getPose().getX()
+                        - AllianceFlipUtil.apply(FieldConstants.Barge.middleCage).getX())
                 < BargeRumbleThreshold.getAsDouble();
 
     superstructure = new Superstructure(arm, elevator, manipulator::hasAlgae);
