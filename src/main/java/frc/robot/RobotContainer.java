@@ -22,8 +22,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -85,10 +83,12 @@ import frc.robot.util.AuxControllerUtil;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.List;
 import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import lombok.Setter;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
@@ -112,8 +112,10 @@ public class RobotContainer {
   private final LoggedTunableNumber endgameAlert1 = new LoggedTunableNumber("EndgameAlert2", 30.0);
   private final LoggedNetworkNumber endgameAlert2 =
       new LoggedNetworkNumber("Endgame Alert #2", 15.0);
-  private final LoggedTunableNumber coralStationThreshold = new LoggedTunableNumber("CoralStationDistanceThreshold", 5);
-  private final LoggedTunableNumber BargeRumbleThreshold = new LoggedTunableNumber("BargeRumbleDistanceThreshold", 5);
+  private final LoggedTunableNumber coralStationThreshold =
+      new LoggedTunableNumber("CoralStationDistanceThreshold", 5);
+  private final LoggedTunableNumber BargeRumbleThreshold =
+      new LoggedTunableNumber("BargeRumbleDistanceThreshold", 5);
   private final LoggedDashboardChooser<BooleanSupplier> pathOverride;
   @Setter BooleanSupplier pathingOverrideSupplier;
 
@@ -135,6 +137,7 @@ public class RobotContainer {
 
   private final Supplier<Rotation2d> getHumanPlayerAngle;
   private final Supplier<Translation2d> getHumanPlayerTranslation;
+  @AutoLogOutput private final DoubleSupplier getHumanPlayerDistance;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -268,7 +271,6 @@ public class RobotContainer {
                           Units.inchesToMeters(2.5), new Rotation2d(Units.degreesToRadians(3.0)))));
     }
 
-
     NamedCommands.registerCommand(
         "DriveToLeftHumanPlayerStation",
         new DriveToHumanStation(drive, () -> FieldConstants.HumanStation.LEFT));
@@ -305,8 +307,14 @@ public class RobotContainer {
                         && !AllianceFlipUtil.shouldFlip())
                     || (drive.getPose().getY() < FieldConstants.fieldWidth / 2
                         && AllianceFlipUtil.shouldFlip())
-                ? AllianceFlipUtil.apply(FieldConstants.CoralStation.rightCenterFace.getTranslation())
-                : AllianceFlipUtil.apply(FieldConstants.CoralStation.leftCenterFace.getTranslation());
+                ? AllianceFlipUtil.apply(
+                    FieldConstants.CoralStation.rightCenterFace.getTranslation())
+                : AllianceFlipUtil.apply(
+                    FieldConstants.CoralStation.leftCenterFace.getTranslation());
+
+    getHumanPlayerDistance = 
+        () -> getHumanPlayerTranslation.get().getDistance(drive.getPose().getTranslation());
+
 
     new Trigger(
             () ->
@@ -319,10 +327,7 @@ public class RobotContainer {
                 .beforeStarting(() -> leds.setEndGameWarning(true))
                 .finallyDo(() -> leds.setEndGameWarning(false)));
 
-    new Trigger(drive.getNearBargeSupplier())
-    .onTrue(
-        controllerRumbleCommand()
-        .withTimeout(0.5));
+    new Trigger(drive.getNearBargeSupplier()).onTrue(controllerRumbleCommand().withTimeout(0.5));
 
     new Trigger(
             () ->
@@ -627,9 +632,11 @@ public class RobotContainer {
 
     controller
         .rightBumper()
-        .and(() -> getHumanPlayerTranslation.get().getDistance(drive.getPose().getTranslation()) < coralStationThreshold.getAsDouble())
-        .onTrue(superstructure.setSuperstructureCommand(() -> SuperstructureStates.CORAL_INTAKING)
-        .alongWith(manipulator.setManipulatorState(ManipulatorState.INTAKING_CORAL)));
+        .and(() -> getHumanPlayerDistance.getAsDouble() < coralStationThreshold.getAsDouble())
+        .onTrue(
+            superstructure
+                .setSuperstructureCommand(() -> SuperstructureStates.CORAL_INTAKING)
+                .alongWith(manipulator.setManipulatorState(ManipulatorState.INTAKING_CORAL)));
 
     // Climb Commands
     controller
