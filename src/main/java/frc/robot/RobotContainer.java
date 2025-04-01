@@ -242,8 +242,7 @@ public class RobotContainer {
 
     drive.setNearBargeSupplier(
         () ->
-            AllianceFlipUtil.apply(drive.getPose()).getX()
-                    - AllianceFlipUtil.apply(FieldConstants.Barge.middleCage).getX()
+            AllianceFlipUtil.apply(drive.getPose().getTranslation()).getDistance(FieldConstants.Barge.middleCage)
                 < BargeRumbleThreshold.getAsDouble());
 
     superstructure = new Superstructure(arm, elevator, manipulator::hasAlgae);
