@@ -20,7 +20,10 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -109,6 +112,8 @@ public class RobotContainer {
   private final LoggedTunableNumber endgameAlert1 = new LoggedTunableNumber("EndgameAlert2", 30.0);
   private final LoggedNetworkNumber endgameAlert2 =
       new LoggedNetworkNumber("Endgame Alert #2", 15.0);
+  private final LoggedTunableNumber coralStationThreshold = new LoggedTunableNumber("CoralStationDistanceThreshold", 5);
+  private final LoggedTunableNumber BargeRumbleThreshold = new LoggedTunableNumber("BargeRumbleDistanceThreshold", 5);
   private final LoggedDashboardChooser<BooleanSupplier> pathOverride;
   @Setter BooleanSupplier pathingOverrideSupplier;
 
@@ -129,6 +134,7 @@ public class RobotContainer {
       new Alert("Operator controller disconnected (port 1).", AlertType.kWarning);
 
   private final Supplier<Rotation2d> getHumanPlayerAngle;
+  private final Supplier<Translation2d> getHumanPlayerTranslation;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -231,11 +237,11 @@ public class RobotContainer {
         break;
     }
 
-    // drive.setNearBargeSupplier(
-    //     () ->
-    //         AllianceFlipUtil.apply(drive.getPose()).getY()
-    //                 - AllianceFlipUtil.apply(FieldConstants.Barge.middleCage).getY()
-    //             < 0.4);
+    drive.setNearBargeSupplier(
+        () ->
+            AllianceFlipUtil.apply(drive.getPose()).getY()
+                    - AllianceFlipUtil.apply(FieldConstants.Barge.middleCage).getY()
+                < 0.4);
 
     superstructure = new Superstructure(arm, elevator, manipulator::hasAlgae);
     // Set up auto routines
@@ -261,6 +267,7 @@ public class RobotContainer {
                       && reefCommand.withinTolerance(
                           Units.inchesToMeters(2.5), new Rotation2d(Units.degreesToRadians(3.0)))));
     }
+
 
     NamedCommands.registerCommand(
         "DriveToLeftHumanPlayerStation",
@@ -292,6 +299,15 @@ public class RobotContainer {
                 ? AllianceFlipUtil.apply(new Rotation2d(Degrees.of(-54)))
                 : AllianceFlipUtil.apply(new Rotation2d(Degrees.of(54)));
 
+    getHumanPlayerTranslation =
+        () ->
+            (drive.getPose().getY() > FieldConstants.fieldWidth / 2
+                        && !AllianceFlipUtil.shouldFlip())
+                    || (drive.getPose().getY() < FieldConstants.fieldWidth / 2
+                        && AllianceFlipUtil.shouldFlip())
+                ? AllianceFlipUtil.apply(FieldConstants.CoralStation.rightCenterFace.getTranslation())
+                : AllianceFlipUtil.apply(FieldConstants.CoralStation.leftCenterFace.getTranslation());
+
     new Trigger(
             () ->
                 DriverStation.isTeleopEnabled()
@@ -302,6 +318,11 @@ public class RobotContainer {
                 .withTimeout(0.5)
                 .beforeStarting(() -> leds.setEndGameWarning(true))
                 .finallyDo(() -> leds.setEndGameWarning(false)));
+
+    new Trigger(drive.getNearBargeSupplier())
+    .onTrue(
+        controllerRumbleCommand()
+        .withTimeout(0.5));
 
     new Trigger(
             () ->
@@ -603,6 +624,12 @@ public class RobotContainer {
                 () -> -controller.getLeftY(),
                 () -> -controller.getLeftX(),
                 () -> getHumanPlayerAngle.get()));
+
+    controller
+        .rightBumper()
+        .and(() -> getHumanPlayerTranslation.get().getDistance(drive.getPose().getTranslation()) < coralStationThreshold.getAsDouble())
+        .onTrue(superstructure.setSuperstructureCommand(() -> SuperstructureStates.CORAL_INTAKING)
+        .alongWith(manipulator.setManipulatorState(ManipulatorState.INTAKING_CORAL)));
 
     // Climb Commands
     controller

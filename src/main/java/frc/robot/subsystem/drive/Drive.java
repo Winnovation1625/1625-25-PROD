@@ -65,7 +65,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.BooleanSupplier;
 import lombok.Getter;
+import lombok.Setter;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -128,6 +130,8 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
   @Getter @AutoLogOutput private Pose2d odometryPose = new Pose2d();
   private final SwerveSetpointGenerator setpointGenerator;
   private SwerveSetpoint previousSetpoint;
+
+  @Getter @Setter private BooleanSupplier nearBargeSupplier;
 
   private static final LoggedTunableNumber txTyObservationStaleSecs =
       new LoggedTunableNumber("Drive/TxTyObservationStaleSeconds", 0.5);
