@@ -20,6 +20,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -83,6 +84,7 @@ import frc.robot.util.AuxControllerUtil;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.List;
 import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import lombok.Setter;
 import org.ironmaple.simulation.SimulatedArena;
@@ -128,8 +130,12 @@ public class RobotContainer {
       new Alert("Driver controller disconnected (port 0).", AlertType.kWarning);
   private final Alert auxDisconnected =
       new Alert("Operator controller disconnected (port 1).", AlertType.kWarning);
+  private final LoggedTunableNumber coralStationThreshold =
+      new LoggedTunableNumber("CoralStationDistanceThreshold", 5);
 
   private final Supplier<Rotation2d> getHumanPlayerAngle;
+  private final DoubleSupplier getHumanPlayerDistance;
+  private final Supplier<Translation2d> getHumanPlayerTranslation;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -233,8 +239,8 @@ public class RobotContainer {
 
     // drive.setNearBargeSupplier(
     //     () ->
-    //         AllianceFlipUtil.apply(drive.getPose()).getY()
-    //                 - AllianceFlipUtil.apply(FieldConstants.Barge.middleCage).getY()
+    //         AllianceFlipUtil.apply(drive.getPose()).getX()
+    //                 - AllianceFlipUtil.apply(FieldConstants.Barge.middleCage).getX()
     //             < 0.4);
 
     superstructure = new Superstructure(arm, elevator, manipulator::hasAlgae);
@@ -282,6 +288,20 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
+
+    getHumanPlayerTranslation =
+        () ->
+            (drive.getPose().getY() > FieldConstants.fieldWidth / 2
+                        && !AllianceFlipUtil.shouldFlip())
+                    || (drive.getPose().getY() < FieldConstants.fieldWidth / 2
+                        && AllianceFlipUtil.shouldFlip())
+                ? AllianceFlipUtil.apply(
+                    FieldConstants.CoralStation.leftCenterFace.getTranslation())
+                : AllianceFlipUtil.apply(
+                    FieldConstants.CoralStation.rightCenterFace.getTranslation());
+
+    getHumanPlayerDistance =
+        () -> getHumanPlayerTranslation.get().getDistance(drive.getPose().getTranslation());
 
     getHumanPlayerAngle =
         () ->
@@ -603,6 +623,14 @@ public class RobotContainer {
                 () -> -controller.getLeftY(),
                 () -> -controller.getLeftX(),
                 () -> getHumanPlayerAngle.get()));
+
+    controller
+    .rightBumper()
+    .and(() -> getHumanPlayerDistance.getAsDouble() < coralStationThreshold.getAsDouble())
+    .onTrue(
+            superstructure
+            .setSuperstructureCommand(() -> SuperstructureStates.CORAL_INTAKING)
+            .alongWith(manipulator.setManipulatorState(ManipulatorState.INTAKING_CORAL)));
 
     // Climb Commands
     controller
