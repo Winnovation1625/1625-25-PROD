@@ -131,11 +131,14 @@ public class RobotContainer {
   private final Alert auxDisconnected =
       new Alert("Operator controller disconnected (port 1).", AlertType.kWarning);
   private final LoggedTunableNumber coralStationThreshold =
-      new LoggedTunableNumber("CoralStationDistanceThreshold", 5);
+      new LoggedTunableNumber("CoralStationDistanceThreshold", 1);
+  private final LoggedTunableNumber BargeRumbleThreshold =
+      new LoggedTunableNumber("BargeRumbleDistanceThreshold", 5);
 
   private final Supplier<Rotation2d> getHumanPlayerAngle;
   private final DoubleSupplier getHumanPlayerDistance;
   private final Supplier<Translation2d> getHumanPlayerTranslation;
+  private final Supplier<Boolean> nearBargeSupplier;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -237,11 +240,11 @@ public class RobotContainer {
         break;
     }
 
-    // drive.setNearBargeSupplier(
-    //     () ->
-    //         AllianceFlipUtil.apply(drive.getPose()).getX()
-    //                 - AllianceFlipUtil.apply(FieldConstants.Barge.middleCage).getX()
-    //             < 0.4);
+    nearBargeSupplier =
+        () ->
+            AllianceFlipUtil.apply(drive.getPose()).getX()
+                    - AllianceFlipUtil.apply(FieldConstants.Barge.middleCage).getX()
+                < BargeRumbleThreshold.getAsDouble();
 
     superstructure = new Superstructure(arm, elevator, manipulator::hasAlgae);
     // Set up auto routines
@@ -322,6 +325,9 @@ public class RobotContainer {
                 .withTimeout(0.5)
                 .beforeStarting(() -> leds.setEndGameWarning(true))
                 .finallyDo(() -> leds.setEndGameWarning(false)));
+
+    new Trigger(() -> nearBargeSupplier.get() == true)
+        .onTrue(controllerRumbleCommand().withTimeout(0.5));
 
     new Trigger(
             () ->
@@ -625,12 +631,19 @@ public class RobotContainer {
                 () -> getHumanPlayerAngle.get()));
 
     controller
-    .rightBumper()
-    .and(() -> getHumanPlayerDistance.getAsDouble() < coralStationThreshold.getAsDouble())
-    .onTrue(
+        .rightBumper()
+        .and(() -> getHumanPlayerDistance.getAsDouble() < coralStationThreshold.getAsDouble())
+        .onTrue(
             superstructure
-            .setSuperstructureCommand(() -> SuperstructureStates.CORAL_INTAKING)
-            .alongWith(manipulator.setManipulatorState(ManipulatorState.INTAKING_CORAL)));
+                .setSuperstructureCommand(() -> SuperstructureStates.CORAL_INTAKING)
+                .alongWith(manipulator.setManipulatorState(ManipulatorState.INTAKING_CORAL))
+                .andThen(
+                    Commands.waitUntil(
+                        () ->
+                            manipulator.getGamepieceState() == GamepieceState.CORAL_STAGING
+                                || manipulator.getGamepieceState()
+                                    == GamepieceState.CORAL_IN_MANIPULATOR))
+                .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
 
     // Climb Commands
     controller
