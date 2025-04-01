@@ -136,7 +136,7 @@ public class RobotContainer {
       new Alert("Operator controller disconnected (port 1).", AlertType.kWarning);
 
   private final Supplier<Rotation2d> getHumanPlayerAngle;
-  private final Supplier<Translation2d> getHumanPlayerTranslation;
+  @AutoLogOutput private final Supplier<Translation2d> getHumanPlayerTranslation;
   @AutoLogOutput private final DoubleSupplier getHumanPlayerDistance;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -242,8 +242,8 @@ public class RobotContainer {
 
     drive.setNearBargeSupplier(
         () ->
-            AllianceFlipUtil.apply(drive.getPose()).getY()
-                    - AllianceFlipUtil.apply(FieldConstants.Barge.middleCage).getY()
+            AllianceFlipUtil.apply(drive.getPose()).getX()
+                    - AllianceFlipUtil.apply(FieldConstants.Barge.middleCage).getX()
                 < 0.4);
 
     superstructure = new Superstructure(arm, elevator, manipulator::hasAlgae);
@@ -312,9 +312,8 @@ public class RobotContainer {
                 : AllianceFlipUtil.apply(
                     FieldConstants.CoralStation.leftCenterFace.getTranslation());
 
-    getHumanPlayerDistance = 
+    getHumanPlayerDistance =
         () -> getHumanPlayerTranslation.get().getDistance(drive.getPose().getTranslation());
-
 
     new Trigger(
             () ->
