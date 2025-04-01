@@ -244,7 +244,7 @@ public class RobotContainer {
         () ->
             AllianceFlipUtil.apply(drive.getPose()).getX()
                     - AllianceFlipUtil.apply(FieldConstants.Barge.middleCage).getX()
-                < 1);
+                < 4);
 
     superstructure = new Superstructure(arm, elevator, manipulator::hasAlgae);
     // Set up auto routines
