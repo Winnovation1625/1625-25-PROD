@@ -131,7 +131,7 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
   private final SwerveSetpointGenerator setpointGenerator;
   private SwerveSetpoint previousSetpoint;
 
-  @Getter @Setter private BooleanSupplier nearBargeSupplier;
+  @AutoLogOutput @Getter @Setter private BooleanSupplier nearBargeSupplier;
 
   private static final LoggedTunableNumber txTyObservationStaleSecs =
       new LoggedTunableNumber("Drive/TxTyObservationStaleSeconds", 0.5);
