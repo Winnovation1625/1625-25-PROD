@@ -76,7 +76,7 @@ public class AutoScoreCommands {
         () -> fromStartConfig);
   }
 
-  public static Command autoShootCoral(
+  public static Command shootCoral(
       Superstructure superstructure, Manipulator manipulator, ReefLevel reefLevel) {
     return Commands.either(
         Commands.waitUntil(superstructure::atSuperStructureGoal)

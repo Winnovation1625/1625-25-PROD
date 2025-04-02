@@ -187,6 +187,31 @@ public class FieldConstants {
   }
 
   @RequiredArgsConstructor
+  public enum AlgaePosition {
+    AB(0, 0),
+    CD(1, 5),
+    EF(2, 4),
+    GH(3, 3),
+    IJ(4, 2),
+    KL(5, 1);
+    @Getter private final int fieldConstantsIndex;
+    @Getter private final int face;
+
+    // Reverse-lookup map for getting a reef position from the index of the list
+    private static final Map<Integer, AlgaePosition> lookup = new HashMap<Integer, AlgaePosition>();
+
+    static {
+      for (AlgaePosition index : AlgaePosition.values()) {
+        lookup.put(index.getFieldConstantsIndex(), index);
+      }
+    }
+
+    public static AlgaePosition fromIndex(int index) {
+      return lookup.get(index);
+    }
+  }
+
+  @RequiredArgsConstructor
   public enum HumanStation {
     LEFT(FieldConstants.CoralStation.leftCenterFace),
     RIGHT(FieldConstants.CoralStation.rightCenterFace);
@@ -265,7 +290,8 @@ public class FieldConstants {
   @Builder
   public record CoralObjective(ReefPosition position, ReefLevel reefLevel) {}
 
-  public record AlgaeObjective(int id) {}
+  @Builder
+  public record AlgaeObjective(AlgaePosition position, Boolean level2) {}
 
   @RequiredArgsConstructor
   public enum FieldType {

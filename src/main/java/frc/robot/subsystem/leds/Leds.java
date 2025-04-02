@@ -9,6 +9,7 @@ import com.ctre.phoenix.led.ColorFlowAnimation.Direction;
 import com.ctre.phoenix.led.FireAnimation;
 import com.ctre.phoenix.led.RainbowAnimation;
 import com.ctre.phoenix.led.SingleFadeAnimation;
+import com.ctre.phoenix.led.StrobeAnimation;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.LoggedTunableNumber;
@@ -33,6 +34,7 @@ public class Leds extends VirtualSubsystem {
   @Setter @Getter private boolean lowBattery = false;
   @Setter @Getter private Boolean[] aprilTagCams;
   @Setter @Getter private Boolean autoLiningUp = false;
+  @Setter @Getter private Boolean pathingError = false;
   private Boolean[] lastAprilTagCams = new Boolean[] {true, true, true, true};
 
   public static Leds getInstance() {
@@ -116,6 +118,9 @@ public class Leds extends VirtualSubsystem {
               false,
               HARDWARE_LEDS),
           0);
+    } else if (pathingError) {
+      // strobe yellow
+      candle.animate(new StrobeAnimation(255, 255, 0, 0, 1, LEDS_PER_STRIP, HARDWARE_LEDS), 0);
     } else if (whenLinedUp) {
       // Solid Green
       candle.setLEDs(0, 255, 0, 0, HARDWARE_LEDS, LEDS_PER_STRIP);

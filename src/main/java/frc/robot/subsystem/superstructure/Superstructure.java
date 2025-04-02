@@ -94,7 +94,8 @@ public class Superstructure extends SubsystemBase {
             superstructureGoal == SuperstructureStates.CLVL3
                 || superstructureGoal == SuperstructureStates.CLVL2
                 || superstructureGoal == SuperstructureStates.ALVL2
-                || superstructureGoal == SuperstructureStates.ALVL3;
+                || superstructureGoal == SuperstructureStates.ALVL3
+                || superstructureGoal == SuperstructureStates.CLVL4;
     return Commands.either(
         Commands.either( // true, true worst case
             runElevatorToState(intermediateState)
@@ -125,7 +126,7 @@ public class Superstructure extends SubsystemBase {
             Commands.either(
                 runArmToState(() -> to.get().armState)
                     .alongWith(
-                        Commands.waitTime(Seconds.of(0.5))
+                        Commands.waitTime(Seconds.of(0.25))
                             .andThen(runElevatorToState(toElevatorState)))
                     .andThen(() -> superstructureGoal = to.get(), this)
                     .andThen(Commands.print("Best Case Superstructure Run")),
