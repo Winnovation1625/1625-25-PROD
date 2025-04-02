@@ -148,9 +148,6 @@ public class RobotContainer {
   private final LoggedTunableNumber bargeStowDistanceThreshold =
       new LoggedTunableNumber("BargeStowDistanceThreshold", 1.0);
 
-  private final LoggedTunableNumber distanceAllowedToPath =
-      new LoggedTunableNumber("DistanceAllowedToPathToReef", 2.0);
-
   private final Supplier<Rotation2d> getHumanPlayerAngle;
   private final DoubleSupplier getHumanPlayerDistance;
   private final Supplier<Translation2d> getHumanPlayerTranslation;
