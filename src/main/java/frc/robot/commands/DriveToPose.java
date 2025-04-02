@@ -44,6 +44,8 @@ public class DriveToPose extends Command {
       new LoggedTunableNumber("DriveToPose/FFMinRadius");
   private static final LoggedTunableNumber ffMaxRadius =
       new LoggedTunableNumber("DriveToPose/FFMaxRadius");
+  private static final LoggedTunableNumber errorDistanceThreshold =
+      new LoggedTunableNumber("DriveToPose/ErrorDistanceThreshold");
 
   static {
     drivekP.initDefault(3);
@@ -59,6 +61,7 @@ public class DriveToPose extends Command {
     thetaTolerance.initDefault(Units.degreesToRadians(2.0));
     ffMinRadius.initDefault(0.00);
     ffMaxRadius.initDefault(0.25);
+    errorDistanceThreshold.initDefault(2); // 2 meters
   }
 
   private final Drive drive;
@@ -184,6 +187,11 @@ public class DriveToPose extends Command {
             0.0,
             1.0);
     driveErrorAbs = currentDistance;
+    if (currentDistance > errorDistanceThreshold.get()) {
+      leds.setPathingError(true);
+    } else {
+      leds.setPathingError(false);
+    }
     driveController.reset(
         lastSetpointTranslation.getDistance(targetPose.getTranslation()),
         driveController.getSetpoint().velocity);
@@ -254,6 +262,7 @@ public class DriveToPose extends Command {
     drive.stop();
     leds.setAutoLiningUp(false);
     leds.setWhenLinedUp(false);
+    leds.setPathingError(false);
     running = false;
     // Clear logs
     Logger.recordOutput("DriveToPose/Setpoint", new Pose2d[] {});
