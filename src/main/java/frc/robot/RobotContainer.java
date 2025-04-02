@@ -136,7 +136,7 @@ public class RobotContainer {
   private final LoggedTunableNumber coralStationThreshold =
       new LoggedTunableNumber("CoralStationDistanceThreshold", 1);
   private final LoggedTunableNumber BargeRumbleThreshold =
-      new LoggedTunableNumber("BargeRumbleDistanceThreshold", 5);
+      new LoggedTunableNumber("BargeRumbleDistanceThreshold", 1.85);
   private final LoggedTunableNumber reefGoalThreshold =
       new LoggedTunableNumber("ReefGoalDistanceThreshold", Units.inchesToMeters(12));
 
@@ -262,20 +262,40 @@ public class RobotContainer {
     NamedCommands.registerCommand("DriveToReefFace4", new DriveToReef(drive, 4, true));
     NamedCommands.registerCommand("DriveToReefFace3", new DriveToReef(drive, 3, true));
     NamedCommands.registerCommand(
-        "LeaveStartConfigAutoScoreL4",
-        AutoScoreCommands.autoScoreCoral(superstructure, manipulator, ReefLevel.L4, true));
+        "Shoot Coral", AutoScoreCommands.autoScoreCoral(superstructure, manipulator, ReefLevel.L4));
+    // NamedCommands.registerCommand(
+    //     "LeaveStartConfigAutoScoreL4",
+    //     AutoScoreCommands.autoMoveSuperStructure(superstructure, manipulator, ReefLevel.L4,
+    // true));
+    // NamedCommands.registerCommand(
+    //     "LeaveStartConfigAutoScoreL2",
+    //     AutoScoreCommands.autoScoreCoral(superstructure, manipulator, ReefLevel.L2, true));
+
+    DriveToReef BranchEFromStartConfig =
+        new DriveToReef(drive, () -> FieldConstants.ReefPosition.E);
     NamedCommands.registerCommand(
-        "LeaveStartConfigAutoScoreL2",
-        AutoScoreCommands.autoScoreCoral(superstructure, manipulator, ReefLevel.L2, true));
+        "DriveToBranchEFromStartConfig",
+        BranchEFromStartConfig.until(
+                () ->
+                    BranchEFromStartConfig.isRunning()
+                        && BranchEFromStartConfig.withinTolerance(
+                            Units.inchesToMeters(2.5), new Rotation2d(Units.degreesToRadians(3.0))))
+            .alongWith(
+                AutoScoreCommands.autoMoveSuperStructure(superstructure, ReefLevel.L4, true)));
+
     for (var position : FieldConstants.ReefPosition.values()) {
       DriveToReef reefCommand = new DriveToReef(drive, () -> position);
       NamedCommands.registerCommand(
           "DriveToBranch" + position.name(),
-          reefCommand.until(
-              () ->
-                  reefCommand.isRunning()
-                      && reefCommand.withinTolerance(
-                          Units.inchesToMeters(2.5), new Rotation2d(Units.degreesToRadians(3.0)))));
+          reefCommand
+              .until(
+                  () ->
+                      reefCommand.isRunning()
+                          && reefCommand.withinTolerance(
+                              Units.inchesToMeters(2.5),
+                              new Rotation2d(Units.degreesToRadians(3.0))))
+              .alongWith(
+                  AutoScoreCommands.autoMoveSuperStructure(superstructure, ReefLevel.L4, false)));
     }
 
     NamedCommands.registerCommand(
@@ -632,7 +652,10 @@ public class RobotContainer {
                 .andThen(superstructure.runArmToState(() -> ArmState.CLVL3))
                 .andThen(
                     Commands.waitUntil(
-                        () -> manipulator.getGamepieceState() == GamepieceState.NONE))
+                        () ->
+                            arm.atGoal() && manipulator.getGamepieceState() == GamepieceState.NONE))
+                .andThen(superstructure.runArmToState(() -> ArmState.STOW))
+                .andThen(Commands.waitTime(Seconds.of(0.15)))
                 .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
 
     controller

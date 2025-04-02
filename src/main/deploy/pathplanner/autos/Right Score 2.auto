@@ -17,7 +17,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "DriveToBranchE"
+                  "name": "DriveToBranchEFromStartConfig"
                 }
               },
               {
@@ -32,7 +32,7 @@
         {
           "type": "named",
           "data": {
-            "name": "LeaveStartConfigAutoScoreL4"
+            "name": "Shoot Coral"
           }
         },
         {
@@ -62,7 +62,7 @@
         {
           "type": "named",
           "data": {
-            "name": "AutoScoreL4"
+            "name": "Shoot Coral"
           }
         }
       ]
