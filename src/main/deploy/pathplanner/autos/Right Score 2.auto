@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Right Barge to Coral E2"
+            "pathName": "R Barge to Reef E"
           }
         },
         {
@@ -44,7 +44,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Reef Face 3 to Human"
+            "pathName": "Reef E to R HP"
           }
         },
         {
@@ -56,7 +56,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Right Human Player to D"
+            "pathName": "R HP to Reef C"
           }
         },
         {
