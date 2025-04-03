@@ -406,6 +406,18 @@ public class RobotContainer {
                         && autoStowSuperstructure.get())
         .onTrue(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW));
 
+    new Trigger(
+            () ->
+                DriverStation.isTeleopEnabled()
+                    && (superstructure.getSuperstructureGoal() == SuperstructureStates.ALVL2
+                        || superstructure.getSuperstructureGoal() == SuperstructureStates.ALVL3)
+                    && manipulator.getGamepieceState() == GamepieceState.ALGAE_IN_CLAW)
+        .onTrue(
+            manipulator
+                .setManipulatorState(ManipulatorState.IDLE)
+                .alongWith(
+                    superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
+
     pathOverride.addDefaultOption("off", pathingOverrideSupplier = () -> false);
     pathOverride.addOption("on", pathingOverrideSupplier = () -> true);
   }
@@ -683,7 +695,7 @@ public class RobotContainer {
                 Commands.waitUntil(
                         () ->
                             algaePathCommand.withinTolerance(
-                                Units.inchesToMeters(12), Rotation2d.kCCW_90deg))
+                                Units.inchesToMeters(20), Rotation2d.kCCW_90deg))
                     .andThen(
                         superstructure
                             .setSuperstructureCommand(getAlgaeReefLevel)
@@ -694,12 +706,7 @@ public class RobotContainer {
                                     () ->
                                         superstructure.atSuperStructureGoal()
                                             && manipulator.getGamepieceState()
-                                                == Manipulator.GamepieceState.ALGAE_IN_CLAW))
-                            .andThen(
-                                superstructure
-                                    .setSuperstructureCommand(() -> SuperstructureStates.STOW)
-                                    .alongWith(
-                                        manipulator.setManipulatorState(ManipulatorState.IDLE))))));
+                                                == Manipulator.GamepieceState.ALGAE_IN_CLAW)))));
 
     // when we don't want to path to the algae, we want the old controls
     controller
@@ -753,7 +760,7 @@ public class RobotContainer {
                         () ->
                             arm.atGoal() && manipulator.getGamepieceState() == GamepieceState.NONE))
                 .andThen(superstructure.runArmToState(() -> ArmState.STOW))
-                .andThen(Commands.waitTime(Seconds.of(0.15)))
+                .andThen(Commands.waitTime(Seconds.of(0.175)))
                 .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
 
     controller

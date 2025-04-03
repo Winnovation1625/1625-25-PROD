@@ -80,19 +80,22 @@ public class AutoScoreCommands {
       Superstructure superstructure, Manipulator manipulator, ReefLevel reefLevel) {
     return Commands.either(
         Commands.waitUntil(superstructure::atSuperStructureGoal)
-            .andThen(Commands.waitUntil(superstructure::atSuperStructureGoal))
             .andThen(manipulator.setManipulatorState(ManipulatorState.SHOOTING_CORAL))
             .andThen(
                 Commands.waitUntil(
-                    () -> manipulator.getGamepieceState() == GamepieceState.CORAL_EXITING_BOT))
+                    () ->
+                        manipulator.getGamepieceState() == GamepieceState.CORAL_EXITING_BOT
+                            || manipulator.getGamepieceState() == GamepieceState.NONE))
             .andThen(Commands.waitTime(Seconds.of(0.1)))
             .andThen(superstructure.runArmToState(() -> ArmState.CLVL3))
             .andThen(
                 Commands.waitUntil(() -> manipulator.getGamepieceState() == GamepieceState.NONE))
-            .andThen(manipulator.setManipulatorState(ManipulatorState.IDLE))
-            .alongWith(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)),
-        manipulator
-            .setManipulatorState(ManipulatorState.SHOOTING_CORAL)
+            .andThen(superstructure.runArmToState(() -> ArmState.STOW))
+            .alongWith(manipulator.setManipulatorState(ManipulatorState.IDLE))
+            .andThen(Commands.waitTime(Seconds.of(0.175)))
+            .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)),
+        Commands.waitUntil(superstructure::atSuperStructureGoal)
+            .andThen(manipulator.setManipulatorState(ManipulatorState.SHOOTING_CORAL))
             .andThen(
                 Commands.waitUntil(() -> manipulator.getGamepieceState() == GamepieceState.NONE))
             .andThen(manipulator.setManipulatorState(ManipulatorState.IDLE))
