@@ -86,8 +86,8 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
 
   // PathPlanner config constants
   private static final double ROBOT_MASS_KG = 62.9994443;
-  private static final double ROBOT_MOI = 6.283;
-  private static final double WHEEL_COF = 1.5;
+  private static final double ROBOT_MOI = 6.883;
+  private static final double WHEEL_COF = 1.3;
   private static final RobotConfig PP_CONFIG =
       new RobotConfig(
           ROBOT_MASS_KG,
@@ -189,8 +189,7 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
         this::setPose,
         this::getChassisSpeeds,
         this::runVelocity,
-        new PPHolonomicDriveController(
-            new PIDConstants(1.5, 0.0, 0), new PIDConstants(1.5, 0.0, 0)),
+        new PPHolonomicDriveController(new PIDConstants(3.0, 0.0, 0), new PIDConstants(2, 0.0, 0)),
         PP_CONFIG,
         AllianceFlipUtil::shouldFlip,
         this);

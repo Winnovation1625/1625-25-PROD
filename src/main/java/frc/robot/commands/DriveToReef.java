@@ -100,10 +100,8 @@ public class DriveToReef extends DriveToPose {
                 FieldConstants.Reef.centerFaces[reefFace].transformBy(
                     new Transform2d(
                         isCoral ? reefPoseOffsetX.get() : reefPoseOffsetXAlgae.get(),
-                        isCoral ? reefPoseOffsetY.get() : -reefPoseOffsetY.get(),
-                        isCoral
-                            ? new Rotation2d(Degrees.of(-90))
-                            : new Rotation2d(Degrees.of(90))))),
+                        reefPoseOffsetY.get(),
+                        new Rotation2d(Degrees.of(-90))))),
         // robot position supplier
         () -> {
           Optional<Pose2d> txPose =
@@ -131,12 +129,8 @@ public class DriveToReef extends DriveToPose {
                                                   isCoral
                                                       ? reefPoseOffsetX.get()
                                                       : reefPoseOffsetXAlgae.get(),
-                                                  isCoral
-                                                      ? reefPoseOffsetY.get()
-                                                      : -reefPoseOffsetY.get(),
-                                                  isCoral
-                                                      ? new Rotation2d(Degrees.of(-90))
-                                                      : new Rotation2d(Degrees.of(90)))))
+                                                  reefPoseOffsetY.get(),
+                                                  new Rotation2d(Degrees.of(-90)))))
                                       .getTranslation())
                           - minDistanceTagPoseBlend.get())
                       / (maxDistanceTagPoseBlend.get() - minDistanceTagPoseBlend.get()),
@@ -158,10 +152,8 @@ public class DriveToReef extends DriveToPose {
                     .transformBy(
                         new Transform2d(
                             isCoral.get() ? reefPoseOffsetX.get() : reefPoseOffsetXAlgae.get(),
-                            isCoral.get() ? reefPoseOffsetY.get() : -reefPoseOffsetY.get(),
-                            isCoral.get()
-                                ? new Rotation2d(Degrees.of(-90))
-                                : new Rotation2d(Degrees.of(90))))),
+                            reefPoseOffsetY.get(),
+                            new Rotation2d(Degrees.of(-90))))),
         // robot position supplier
         () -> {
           Optional<Pose2d> txPose =
@@ -191,12 +183,8 @@ public class DriveToReef extends DriveToPose {
                                                       isCoral.get()
                                                           ? reefPoseOffsetX.get()
                                                           : reefPoseOffsetXAlgae.get(),
-                                                      isCoral.get()
-                                                          ? reefPoseOffsetY.get()
-                                                          : -reefPoseOffsetY.get(),
-                                                      isCoral.get()
-                                                          ? new Rotation2d(Degrees.of(-90))
-                                                          : new Rotation2d(Degrees.of(90)))))
+                                                      reefPoseOffsetY.get(),
+                                                      new Rotation2d(Degrees.of(-90)))))
                                       .getTranslation())
                           - minDistanceTagPoseBlend.get())
                       / (maxDistanceTagPoseBlend.get() - minDistanceTagPoseBlend.get()),

@@ -51,7 +51,7 @@ public class DriveToPose extends Command {
   private boolean isSlow;
 
   static {
-    drivekP.initDefault(3);
+    drivekP.initDefault(3.5);
     drivekI.initDefault(0.0);
     drivekD.initDefault(0.0);
     thetakP.initDefault(3.5);
@@ -59,10 +59,10 @@ public class DriveToPose extends Command {
     driveMaxVelocity.initDefault(2.0);
     driveMaxVelocitySlow.initDefault(1.5);
     driveMaxAccelerationSlow.initDefault(1.0);
-    driveMaxAcceleration.initDefault(3.0);
+    driveMaxAcceleration.initDefault(2.5);
     thetaMaxVelocity.initDefault(Units.degreesToRadians(270.0));
     thetaMaxAcceleration.initDefault(4.0);
-    driveTolerance.initDefault(0.0408); // 2 inch
+    driveTolerance.initDefault(Units.inchesToMeters(1.75)); // 2 inch
     thetaTolerance.initDefault(Units.degreesToRadians(2.0));
     ffMinRadius.initDefault(0.00);
     ffMaxRadius.initDefault(0.25);

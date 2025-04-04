@@ -1,0 +1,104 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "R Barge to Reef E"
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "DriveToBranchEFromStartConfig"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 20.0
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot Coral"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.25
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Reef E to R HP"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "CoralIntake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "R HP to Reef C"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "DriveToBranchC"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot Coral"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.25
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "AlgaeCD"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AlgaeAquireCD"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StowAlgae"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": true
+}
