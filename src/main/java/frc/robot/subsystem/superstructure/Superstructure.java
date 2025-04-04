@@ -161,7 +161,7 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command leaveStartConfigToStow() {
-    return runElevatorToState(() -> ElevatorState.ALGAE_CLEARANCE)
+    return runElevatorToState(() -> ElevatorState.CLVL3)
         .andThen(Commands.waitUntil(() -> atGoal()))
         .andThen(Commands.print("Elevator at algae Clearance, moving Arm"))
         .andThen(runArmToState(() -> SuperstructureStates.STOW.getArmState()))
