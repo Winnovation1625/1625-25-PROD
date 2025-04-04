@@ -24,6 +24,8 @@ public class DriveToReef extends DriveToPose {
       new LoggedTunableNumber("DriveToReef/MaxDistanceTagPoseBlend", Units.inchesToMeters(36.0));
   private static final LoggedTunableNumber reefPoseOffsetX =
       new LoggedTunableNumber("DriveToReef/ReefCoralScoreXOffset", Units.inchesToMeters(17));
+  private static final LoggedTunableNumber reefPoseOffsetXAlgae =
+      new LoggedTunableNumber("DriveToReef/ReefCoralScoreXOffsetAlgae", Units.inchesToMeters(22));
   private static final LoggedTunableNumber reefPoseOffsetY =
       new LoggedTunableNumber("DriveToReef/ReefCoralScoreYOffset", Units.inchesToMeters(-10.725));
 
@@ -31,6 +33,7 @@ public class DriveToReef extends DriveToPose {
     minDistanceTagPoseBlend.initDefault(Units.inchesToMeters(24.0));
     maxDistanceTagPoseBlend.initDefault(Units.inchesToMeters(36.0));
     reefPoseOffsetX.initDefault(Units.inchesToMeters(17));
+    reefPoseOffsetXAlgae.initDefault(Units.inchesToMeters(22));
     reefPoseOffsetY.initDefault(Units.inchesToMeters(-10.725));
   }
 
@@ -84,7 +87,8 @@ public class DriveToReef extends DriveToPose {
                   0.0,
                   1.0);
           return drive.getPose().interpolate(txPose.get(), 1.0 - t);
-        });
+        },
+        false);
   }
 
   public DriveToReef(Drive drive, int reefFace, boolean isCoral) {
@@ -95,7 +99,7 @@ public class DriveToReef extends DriveToPose {
             AllianceFlipUtil.apply(
                 FieldConstants.Reef.centerFaces[reefFace].transformBy(
                     new Transform2d(
-                        reefPoseOffsetX.get(),
+                        isCoral ? reefPoseOffsetX.get() : reefPoseOffsetXAlgae.get(),
                         isCoral ? reefPoseOffsetY.get() : -reefPoseOffsetY.get(),
                         isCoral
                             ? new Rotation2d(Degrees.of(-90))
@@ -124,7 +128,9 @@ public class DriveToReef extends DriveToPose {
                                   AllianceFlipUtil.apply(
                                           FieldConstants.Reef.centerFaces[reefFace].transformBy(
                                               new Transform2d(
-                                                  reefPoseOffsetX.get(),
+                                                  isCoral
+                                                      ? reefPoseOffsetX.get()
+                                                      : reefPoseOffsetXAlgae.get(),
                                                   isCoral
                                                       ? reefPoseOffsetY.get()
                                                       : -reefPoseOffsetY.get(),
@@ -137,7 +143,8 @@ public class DriveToReef extends DriveToPose {
                   0.0,
                   1.0);
           return drive.getPose().interpolate(txPose.get(), 1.0 - t);
-        });
+        },
+        !isCoral);
   }
 
   public DriveToReef(
@@ -150,7 +157,7 @@ public class DriveToReef extends DriveToPose {
                 FieldConstants.Reef.centerFaces[algaeObjective.get().position().getFace()]
                     .transformBy(
                         new Transform2d(
-                            reefPoseOffsetX.get(),
+                            isCoral.get() ? reefPoseOffsetX.get() : reefPoseOffsetXAlgae.get(),
                             isCoral.get() ? reefPoseOffsetY.get() : -reefPoseOffsetY.get(),
                             isCoral.get()
                                 ? new Rotation2d(Degrees.of(-90))
@@ -181,7 +188,9 @@ public class DriveToReef extends DriveToPose {
                                               algaeObjective.get().position().getFace()]
                                               .transformBy(
                                                   new Transform2d(
-                                                      reefPoseOffsetX.get(),
+                                                      isCoral.get()
+                                                          ? reefPoseOffsetX.get()
+                                                          : reefPoseOffsetXAlgae.get(),
                                                       isCoral.get()
                                                           ? reefPoseOffsetY.get()
                                                           : -reefPoseOffsetY.get(),
@@ -194,6 +203,7 @@ public class DriveToReef extends DriveToPose {
                   0.0,
                   1.0);
           return drive.getPose().interpolate(txPose.get(), 1.0 - t);
-        });
+        },
+        !isCoral.get());
   }
 }

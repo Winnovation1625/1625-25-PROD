@@ -32,6 +32,8 @@ public class DriveToPose extends Command {
       new LoggedTunableNumber("DriveToPose/DriveMaxVelocitySlow");
   private static final LoggedTunableNumber driveMaxAcceleration =
       new LoggedTunableNumber("DriveToPose/DriveMaxAcceleration");
+  private static final LoggedTunableNumber driveMaxAccelerationSlow =
+      new LoggedTunableNumber("DriveToPose/DriveMaxAccelerationSlow");
   private static final LoggedTunableNumber thetaMaxVelocity =
       new LoggedTunableNumber("DriveToPose/ThetaMaxVelocity");
   private static final LoggedTunableNumber thetaMaxAcceleration =
@@ -46,6 +48,7 @@ public class DriveToPose extends Command {
       new LoggedTunableNumber("DriveToPose/FFMaxRadius");
   private static final LoggedTunableNumber errorDistanceThreshold =
       new LoggedTunableNumber("DriveToPose/ErrorDistanceThreshold");
+  private boolean isSlow;
 
   static {
     drivekP.initDefault(3);
@@ -53,8 +56,10 @@ public class DriveToPose extends Command {
     drivekD.initDefault(0.0);
     thetakP.initDefault(3.5);
     thetakD.initDefault(0.2);
-    driveMaxVelocity.initDefault(1.5);
-    driveMaxAcceleration.initDefault(1.0);
+    driveMaxVelocity.initDefault(2.0);
+    driveMaxVelocitySlow.initDefault(1.5);
+    driveMaxAccelerationSlow.initDefault(1.0);
+    driveMaxAcceleration.initDefault(3.0);
     thetaMaxVelocity.initDefault(Units.degreesToRadians(270.0));
     thetaMaxAcceleration.initDefault(4.0);
     driveTolerance.initDefault(0.0408); // 2 inch
@@ -83,18 +88,18 @@ public class DriveToPose extends Command {
   private Supplier<Translation2d> linearFF = () -> Translation2d.kZero;
   private DoubleSupplier omegaFF = () -> 0.0;
 
-  public DriveToPose(Drive drive, Supplier<Pose2d> target) {
+  public DriveToPose(Drive drive, Supplier<Pose2d> target, boolean isSlow) {
     this.drive = drive;
     this.target = target;
-
+    this.isSlow = isSlow;
     // Enable continuous input for theta controller
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
     robot = drive::getPose;
     addRequirements(drive);
   }
 
-  public DriveToPose(Drive drive, Supplier<Pose2d> target, Supplier<Pose2d> robot) {
-    this(drive, target);
+  public DriveToPose(Drive drive, Supplier<Pose2d> target, Supplier<Pose2d> robot, boolean isSlow) {
+    this(drive, target, isSlow);
     this.robot = robot;
   }
 
@@ -103,8 +108,9 @@ public class DriveToPose extends Command {
       Supplier<Pose2d> target,
       Supplier<Pose2d> robot,
       Supplier<Translation2d> linearFF,
-      DoubleSupplier omegaFF) {
-    this(drive, target, robot);
+      DoubleSupplier omegaFF,
+      boolean isSlow) {
+    this(drive, target, robot, isSlow);
     this.linearFF = linearFF;
     this.omegaFF = omegaFF;
   }
@@ -135,7 +141,9 @@ public class DriveToPose extends Command {
     driveController.setI(drivekI.get());
     driveController.setD(drivekD.get());
     driveController.setConstraints(
-        new TrapezoidProfile.Constraints(driveMaxVelocity.get(), driveMaxAcceleration.get()));
+        new TrapezoidProfile.Constraints(
+            isSlow ? driveMaxVelocitySlow.get() : driveMaxVelocity.get(),
+            isSlow ? driveMaxAccelerationSlow.get() : driveMaxAcceleration.get()));
     driveController.setTolerance(driveTolerance.get());
     thetaController.setP(thetakP.get());
     thetaController.setD(thetakD.get());
@@ -153,6 +161,7 @@ public class DriveToPose extends Command {
     if (driveMaxVelocity.hasChanged(hashCode())
         || driveMaxVelocitySlow.hasChanged(hashCode())
         || driveMaxAcceleration.hasChanged(hashCode())
+        || driveMaxAccelerationSlow.hasChanged(hashCode())
         || driveTolerance.hasChanged(hashCode())
         || thetaMaxVelocity.hasChanged(hashCode())
         || thetaMaxAcceleration.hasChanged(hashCode())
@@ -166,7 +175,9 @@ public class DriveToPose extends Command {
       driveController.setI(drivekI.get());
       driveController.setD(drivekD.get());
       driveController.setConstraints(
-          new TrapezoidProfile.Constraints(driveMaxVelocity.get(), driveMaxAcceleration.get()));
+          new TrapezoidProfile.Constraints(
+              isSlow ? driveMaxVelocitySlow.get() : driveMaxVelocity.get(),
+              isSlow ? driveMaxAccelerationSlow.get() : driveMaxAcceleration.get()));
       driveController.setTolerance(driveTolerance.get());
       thetaController.setP(thetakP.get());
       thetaController.setD(thetakD.get());

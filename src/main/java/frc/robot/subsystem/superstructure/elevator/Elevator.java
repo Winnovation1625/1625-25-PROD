@@ -65,7 +65,7 @@ public class Elevator {
     CLVL3(new LoggedTunableNumber("Superstructure/Elevator/CLVL3", 0.94)),
     CLVL4(new LoggedTunableNumber("Superstructure/Elevator/CLVL4", 1.755)),
     ALVL2(new LoggedTunableNumber("Superstructure/Elevator/ALVL2", 0.41)),
-    ALVL3(new LoggedTunableNumber("Superstructure/Elevator/ALVL3", 1.0)),
+    ALVL3(new LoggedTunableNumber("Superstructure/Elevator/ALVL3", 0.9)),
     PROCESS(new LoggedTunableNumber("Superstructure/Elevator/PROCESS", 0.18)),
     STOP(() -> 0);
     @Getter private final DoubleSupplier elevatorHeight;

@@ -136,7 +136,7 @@ public class RobotContainer {
   private final Alert auxDisconnected =
       new Alert("Operator controller disconnected (port 1).", AlertType.kWarning);
   private final LoggedTunableNumber coralStationThreshold =
-      new LoggedTunableNumber("CoralStationDistanceThreshold", 1);
+      new LoggedTunableNumber("CoralStationDistanceThreshold", 1.6);
   private final LoggedTunableNumber BargeRumbleThreshold =
       new LoggedTunableNumber("BargeRumbleDistanceThreshold", 1.85);
   private final LoggedTunableNumber reefGoalThreshold =
