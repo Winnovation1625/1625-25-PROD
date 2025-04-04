@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "R Barge to Reef E"
+            "pathName": "L Barge to Reef J"
           }
         },
         {
@@ -17,13 +17,13 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "DriveToBranchEFromStartConfig"
+                  "name": "DriveToBranchJFromStartConfig"
                 }
               },
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 20.0
+                  "waitTime": 8.0
                 }
               }
             ]
@@ -38,13 +38,13 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.75
+            "waitTime": 0.25
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Reef E to R HP"
+            "pathName": "Reef J to L HP"
           }
         },
         {
@@ -56,19 +56,43 @@
         {
           "type": "path",
           "data": {
-            "pathName": "R HP to Reef C"
+            "pathName": "L HP to Reef K"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "DriveToBranchC"
+            "name": "DriveToBranchK"
           }
         },
         {
           "type": "named",
           "data": {
             "name": "Shoot Coral"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.25
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Reef K To L HP"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "CoralIntake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "L HP To Reef L"
           }
         }
       ]
