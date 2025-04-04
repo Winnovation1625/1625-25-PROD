@@ -65,6 +65,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
 import lombok.Getter;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -85,8 +86,8 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
 
   // PathPlanner config constants
   private static final double ROBOT_MASS_KG = 62.9994443;
-  private static final double ROBOT_MOI = 6.283;
-  private static final double WHEEL_COF = 1.5;
+  private static final double ROBOT_MOI = 6.883;
+  private static final double WHEEL_COF = 1.3;
   private static final RobotConfig PP_CONFIG =
       new RobotConfig(
           ROBOT_MASS_KG,
@@ -128,6 +129,7 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
   @Getter @AutoLogOutput private Pose2d odometryPose = new Pose2d();
   private final SwerveSetpointGenerator setpointGenerator;
   private SwerveSetpoint previousSetpoint;
+  private final Consumer<Pose2d> resetSimulationPoseCallBack;
 
   private static final LoggedTunableNumber txTyObservationStaleSecs =
       new LoggedTunableNumber("Drive/TxTyObservationStaleSeconds", 0.5);
@@ -166,8 +168,10 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
       ModuleIO flModuleIO,
       ModuleIO frModuleIO,
       ModuleIO blModuleIO,
-      ModuleIO brModuleIO) {
+      ModuleIO brModuleIO,
+      Consumer<Pose2d> resetSimulationPoseCallBack) {
     this.gyroIO = gyroIO;
+    this.resetSimulationPoseCallBack = resetSimulationPoseCallBack;
     modules[0] = new Module(flModuleIO, 0, TunerConstants.FrontLeft);
     modules[1] = new Module(frModuleIO, 1, TunerConstants.FrontRight);
     modules[2] = new Module(blModuleIO, 2, TunerConstants.BackLeft);
@@ -185,8 +189,7 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
         this::setPose,
         this::getChassisSpeeds,
         this::runVelocity,
-        new PPHolonomicDriveController(
-            new PIDConstants(1.5, 0.0, 0), new PIDConstants(1.5, 0.0, 0)),
+        new PPHolonomicDriveController(new PIDConstants(3.0, 0.0, 0), new PIDConstants(2, 0.0, 0)),
         PP_CONFIG,
         AllianceFlipUtil::shouldFlip,
         this);
@@ -410,6 +413,7 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
 
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
+    resetSimulationPoseCallBack.accept(pose);
     poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
   }
 

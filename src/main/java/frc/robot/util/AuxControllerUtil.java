@@ -1,5 +1,7 @@
 package frc.robot.util;
 
+import frc.robot.FieldConstants.AlgaeObjective;
+import frc.robot.FieldConstants.AlgaePosition;
 import frc.robot.FieldConstants.CoralObjective;
 import frc.robot.FieldConstants.ReefLevel;
 import frc.robot.FieldConstants.ReefPosition;
@@ -24,5 +26,13 @@ public class AuxControllerUtil {
       }
     }
     return 1; // Return -1 if no true value is found
+  }
+
+  public static AlgaeObjective getAlgaeObjective(List<Boolean> algaeObjectiveButtons) {
+    int algaeObjectiveIndex = getTrueIndex(algaeObjectiveButtons);
+    return AlgaeObjective.builder()
+        .position(AlgaePosition.fromIndex(algaeObjectiveIndex))
+        .level2(algaeObjectiveIndex % 2 != 0)
+        .build();
   }
 }

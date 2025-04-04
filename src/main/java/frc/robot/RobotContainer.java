@@ -20,6 +20,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -33,11 +34,12 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.FieldConstants.AlgaeObjective;
+import frc.robot.FieldConstants.AlgaePosition;
 import frc.robot.FieldConstants.ReefLevel;
 import frc.robot.FieldConstants.ReefPosition;
 import frc.robot.commands.AutoScoreCommands;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.DriveToHumanStation;
 import frc.robot.commands.DriveToReef;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystem.apriltagvision.AprilTagVision;
@@ -55,6 +57,7 @@ import frc.robot.subsystem.drive.GyroIO;
 import frc.robot.subsystem.drive.GyroIOPigeon2;
 import frc.robot.subsystem.drive.GyroIOSim;
 import frc.robot.subsystem.drive.ModuleIO;
+import frc.robot.subsystem.drive.ModuleIOSim;
 import frc.robot.subsystem.drive.ModuleIOTalonFX;
 import frc.robot.subsystem.leds.Leds;
 import frc.robot.subsystem.manipulator.Manipulator;
@@ -77,17 +80,20 @@ import frc.robot.subsystem.superstructure.elevator.Elevator;
 import frc.robot.subsystem.superstructure.elevator.ElevatorConstants;
 import frc.robot.subsystem.superstructure.elevator.ElevatorIO;
 import frc.robot.subsystem.superstructure.elevator.ElevatorIOKraken;
+import frc.robot.subsystem.superstructure.elevator.ElevatorIOSim;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.AuxControllerUtil;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.List;
 import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import lombok.Setter;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /**
@@ -110,6 +116,9 @@ public class RobotContainer {
   private final LoggedNetworkNumber endgameAlert2 =
       new LoggedNetworkNumber("Endgame Alert #2", 15.0);
   private final LoggedDashboardChooser<BooleanSupplier> pathOverride;
+  private final LoggedNetworkBoolean autoMoveSuperstructure;
+  private final LoggedNetworkBoolean autoStowSuperstructure;
+  private final LoggedNetworkBoolean algaePathing;
   @Setter BooleanSupplier pathingOverrideSupplier;
 
   @SuppressWarnings("unused")
@@ -127,14 +136,34 @@ public class RobotContainer {
       new Alert("Driver controller disconnected (port 0).", AlertType.kWarning);
   private final Alert auxDisconnected =
       new Alert("Operator controller disconnected (port 1).", AlertType.kWarning);
+  private final LoggedTunableNumber coralStationThreshold =
+      new LoggedTunableNumber("CoralStationDistanceThreshold", 1.6);
+  private final LoggedTunableNumber BargeRumbleThreshold =
+      new LoggedTunableNumber("BargeRumbleDistanceThreshold", 1.85);
+  private final LoggedTunableNumber reefGoalThreshold =
+      new LoggedTunableNumber("ReefGoalDistanceThreshold", Units.inchesToMeters(12));
+
+  private final LoggedTunableNumber reefStowDistanceThreshold =
+      new LoggedTunableNumber("ReefStowDistanceThreshold", 2.0);
+
+  private final LoggedTunableNumber bargeStowDistanceThreshold =
+      new LoggedTunableNumber("BargeStowDistanceThreshold", 1.0);
 
   private final Supplier<Rotation2d> getHumanPlayerAngle;
+  private final DoubleSupplier getHumanPlayerDistance;
+  private final Supplier<Translation2d> getHumanPlayerTranslation;
+  private final Supplier<Boolean> nearBargeSupplier;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
 
     pathOverride = new LoggedDashboardChooser<>("Pathing Override");
-
+    autoMoveSuperstructure = new LoggedNetworkBoolean("Auto Move Superstructure");
+    autoStowSuperstructure = new LoggedNetworkBoolean("Auto Stow Superstructure");
+    algaePathing = new LoggedNetworkBoolean("Algae Pathing");
+    autoStowSuperstructure.setDefault(true);
+    autoMoveSuperstructure.setDefault(true);
+    algaePathing.setDefault(true);
     switch (Constants.CURRENT_MODE) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
@@ -144,7 +173,8 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontLeft),
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
-                new ModuleIOTalonFX(TunerConstants.BackRight));
+                new ModuleIOTalonFX(TunerConstants.BackRight),
+                (robotPose) -> {});
         manipulator =
             new Manipulator(new ManipulatorIOKraken(), new ManipulatorSensorsIOCANrange());
         arm = new Arm(new ArmIOKraken(), manipulator::getGamepieceState);
@@ -177,13 +207,14 @@ public class RobotContainer {
         drive =
             new Drive(
                 new GyroIOSim(driveSimulation.getGyroSimulation()),
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {});
+                new ModuleIOSim(driveSimulation.getModules()[0]),
+                new ModuleIOSim(driveSimulation.getModules()[1]),
+                new ModuleIOSim(driveSimulation.getModules()[2]),
+                new ModuleIOSim(driveSimulation.getModules()[3]),
+                driveSimulation::setSimulationWorldPose);
         manipulator = new Manipulator(new ManipulatorIOSim(), new ManipulatorSensorIOSim());
         arm = new Arm(new ArmIOSim(), manipulator::getGamepieceState);
-        elevator = new Elevator(new ElevatorIO() {});
+        elevator = new Elevator(new ElevatorIOSim());
         aprilTagVision =
             new AprilTagVision(
                 drive::accept,
@@ -199,10 +230,6 @@ public class RobotContainer {
                 new AprilTagVisionIOPhotonSim(
                     AprilTagVisionConstants.CAMERA_CONFIGS.get(2),
                     drive::getRotation,
-                    driveSimulation::getSimulatedDriveTrainPose),
-                new AprilTagVisionIOPhotonSim(
-                    AprilTagVisionConstants.CAMERA_CONFIGS.get(3),
-                    drive::getRotation,
                     driveSimulation::getSimulatedDriveTrainPose));
         climber = new Climber(new ClimberIOSim());
         break;
@@ -215,7 +242,8 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {},
-                new ModuleIO() {});
+                new ModuleIO() {},
+                (robotPose) -> {});
         manipulator = new Manipulator(new ManipulatorIO() {}, new ManipulatorSensorIO() {});
         arm = new Arm(new ArmIO() {}, manipulator::getGamepieceState);
         elevator = new Elevator(new ElevatorIO() {});
@@ -231,11 +259,12 @@ public class RobotContainer {
         break;
     }
 
-    // drive.setNearBargeSupplier(
-    //     () ->
-    //         AllianceFlipUtil.apply(drive.getPose()).getY()
-    //                 - AllianceFlipUtil.apply(FieldConstants.Barge.middleCage).getY()
-    //             < 0.4);
+    nearBargeSupplier =
+        () ->
+            Math.abs(
+                    drive.getPose().getX()
+                        - AllianceFlipUtil.apply(FieldConstants.Barge.middleCage).getX())
+                < BargeRumbleThreshold.getAsDouble();
 
     superstructure = new Superstructure(arm, elevator, manipulator::hasAlgae);
     // Set up auto routines
@@ -246,32 +275,73 @@ public class RobotContainer {
     NamedCommands.registerCommand("DriveToReefFace4", new DriveToReef(drive, 4, true));
     NamedCommands.registerCommand("DriveToReefFace3", new DriveToReef(drive, 3, true));
     NamedCommands.registerCommand(
-        "LeaveStartConfigAutoScoreL4",
-        AutoScoreCommands.autoScoreCoral(superstructure, manipulator, ReefLevel.L4, true));
+        "Shoot Coral", AutoScoreCommands.shootCoral(superstructure, manipulator, ReefLevel.L4));
     NamedCommands.registerCommand(
-        "LeaveStartConfigAutoScoreL2",
-        AutoScoreCommands.autoScoreCoral(superstructure, manipulator, ReefLevel.L2, true));
+        "Level4", superstructure.setSuperstructureCommand(() -> SuperstructureStates.CLVL4));
+    // NamedCommands.registerCommand(
+    //     "LeaveStartConfigAutoScoreL4",
+    //     AutoScoreCommands.autoMoveSuperStructure(superstructure, manipulator, ReefLevel.L4,
+    // true));
+    // NamedCommands.registerCommand(
+    //     "LeaveStartConfigAutoScoreL2",
+    //     AutoScoreCommands.autoScoreCoral(superstructure, manipulator, ReefLevel.L2, true));
+
+    DriveToReef BranchEFromStartConfig =
+        new DriveToReef(drive, () -> FieldConstants.ReefPosition.E);
+    NamedCommands.registerCommand(
+        "DriveToBranchEFromStartConfig",
+        BranchEFromStartConfig.until(
+                () ->
+                    BranchEFromStartConfig.withinTolerance(
+                        Units.inchesToMeters(1.75), new Rotation2d(Units.degreesToRadians(3.0))))
+            .alongWith(
+                Commands.waitUntil(
+                        () ->
+                            BranchEFromStartConfig.withinTolerance(
+                                Units.inchesToMeters(12), Rotation2d.kCCW_90deg))
+                    .andThen(
+                        AutoScoreCommands.autoMoveSuperStructure(
+                            superstructure, ReefLevel.L4, true))));
+    DriveToReef algaeAquire =
+        new DriveToReef(
+            drive,
+            () -> AlgaeObjective.builder().position(AlgaePosition.CD).level2(true).build(),
+            () -> false);
+    NamedCommands.registerCommand(
+        "AlgaeAquireCD",
+        algaeAquire.alongWith(
+            superstructure
+                .setSuperstructureCommand(() -> SuperstructureStates.ALVL2)
+                .alongWith(manipulator.setManipulatorState(ManipulatorState.INTAKING_ALGAE))
+                .andThen(
+                    Commands.waitUntil(
+                        () ->
+                            superstructure.atSuperStructureGoal()
+                                && manipulator.getGamepieceState()
+                                    == Manipulator.GamepieceState.ALGAE_IN_CLAW))));
+    NamedCommands.registerCommand(
+        "StowAlgae",
+        superstructure
+            .setSuperstructureCommand(() -> SuperstructureStates.STOW)
+            .alongWith(manipulator.setManipulatorState(ManipulatorState.IDLE)));
     for (var position : FieldConstants.ReefPosition.values()) {
       DriveToReef reefCommand = new DriveToReef(drive, () -> position);
       NamedCommands.registerCommand(
           "DriveToBranch" + position.name(),
-          reefCommand.until(
-              () ->
-                  reefCommand.isRunning()
-                      && reefCommand.withinTolerance(
-                          Units.inchesToMeters(2.5), new Rotation2d(Units.degreesToRadians(3.0)))));
+          reefCommand
+              .until(
+                  () ->
+                      reefCommand.withinTolerance(
+                          Units.inchesToMeters(1.75), new Rotation2d(Units.degreesToRadians(3.0))))
+              .alongWith(
+                  Commands.waitUntil(
+                          () ->
+                              reefCommand.withinTolerance(
+                                  Units.inchesToMeters(12), Rotation2d.kCCW_90deg))
+                      .andThen(
+                          AutoScoreCommands.autoMoveSuperStructure(
+                              superstructure, ReefLevel.L4, false))));
     }
-
-    NamedCommands.registerCommand(
-        "DriveToLeftHumanPlayerStation",
-        new DriveToHumanStation(drive, () -> FieldConstants.HumanStation.LEFT));
-    NamedCommands.registerCommand(
-        "DriveToRightHumanPlayerStation",
-        new DriveToHumanStation(drive, () -> FieldConstants.HumanStation.RIGHT)
-            .until(
-                () ->
-                    manipulator.getGamepieceState() == GamepieceState.CORAL_STAGING
-                        || manipulator.getGamepieceState() == GamepieceState.CORAL_IN_MANIPULATOR));
     NamedCommands.registerCommand(
         "CoralIntake", AutoScoreCommands.coralIntake(superstructure, manipulator));
     NamedCommands.registerCommand(
@@ -282,6 +352,20 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
+
+    getHumanPlayerTranslation =
+        () ->
+            (drive.getPose().getY() > FieldConstants.fieldWidth / 2
+                        && !AllianceFlipUtil.shouldFlip())
+                    || (drive.getPose().getY() < FieldConstants.fieldWidth / 2
+                        && AllianceFlipUtil.shouldFlip())
+                ? AllianceFlipUtil.apply(
+                    FieldConstants.CoralStation.leftCenterFace.getTranslation())
+                : AllianceFlipUtil.apply(
+                    FieldConstants.CoralStation.rightCenterFace.getTranslation());
+
+    getHumanPlayerDistance =
+        () -> getHumanPlayerTranslation.get().getDistance(drive.getPose().getTranslation());
 
     getHumanPlayerAngle =
         () ->
@@ -303,6 +387,9 @@ public class RobotContainer {
                 .beforeStarting(() -> leds.setEndGameWarning(true))
                 .finallyDo(() -> leds.setEndGameWarning(false)));
 
+    new Trigger(() -> nearBargeSupplier.get() == true)
+        .onTrue(controllerRumbleCommand().withTimeout(0.5));
+
     new Trigger(
             () ->
                 DriverStation.isTeleopEnabled()
@@ -317,7 +404,43 @@ public class RobotContainer {
                 .beforeStarting(() -> leds.setEndGameWarning(true))
                 .finallyDo(() -> leds.setEndGameWarning(false)));
 
-    // new Trigger(() -> auxController.getRawButton(19)).onTrue(getAutonomousCommand());
+    // Auto go back to stow when not near reef and superstructure is in reef position
+    new Trigger(
+            () ->
+                DriverStation.isTeleopEnabled()
+                        && ((superstructure.getSuperstructureGoal() == SuperstructureStates.CLVL4
+                                || superstructure.getSuperstructureGoal()
+                                    == SuperstructureStates.CLVL3
+                                || superstructure.getSuperstructureGoal()
+                                    == SuperstructureStates.CLVL2
+                                || superstructure.getSuperstructureGoal()
+                                    == SuperstructureStates.ALVL2
+                                || superstructure.getSuperstructureGoal()
+                                    == SuperstructureStates.ALVL3)
+                            && drive
+                                    .getPose()
+                                    .getTranslation()
+                                    .getDistance(AllianceFlipUtil.apply(FieldConstants.Reef.center))
+                                > reefStowDistanceThreshold.get())
+                    || (superstructure.getSuperstructureGoal() == SuperstructureStates.BARGE
+                            && Math.abs(
+                                    drive.getPose().getTranslation().getX()
+                                        - AllianceFlipUtil.applyX(FieldConstants.startingLineX))
+                                > bargeStowDistanceThreshold.get())
+                        && autoStowSuperstructure.get())
+        .onTrue(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW));
+
+    new Trigger(
+            () ->
+                DriverStation.isTeleopEnabled()
+                    && (superstructure.getSuperstructureGoal() == SuperstructureStates.ALVL2
+                        || superstructure.getSuperstructureGoal() == SuperstructureStates.ALVL3)
+                    && manipulator.getGamepieceState() == GamepieceState.ALGAE_IN_CLAW)
+        .onTrue(
+            manipulator
+                .setManipulatorState(ManipulatorState.IDLE)
+                .alongWith(
+                    superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
 
     pathOverride.addDefaultOption("off", pathingOverrideSupplier = () -> false);
     pathOverride.addOption("on", pathingOverrideSupplier = () -> true);
@@ -397,6 +520,17 @@ public class RobotContainer {
         }
       };
 
+  private Supplier<AlgaeObjective> getAlgaeObjective =
+      () ->
+          AuxControllerUtil.getAlgaeObjective(
+              List.of(
+                  auxController.getRawButton(13),
+                  auxController.getRawButton(14),
+                  auxController.getRawButton(15),
+                  auxController.getRawButton(16),
+                  auxController.getRawButton(17),
+                  auxController.getRawButton(18)));
+
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
@@ -441,6 +575,7 @@ public class RobotContainer {
     controller
         .rightTrigger()
         .and(() -> manipulator.getGamepieceState() == Manipulator.GamepieceState.NONE)
+        .and(() -> !autoMoveSuperstructure.get())
         .onTrue(
             superstructure
                 .setSuperstructureCommand(() -> SuperstructureStates.CORAL_INTAKING)
@@ -461,40 +596,32 @@ public class RobotContainer {
                                 () -> SuperstructureStates.STOW)))
                 .andThen(controllerRumbleCommand().withTimeout(Seconds.of(0.5))));
 
-    // go to coral score position when having coral
     controller
         .rightTrigger()
-        .and(
-            () ->
-                manipulator.getGamepieceState() == Manipulator.GamepieceState.CORAL_IN_MANIPULATOR)
+        .and(() -> manipulator.getGamepieceState() == GamepieceState.NONE)
+        .whileTrue(
+            DriveCommands.joystickDriveAtAngle(
+                drive,
+                () -> -controller.getLeftY(),
+                () -> -controller.getLeftX(),
+                () -> getHumanPlayerAngle.get()));
+
+    controller
+        .rightTrigger()
+        .and(autoMoveSuperstructure::get)
+        .and(() -> manipulator.getGamepieceState() == GamepieceState.NONE)
+        .and(() -> getHumanPlayerDistance.getAsDouble() < coralStationThreshold.getAsDouble())
         .onTrue(
-            Commands.either(
-                superstructure
-                    .setSuperstructureCommand(getCoralLevel)
-                    .andThen(Commands.waitUntil(superstructure::atSuperStructureGoal))
-                    .andThen(
-                        Commands.waitUntil(
-                            () ->
-                                manipulator.getGamepieceState()
-                                    == GamepieceState.CORAL_EXITING_BOT))
-                    .andThen(Commands.waitTime(Seconds.of(0.1)))
-                    .andThen(superstructure.runArmToState(() -> ArmState.CLVL3))
-                    .andThen(
-                        Commands.waitUntil(
-                            () -> manipulator.getGamepieceState() == GamepieceState.NONE))
-                    .andThen(
-                        superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)),
-                superstructure
-                    .setSuperstructureCommand(getCoralLevel)
-                    .andThen(
-                        Commands.waitUntil(
-                            () ->
-                                superstructure.atSuperStructureGoal()
-                                    && manipulator.getGamepieceState()
-                                        == Manipulator.GamepieceState.NONE))
-                    .andThen(
-                        superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)),
-                () -> getCoralLevel.get() == SuperstructureStates.CLVL4));
+            superstructure
+                .setSuperstructureCommand(() -> SuperstructureStates.CORAL_INTAKING)
+                .alongWith(manipulator.setManipulatorState(ManipulatorState.INTAKING_CORAL))
+                .andThen(
+                    Commands.waitUntil(
+                        () ->
+                            manipulator.getGamepieceState() == GamepieceState.CORAL_STAGING
+                                || manipulator.getGamepieceState()
+                                    == GamepieceState.CORAL_IN_MANIPULATOR))
+                .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
 
     // auto path coral to reeef
     DriveToReef reefPathCommand = new DriveToReef(drive, getCoralObjective);
@@ -503,8 +630,49 @@ public class RobotContainer {
             () ->
                 reefPathCommand.withinTolerance(
                     Units.inchesToMeters(2.5), new Rotation2d(Degrees.of(2))));
-    controller.leftBumper().whileTrue(reefPathCommand);
-    controller.leftBumper().and(pathLinedUp).whileTrue(controllerRumbleCommand());
+    Trigger within12Inches =
+        new Trigger(
+            () ->
+                reefPathCommand.withinTolerance(
+                    reefGoalThreshold.get(), new Rotation2d(Degrees.of(90))));
+    // go to coral score position when having coral manual mode
+    controller
+        .rightTrigger()
+        .and(() -> !autoMoveSuperstructure.get())
+        .and(
+            () ->
+                manipulator.getGamepieceState() == Manipulator.GamepieceState.CORAL_IN_MANIPULATOR)
+        .onTrue(superstructure.setSuperstructureCommand(getCoralLevel));
+
+    // path to coral destination and auto move superstructure into position
+    controller
+        .rightTrigger()
+        .and(autoMoveSuperstructure::get)
+        .and(
+            () ->
+                manipulator.getGamepieceState() == Manipulator.GamepieceState.CORAL_IN_MANIPULATOR)
+        .whileTrue(
+            reefPathCommand.alongWith(
+                Commands.waitUntil(within12Inches)
+                    .andThen(superstructure.setSuperstructureCommand(getCoralLevel))));
+    controller
+        .rightTrigger()
+        .and(autoMoveSuperstructure::get)
+        .and(
+            () ->
+                manipulator.getGamepieceState() == Manipulator.GamepieceState.CORAL_IN_MANIPULATOR)
+        .and(pathLinedUp)
+        .whileTrue(controllerRumbleCommand());
+
+    // controller.leftBumper().whileTrue(reefPathCommand);
+
+    // controller
+    //     .leftBumper()
+    //     .and(autoMoveSuperstructure::get)
+    //     .and(within12Inches)
+    //     .and(() -> manipulator.getGamepieceState() == GamepieceState.CORAL_IN_MANIPULATOR)
+    //     .onTrue(superstructure.setSuperstructureCommand(getCoralLevel));
+    // controller.leftBumper().and(pathLinedUp).whileTrue(controllerRumbleCommand());
 
     // Algae Controls
     // score algae in barge or processor depending on aux button state
@@ -540,9 +708,34 @@ public class RobotContainer {
                 .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
 
     // When left trigger and no algae in bot, grab algae from reef height dependent on aux algae pos
-    // button
+    // button, now hold to path and automove superstructure into position
+    DriveToReef algaePathCommand = new DriveToReef(drive, getAlgaeObjective, () -> false);
     controller
         .leftTrigger()
+        .and(algaePathing::get)
+        .and(() -> manipulator.getGamepieceState() == Manipulator.GamepieceState.NONE)
+        .whileTrue(
+            algaePathCommand.alongWith(
+                Commands.waitUntil(
+                        () ->
+                            algaePathCommand.withinTolerance(
+                                Units.inchesToMeters(20), Rotation2d.kCCW_90deg))
+                    .andThen(
+                        superstructure
+                            .setSuperstructureCommand(getAlgaeReefLevel)
+                            .alongWith(
+                                manipulator.setManipulatorState(ManipulatorState.INTAKING_ALGAE))
+                            .andThen(
+                                Commands.waitUntil(
+                                    () ->
+                                        superstructure.atSuperStructureGoal()
+                                            && manipulator.getGamepieceState()
+                                                == Manipulator.GamepieceState.ALGAE_IN_CLAW)))));
+
+    // when we don't want to path to the algae, we want the old controls
+    controller
+        .leftTrigger()
+        .and(() -> !algaePathing.get())
         .and(() -> manipulator.getGamepieceState() == Manipulator.GamepieceState.NONE)
         .onTrue(
             superstructure
@@ -573,6 +766,37 @@ public class RobotContainer {
                 manipulator.setManipulatorState(ManipulatorState.SHOOTING_ALGAE),
                 manipulator.setManipulatorState(ManipulatorState.SHOOTING_CORAL),
                 manipulator::hasAlgae));
+    controller
+        .a()
+        .and(() -> manipulator.getGamepieceState() == GamepieceState.CORAL_IN_MANIPULATOR)
+        .and(() -> getCoralLevel.get() == SuperstructureStates.CLVL4)
+        .onTrue(
+            Commands.waitUntil(superstructure::atSuperStructureGoal)
+                .andThen(
+                    Commands.waitUntil(
+                        () ->
+                            manipulator.getGamepieceState() == GamepieceState.CORAL_EXITING_BOT
+                                || manipulator.getGamepieceState() == GamepieceState.NONE))
+                .andThen(Commands.waitTime(Seconds.of(0.1)))
+                .andThen(superstructure.runArmToState(() -> ArmState.CLVL3))
+                .andThen(
+                    Commands.waitUntil(
+                        () ->
+                            arm.atGoal() && manipulator.getGamepieceState() == GamepieceState.NONE))
+                .andThen(superstructure.runArmToState(() -> ArmState.STOW))
+                .andThen(Commands.waitTime(Seconds.of(0.175)))
+                .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
+
+    controller
+        .a()
+        .and(() -> manipulator.getGamepieceState() == GamepieceState.CORAL_IN_MANIPULATOR)
+        .and(() -> getCoralLevel.get() != SuperstructureStates.CLVL4)
+        .onTrue(
+            Commands.waitUntil(
+                    () ->
+                        superstructure.atSuperStructureGoal()
+                            && manipulator.getGamepieceState() == Manipulator.GamepieceState.NONE)
+                .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
 
     controller
         .a()
@@ -594,15 +818,6 @@ public class RobotContainer {
         .and(() -> superstructure.getSuperstructureGoal() != SuperstructureStates.STOW)
         .and(() -> manipulator.getGamepieceState() == GamepieceState.ALGAE_IN_CLAW)
         .whileTrue(manipulator.setManipulatorState(ManipulatorState.RETURN_ALGAE));
-
-    controller
-        .rightBumper()
-        .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
-                () -> getHumanPlayerAngle.get()));
 
     // Climb Commands
     controller

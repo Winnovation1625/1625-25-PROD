@@ -58,8 +58,8 @@ public class Arm {
     TROUGH(new LoggedTunableNumber("Superstructure/Arm/TROUGH", 0)),
     CLVL3(new LoggedTunableNumber("Superstructure/Arm/CLVL3", 0.32)),
     CLVL4(new LoggedTunableNumber("Superstructure/Arm/CLVL4", 0.69)),
-    ALVL2(new LoggedTunableNumber("Superstructure/Arm/ALVL2", 0.38)),
-    ALVL3(new LoggedTunableNumber("Superstructure/Arm/ALVL3", 0.51)),
+    ALVL2(new LoggedTunableNumber("Superstructure/Arm/ALVL2", 3)),
+    ALVL3(new LoggedTunableNumber("Superstructure/Arm/ALVL3", 3)),
     PROCESS(new LoggedTunableNumber("Superstructure/Arm/PROCESS", 0.05)),
     FLAT(() -> 0),
     STOP(() -> 0);

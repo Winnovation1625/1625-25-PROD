@@ -15,8 +15,8 @@ public class ArmConstants {
   public static final double ARM_MASS_KG = 5.06571959;
   public static final double ARM_LENGTH = 1.02108;
   public static final Angle ARM_ENCODER_OFFSET = Radian.of(0.991);
-  public static final Angle ARM_MIN_ANGLE_RADS = Rotations.of(-0.3);
-  public static final Angle ARM_MAX_ANGLE_RADS = Rotations.of(0.4);
+  public static final Angle ARM_MIN_ANGLE_RADS = Rotations.of(-3);
+  public static final Angle ARM_MAX_ANGLE_RADS = Rotations.of(3);
   public static final double ARM_MAX_VELOCITY = 1.0;
   public static final double ARM_MAX_ACCELERATION = 4.0;
   public static final boolean ARM_INVERTED = true;
@@ -24,7 +24,7 @@ public class ArmConstants {
   public static Gains gains =
       switch (Constants.CURRENT_MODE) {
         case SIM -> new Gains(4.0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 200.0, 400.0);
-        case REAL, REPLAY -> new Gains(220, 100.0, 140.0, 6.0, 2.0, 1.0, 3.5, 12, 3, 1, 4);
+        case REAL, REPLAY -> new Gains(400, 90.0, 180.0, 6.0, 2.2, 1.2, 3.5, 10, 3, 3, 6);
       };
 
   public record Gains(
