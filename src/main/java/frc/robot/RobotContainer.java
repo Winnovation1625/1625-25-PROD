@@ -452,7 +452,8 @@ public class RobotContainer {
     // Auto go back to stow when not near reef and superstructure is in reef position
     new Trigger(
             () ->
-                DriverStation.isTeleopEnabled() && autoStowSuperstructure.get()
+                DriverStation.isTeleopEnabled()
+                        && autoStowSuperstructure.get()
                         && ((superstructure.getSuperstructureGoal() == SuperstructureStates.CLVL4
                                 || superstructure.getSuperstructureGoal()
                                     == SuperstructureStates.CLVL3
@@ -480,7 +481,7 @@ public class RobotContainer {
                 DriverStation.isTeleopEnabled()
                     && (superstructure.getSuperstructureGoal() == SuperstructureStates.ALVL2
                         || superstructure.getSuperstructureGoal() == SuperstructureStates.ALVL3)
-                    && manipulator.getGamepieceState() == GamepieceState.ALGAE_IN_CLAW )
+                    && manipulator.getGamepieceState() == GamepieceState.ALGAE_IN_CLAW)
         .onTrue(
             manipulator
                 .setManipulatorState(ManipulatorState.IDLE)
