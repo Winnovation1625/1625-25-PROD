@@ -669,13 +669,13 @@ public class RobotContainer {
                                     == GamepieceState.CORAL_IN_MANIPULATOR))
                 .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
 
-    // auto path coral to reeef
+    // auto path coral to reef
     DriveToReef reefPathCommand = new DriveToReef(drive, getCoralObjective);
     Trigger pathLinedUp =
         new Trigger(
             () ->
                 reefPathCommand.withinTolerance(
-                    Units.inchesToMeters(2.5), new Rotation2d(Degrees.of(2))));
+                    Units.inchesToMeters(1.75), new Rotation2d(Degrees.of(2))));
     Trigger within12Inches =
         new Trigger(
             () ->
