@@ -1,0 +1,68 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 4.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Center Auto Path"
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "DriveToBranchHFromStartConfig"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 5.0
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot Coral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "AlgaeGH"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AlgaeAquireGH"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StowAlgae"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": true
+}

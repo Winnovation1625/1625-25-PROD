@@ -23,7 +23,7 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 20.0
+                  "waitTime": 7.0
                 }
               }
             ]
@@ -48,9 +48,22 @@
           }
         },
         {
-          "type": "named",
+          "type": "race",
           "data": {
-            "name": "CoralIntake"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "CoralIntake"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 4.0
+                }
+              }
+            ]
           }
         },
         {

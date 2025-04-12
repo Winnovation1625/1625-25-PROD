@@ -25,7 +25,7 @@ public class Manipulator extends SubsystemBase {
 
   @RequiredArgsConstructor
   public enum ManipulatorState {
-    INTAKING_CORAL(new LoggedTunableNumber("Manipulator/CoralIntakeVoltage", -3)),
+    INTAKING_CORAL(new LoggedTunableNumber("Manipulator/CoralIntakeVoltage", -4)),
     INTAKING_ALGAE(new LoggedTunableNumber("Manipulator/AlgaeIntakeVoltage", 4)),
     STAGING_CORAL(new LoggedTunableNumber("Manipulator/CoralStagingVoltage", -1.5)),
     TROUGH_CORAL(new LoggedTunableNumber("Manipulator/CoralTroughVoltage", -3)),

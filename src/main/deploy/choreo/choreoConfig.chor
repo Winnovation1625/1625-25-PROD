@@ -4,7 +4,22 @@
  "type":"Swerve",
  "variables":{
   "expressions":{},
-  "poses":{}
+  "poses":{
+   "RHP":{
+    "x":{
+     "exp":"1.4355149269104004 m",
+     "val":1.4355149269104004
+    },
+    "y":{
+     "exp":"0.8680712580680847 m",
+     "val":0.8680712580680847
+    },
+    "heading":{
+     "exp":"54 deg",
+     "val":0.942477796076938
+    }
+   }
+  }
  },
  "config":{
   "frontLeft":{

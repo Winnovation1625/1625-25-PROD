@@ -286,39 +286,123 @@ public class RobotContainer {
     //     "LeaveStartConfigAutoScoreL2",
     //     AutoScoreCommands.autoScoreCoral(superstructure, manipulator, ReefLevel.L2, true));
 
-    DriveToReef BranchEFromStartConfig =
+    DriveToReef branchEFromStartConfig =
         new DriveToReef(drive, () -> FieldConstants.ReefPosition.E);
     NamedCommands.registerCommand(
         "DriveToBranchEFromStartConfig",
-        BranchEFromStartConfig.until(
+        branchEFromStartConfig
+            .until(
                 () ->
-                    BranchEFromStartConfig.withinTolerance(
+                    branchEFromStartConfig.withinTolerance(
                         Units.inchesToMeters(1.75), new Rotation2d(Units.degreesToRadians(3.0))))
             .alongWith(
                 Commands.waitUntil(
                         () ->
-                            BranchEFromStartConfig.withinTolerance(
+                            branchEFromStartConfig.withinTolerance(
                                 Units.inchesToMeters(12), Rotation2d.kCCW_90deg))
                     .andThen(
                         AutoScoreCommands.autoMoveSuperStructure(
                             superstructure, ReefLevel.L4, true))));
-    DriveToReef algaeAquire =
+    DriveToReef branchJFromStartConfig =
+        new DriveToReef(drive, () -> FieldConstants.ReefPosition.J);
+    NamedCommands.registerCommand(
+        "DriveToBranchJFromStartConfig",
+        branchJFromStartConfig
+            .until(
+                () ->
+                    branchJFromStartConfig.withinTolerance(
+                        Units.inchesToMeters(1.75), new Rotation2d(Units.degreesToRadians(3.0))))
+            .alongWith(
+                Commands.waitUntil(
+                        () ->
+                            branchJFromStartConfig.withinTolerance(
+                                Units.inchesToMeters(12), Rotation2d.kCCW_90deg))
+                    .andThen(
+                        AutoScoreCommands.autoMoveSuperStructure(
+                            superstructure, ReefLevel.L4, true))));
+    DriveToReef branchHFromStartConfig =
+        new DriveToReef(drive, () -> FieldConstants.ReefPosition.H);
+    NamedCommands.registerCommand(
+        "DriveToBranchHFromStartConfig",
+        branchHFromStartConfig
+            .until(
+                () ->
+                    branchHFromStartConfig.withinTolerance(
+                        Units.inchesToMeters(1.75), new Rotation2d(Units.degreesToRadians(3.0))))
+            .alongWith(
+                Commands.waitUntil(
+                        () ->
+                            branchHFromStartConfig.withinTolerance(
+                                Units.inchesToMeters(12), Rotation2d.kCCW_90deg))
+                    .andThen(
+                        AutoScoreCommands.autoMoveSuperStructure(
+                            superstructure, ReefLevel.L4, true))));
+    DriveToReef algaeAquireCD =
         new DriveToReef(
             drive,
             () -> AlgaeObjective.builder().position(AlgaePosition.CD).level2(true).build(),
             () -> false);
     NamedCommands.registerCommand(
         "AlgaeAquireCD",
-        algaeAquire.alongWith(
-            superstructure
-                .setSuperstructureCommand(() -> SuperstructureStates.ALVL2)
-                .alongWith(manipulator.setManipulatorState(ManipulatorState.INTAKING_ALGAE))
-                .andThen(
-                    Commands.waitUntil(
-                        () ->
-                            superstructure.atSuperStructureGoal()
-                                && manipulator.getGamepieceState()
-                                    == Manipulator.GamepieceState.ALGAE_IN_CLAW))));
+        algaeAquireCD
+            .until(
+                () ->
+                    algaeAquireCD.withinTolerance(
+                        Units.inchesToMeters(1.75), new Rotation2d(Units.degreesToRadians(3.0))))
+            .alongWith(
+                superstructure
+                    .setSuperstructureCommand(() -> SuperstructureStates.ALVL2)
+                    .alongWith(manipulator.setManipulatorState(ManipulatorState.INTAKING_ALGAE))
+                    .andThen(
+                        Commands.waitUntil(
+                            () ->
+                                superstructure.atSuperStructureGoal()
+                                    && manipulator.getGamepieceState()
+                                        == Manipulator.GamepieceState.ALGAE_IN_CLAW))));
+    DriveToReef algaeAquireGH =
+        new DriveToReef(
+            drive,
+            () -> AlgaeObjective.builder().position(AlgaePosition.GH).level2(true).build(),
+            () -> false);
+    NamedCommands.registerCommand(
+        "AlgaeAquireGH",
+        algaeAquireGH
+            .until(
+                () ->
+                    algaeAquireGH.withinTolerance(
+                        Units.inchesToMeters(1.75), new Rotation2d(Units.degreesToRadians(3.0))))
+            .alongWith(
+                superstructure
+                    .setSuperstructureCommand(() -> SuperstructureStates.ALVL2)
+                    .alongWith(manipulator.setManipulatorState(ManipulatorState.INTAKING_ALGAE))
+                    .andThen(
+                        Commands.waitUntil(
+                            () ->
+                                superstructure.atSuperStructureGoal()
+                                    && manipulator.getGamepieceState()
+                                        == Manipulator.GamepieceState.ALGAE_IN_CLAW))));
+    DriveToReef algaeAquireKL =
+        new DriveToReef(
+            drive,
+            () -> AlgaeObjective.builder().position(AlgaePosition.KL).level2(true).build(),
+            () -> false);
+    NamedCommands.registerCommand(
+        "AlgaeAquireKL",
+        algaeAquireKL
+            .until(
+                () ->
+                    algaeAquireKL.withinTolerance(
+                        Units.inchesToMeters(1.75), new Rotation2d(Units.degreesToRadians(3.0))))
+            .alongWith(
+                superstructure
+                    .setSuperstructureCommand(() -> SuperstructureStates.ALVL2)
+                    .alongWith(manipulator.setManipulatorState(ManipulatorState.INTAKING_ALGAE))
+                    .andThen(
+                        Commands.waitUntil(
+                            () ->
+                                superstructure.atSuperStructureGoal()
+                                    && manipulator.getGamepieceState()
+                                        == Manipulator.GamepieceState.ALGAE_IN_CLAW))));
     NamedCommands.registerCommand(
         "StowAlgae",
         superstructure
@@ -408,6 +492,7 @@ public class RobotContainer {
     new Trigger(
             () ->
                 DriverStation.isTeleopEnabled()
+                        && autoStowSuperstructure.get()
                         && ((superstructure.getSuperstructureGoal() == SuperstructureStates.CLVL4
                                 || superstructure.getSuperstructureGoal()
                                     == SuperstructureStates.CLVL3
@@ -623,13 +708,13 @@ public class RobotContainer {
                                     == GamepieceState.CORAL_IN_MANIPULATOR))
                 .andThen(superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW)));
 
-    // auto path coral to reeef
+    // auto path coral to reef
     DriveToReef reefPathCommand = new DriveToReef(drive, getCoralObjective);
     Trigger pathLinedUp =
         new Trigger(
             () ->
                 reefPathCommand.withinTolerance(
-                    Units.inchesToMeters(2.5), new Rotation2d(Degrees.of(2))));
+                    Units.inchesToMeters(1.75), new Rotation2d(Degrees.of(2))));
     Trigger within12Inches =
         new Trigger(
             () ->
