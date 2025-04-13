@@ -77,7 +77,7 @@ public class Superstructure extends SubsystemBase {
     Supplier<ElevatorState> toElevatorState =
         () ->
             to.get() == SuperstructureStates.STOW && hasAlgaeSupplier.get()
-                ? ElevatorState.ALGAE_STOW
+                ? ElevatorState.ALGAE_CLEARANCE
                 : to.get().getElevatorState();
     BooleanSupplier currentlyBelowThreshold =
         () ->

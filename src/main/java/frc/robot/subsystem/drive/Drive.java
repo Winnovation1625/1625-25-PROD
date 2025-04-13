@@ -85,9 +85,9 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
               Math.hypot(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)));
 
   // PathPlanner config constants
-  private static final double ROBOT_MASS_KG = 62.9994443;
+  public static final double ROBOT_MASS_KG = 63.5029;
   private static final double ROBOT_MOI = 6.883;
-  private static final double WHEEL_COF = 1.3;
+  public static final double WHEEL_COF = 1.1;
   private static final RobotConfig PP_CONFIG =
       new RobotConfig(
           ROBOT_MASS_KG,
@@ -189,7 +189,8 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
         this::setPose,
         this::getChassisSpeeds,
         this::runVelocity,
-        new PPHolonomicDriveController(new PIDConstants(3.0, 0.0, 0), new PIDConstants(2, 0.0, 0)),
+        new PPHolonomicDriveController(
+            new PIDConstants(8.0, 0.0, 0), new PIDConstants(4.0, 0.0, 0)),
         PP_CONFIG,
         AllianceFlipUtil::shouldFlip,
         this);
@@ -308,14 +309,30 @@ public class Drive extends SubsystemBase implements AprilTagVision.VisionConsume
    * @param speeds Speeds in meters/sec
    */
   public void runVelocity(ChassisSpeeds speeds) {
-    previousSetpoint = setpointGenerator.generateSetpoint(previousSetpoint, speeds, 0.02);
-    SwerveModuleState[] setpointStates = previousSetpoint.moduleStates();
+    // previousSetpoint = setpointGenerator.generateSetpoint(previousSetpoint, speeds, 0.02);
+    // SwerveModuleState[] setpointStates = previousSetpoint.moduleStates();
+    // // Send setpoints to modules
+    // for (int i = 0; i < 4; i++) {
+    //   modules[i].runSetpoint(setpointStates[i]);
+    // }
+    // ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
+    // Logger.recordOutput("SwerveChassisSpeeds/Setpoints", discreteSpeeds);
+    // // Log optimized setpoints (runSetpoint mutates each state)
+    // Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
+    // Calculate module setpoints
+    ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
+    SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
+    SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, TunerConstants.kSpeedAt12Volts);
+
+    // Log unoptimized setpoints and setpoint speeds
+    Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
+    Logger.recordOutput("SwerveChassisSpeeds/Setpoints", discreteSpeeds);
+
     // Send setpoints to modules
     for (int i = 0; i < 4; i++) {
       modules[i].runSetpoint(setpointStates[i]);
     }
-    ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
-    Logger.recordOutput("SwerveChassisSpeeds/Setpoints", discreteSpeeds);
+
     // Log optimized setpoints (runSetpoint mutates each state)
     Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
   }

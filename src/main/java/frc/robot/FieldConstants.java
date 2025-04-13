@@ -188,14 +188,15 @@ public class FieldConstants {
 
   @RequiredArgsConstructor
   public enum AlgaePosition {
-    AB(0, 0),
-    CD(1, 5),
-    EF(2, 4),
-    GH(3, 3),
-    IJ(4, 2),
-    KL(5, 1);
+    AB(0, 0, 3),
+    CD(1, 5, 3),
+    EF(2, 4, 3),
+    GH(3, 3, 2),
+    IJ(4, 2, 3),
+    KL(5, 1, 2);
     @Getter private final int fieldConstantsIndex;
     @Getter private final int face;
+    @Getter private final int level;
 
     // Reverse-lookup map for getting a reef position from the index of the list
     private static final Map<Integer, AlgaePosition> lookup = new HashMap<Integer, AlgaePosition>();
