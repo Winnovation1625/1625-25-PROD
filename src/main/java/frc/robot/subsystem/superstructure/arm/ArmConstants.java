@@ -7,7 +7,7 @@ import edu.wpi.first.units.measure.Angle;
 import frc.robot.Constants;
 
 public class ArmConstants {
-  public static final double ARM_TOLERANCE = Units.degreesToRadians(2.3);
+  public static final double ARM_TOLERANCE = Units.degreesToRadians(4);
   public static final double ARM_KV = 0.125;
   public static final double ARM_KA = 0.125;
   public static final double ARM_GEARING = 75.0;
@@ -24,7 +24,7 @@ public class ArmConstants {
   public static Gains gains =
       switch (Constants.CURRENT_MODE) {
         case SIM -> new Gains(4.0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 200.0, 400.0);
-        case REAL, REPLAY -> new Gains(440, 100.0, 170.0, 6.0, 2.2, 1.2, 3.5, 4, 3, 3, 6);
+        case REAL, REPLAY -> new Gains(440, 100.0, 150.0, 6.0, 2.2, 1.2, 3.5, 6, 3, 3, 6);
       };
 
   public record Gains(

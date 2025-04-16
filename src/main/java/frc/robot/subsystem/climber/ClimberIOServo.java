@@ -9,7 +9,7 @@ public class ClimberIOServo implements ClimberIO {
   private final Servo climberReleaseServo;
 
   public ClimberIOServo() {
-    climberReleaseServo = new Servo(8);
+    climberReleaseServo = new Servo(0);
   }
 
   @Override
