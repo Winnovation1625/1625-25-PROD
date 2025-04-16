@@ -85,7 +85,7 @@ public class ElevatorIOKraken implements ElevatorIO {
     config.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseClosedLoopSign;
     config.TorqueCurrent.PeakForwardTorqueCurrent = 80.0;
     config.TorqueCurrent.PeakReverseTorqueCurrent = -80.0;
-    config.Feedback.FeedbackRotorOffset = 0.45;
+    config.Feedback.FeedbackRotorOffset = 0.4463;
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
     config.Feedback.SensorToMechanismRatio = 5.0;
@@ -132,6 +132,7 @@ public class ElevatorIOKraken implements ElevatorIO {
         Radians.of(69.2913385827).in(Rotations);
     followerConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
     followerConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0;
+    followerConfig.Feedback.FeedbackRotorOffset = 0.4048;
     followerConfig.MotionMagic.MotionMagicAcceleration = positionGains.cruiseA();
     followerConfig.MotionMagic.MotionMagicCruiseVelocity = positionGains.cruiseV();
     followerConfig.MotionMagic.MotionMagicJerk = positionGains.cruiseJ();
