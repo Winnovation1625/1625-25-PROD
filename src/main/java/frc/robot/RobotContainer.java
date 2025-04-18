@@ -138,7 +138,7 @@ public class RobotContainer {
   private final LoggedTunableNumber coralStationThreshold =
       new LoggedTunableNumber("CoralStationDistanceThreshold", 1.6);
   private final LoggedTunableNumber BargeRumbleThreshold =
-      new LoggedTunableNumber("BargeRumbleDistanceThreshold", 1.85);
+      new LoggedTunableNumber("BargeRumbleDistanceThreshold", 1.773);
   private final LoggedTunableNumber reefGoalThreshold =
       new LoggedTunableNumber("ReefGoalDistanceThreshold", Units.inchesToMeters(12));
 
@@ -379,13 +379,13 @@ public class RobotContainer {
                               () ->
                                   superstructure.atSuperStructureGoal()
                                       && manipulator.getGamepieceState()
-                                          == Manipulator.GamepieceState.ALGAE_IN_CLAW))));
+                                          == Manipulator.GamepieceState.ALGAE_IN_CLAW)
+                                          .withTimeout(Seconds.of(3.0)))));
     }
     NamedCommands.registerCommand(
         "StowAlgae",
         superstructure
-            .setSuperstructureCommand(() -> SuperstructureStates.STOW)
-            .alongWith(manipulator.setManipulatorState(ManipulatorState.IDLE)));
+            .setSuperstructureCommand(() -> SuperstructureStates.STOW));
     for (var position : FieldConstants.ReefPosition.values()) {
       DriveToReef reefCommand = new DriveToReef(drive, () -> position);
       NamedCommands.registerCommand(
@@ -824,7 +824,7 @@ public class RobotContainer {
                         != SuperstructureStates.ALGAE_INTAKING)
         .whileTrue(
             Commands.either(
-                manipulator.setManipulatorState(ManipulatorState.SHOOTING_ALGAE),
+                Commands.either(manipulator.setManipulatorState(ManipulatorState.SHOOTING_ALGAE),manipulator.setManipulatorState(ManipulatorState.SHOOTING_PROCESSOR), ()-> auxController.getRawButton(23)),
                 manipulator.setManipulatorState(ManipulatorState.SHOOTING_CORAL),
                 manipulator::hasAlgae));
     controller
