@@ -376,16 +376,14 @@ public class RobotContainer {
                       .alongWith(manipulator.setManipulatorState(ManipulatorState.INTAKING_ALGAE))
                       .andThen(
                           Commands.waitUntil(
-                              () ->
-                                  superstructure.atSuperStructureGoal()
-                                      && manipulator.getGamepieceState()
-                                          == Manipulator.GamepieceState.ALGAE_IN_CLAW)
-                                          .withTimeout(Seconds.of(3.0)))));
+                                  () ->
+                                      superstructure.atSuperStructureGoal()
+                                          && manipulator.getGamepieceState()
+                                              == Manipulator.GamepieceState.ALGAE_IN_CLAW)
+                              .withTimeout(Seconds.of(3.0)))));
     }
     NamedCommands.registerCommand(
-        "StowAlgae",
-        superstructure
-            .setSuperstructureCommand(() -> SuperstructureStates.STOW));
+        "StowAlgae", superstructure.setSuperstructureCommand(() -> SuperstructureStates.STOW));
     for (var position : FieldConstants.ReefPosition.values()) {
       DriveToReef reefCommand = new DriveToReef(drive, () -> position);
       NamedCommands.registerCommand(
@@ -824,7 +822,10 @@ public class RobotContainer {
                         != SuperstructureStates.ALGAE_INTAKING)
         .whileTrue(
             Commands.either(
-                Commands.either(manipulator.setManipulatorState(ManipulatorState.SHOOTING_ALGAE),manipulator.setManipulatorState(ManipulatorState.SHOOTING_PROCESSOR), ()-> auxController.getRawButton(23)),
+                Commands.either(
+                    manipulator.setManipulatorState(ManipulatorState.SHOOTING_ALGAE),
+                    manipulator.setManipulatorState(ManipulatorState.SHOOTING_PROCESSOR),
+                    () -> auxController.getRawButton(23)),
                 manipulator.setManipulatorState(ManipulatorState.SHOOTING_CORAL),
                 manipulator::hasAlgae));
     controller
