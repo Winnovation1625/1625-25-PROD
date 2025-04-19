@@ -302,6 +302,23 @@ public class RobotContainer {
                     .andThen(
                         AutoScoreCommands.autoMoveSuperStructure(
                             superstructure, ReefLevel.L4, true))));
+    DriveToReef branchGFromStartConfig =
+        new DriveToReef(drive, () -> FieldConstants.ReefPosition.G);
+    NamedCommands.registerCommand(
+        "DriveToBranchGFromStartConfig",
+        branchGFromStartConfig
+            .until(
+                () ->
+                    branchGFromStartConfig.withinTolerance(
+                        Units.inchesToMeters(1.75), new Rotation2d(Units.degreesToRadians(3.0))))
+            .alongWith(
+                Commands.waitUntil(
+                        () ->
+                            branchGFromStartConfig.withinTolerance(
+                                Units.inchesToMeters(12), Rotation2d.kCCW_90deg))
+                    .andThen(
+                        AutoScoreCommands.autoMoveSuperStructure(
+                            superstructure, ReefLevel.L4, true))));
     DriveToReef branchJFromStartConfig =
         new DriveToReef(drive, () -> FieldConstants.ReefPosition.J);
     NamedCommands.registerCommand(
