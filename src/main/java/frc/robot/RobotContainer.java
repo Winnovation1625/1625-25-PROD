@@ -840,7 +840,22 @@ public class RobotContainer {
         .whileTrue(
             Commands.either(
                 Commands.either(
-                    manipulator.setManipulatorState(ManipulatorState.SHOOTING_ALGAE),
+                    manipulator.setManipulatorState(ManipulatorState.SHOOTING_TELEOP_ALGAE),
+                    manipulator.setManipulatorState(ManipulatorState.SHOOTING_PROCESSOR),
+                    () -> auxController.getRawButton(23)),
+                manipulator.setManipulatorState(ManipulatorState.SHOOTING_CORAL),
+                manipulator::hasAlgae));
+    controller
+        .povDown()
+        .and(
+            () ->
+                superstructure.getSuperstructureGoal() != SuperstructureStates.STOW
+                    && superstructure.getSuperstructureGoal()
+                        != SuperstructureStates.ALGAE_INTAKING)
+        .whileTrue(
+            Commands.either(
+                Commands.either(
+                    manipulator.setManipulatorState(ManipulatorState.SHOOTING_SLOW_ALGAE),
                     manipulator.setManipulatorState(ManipulatorState.SHOOTING_PROCESSOR),
                     () -> auxController.getRawButton(23)),
                 manipulator.setManipulatorState(ManipulatorState.SHOOTING_CORAL),
